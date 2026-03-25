@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex justify-center items-center w-full h-screen relative font-serif">
+
+ 
+
+
+  <div class=" w-full max-w-md p-8 rounded-xl    " >
+    <h1 class="text-[36px] font-bold text-[#0F766E] text-center tracking-widest mb-6">LOG-IN</h1>
+
+    <form action="" method="POST" class="space-y-4" id="form">
+      <div class="flex flex-col">
+        <label for="username" class="mb-1 font-semibold text-[#134E4A]">Username</label>
+        <input id="username" type="email" placeholder=" username"
+               class="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A] focus:outline-none focus:border-none" >
+        <span class="text-red-700 text-sm mt-1 font-semibold" id="userspan" ></span>
+      </div>
+
+      <div class="flex flex-col">
+        <label for="password" class="mb-1 font-semibold text-[#134E4A]">Password</label>
+        <input id="password" type="password" placeholder=" password"
+               class="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A] focus:outline-none focus:border-none">
+        <span class="text-red-700 text-sm mt-1 font-semibold" id="passSpan"></span>
+      </div>
+
+      <input type="submit" value="Login"
+             class="w-full bg-[#0F766E] text-white font-bold py-2 rounded-lg cursor-pointer hover:bg-white hover:shadow-md hover:text-[#0F766E] transition duration-300">
+
+      <p class="text-black text-center font-semibold">
+        Don't have an account?
+        <a href="signup.php" class="text-[#0F766E] font-bold hover:underline">Sign Up</a>
+      </p>
+    </form>
+  </div>
+
+
+
+  
+
+</body>
+</html>
