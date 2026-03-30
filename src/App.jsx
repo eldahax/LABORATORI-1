@@ -1,13 +1,12 @@
-import { useState } from 'react'
 
-import './index.css'
+export default function App(){
 
-export default function App() {
+return(
+
+<>
 
 
-  return (
-    <>
-    <p className='text-red-700'>HELLPOO</p>
-      </>
-  )
+</>
+
+)
 }
