@@ -26,7 +26,7 @@ return(
 
         </div>
 
-        <button className="mt-[15px] bg-[#0F766E] text-white px-[38px] py-[14px] rounded-lg font-semibold hover:bg-[#0d5c56] transition">
+        <button className="mt-[15px] bg-[#0F766E] text-white px-[38px] py-[14px] rounded-lg font-semibold hover:bg-[#0d5c56] transition cursor-pointer">
           BOOK APPOINTMENT
         </button>
 

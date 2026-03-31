@@ -40,13 +40,13 @@ export default function Login() {
 
   return (
     <div className="flex justify-center items-center w-full h-screen relative <font-serif">
-      <div class=" w-full max-w-md p-8 rounded-xl    ">
-        <h1 class="text-[36px] font-bold text-[#0F766E] text-center tracking-widest mb-6">
+      <div className=" w-full max-w-md p-8 rounded-xl    ">
+        <h1 className="text-[36px] font-bold text-[#0F766E] text-center tracking-widest mb-6">
           LOG-IN
         </h1>
 
-        <form onSubmit={handleSubmit} class="space-y-4" id="form">
-          <div class="flex flex-col">
+        <form onSubmit={handleSubmit} className="space-y-4" id="form">
+          <div className="flex flex-col">
             <label for="username" class="mb-1 font-semibold text-[#134E4A]">
               Username
             </label>
@@ -66,7 +66,7 @@ export default function Login() {
             <p className="text-red-500 text-sm ">{userError}</p>
           </div>
 
-          <div class="flex flex-col">
+          <div className="flex flex-col">
             <label for="password" class="mb-1 font-semibold text-[#134E4A]">
               Password
             </label>
@@ -89,12 +89,12 @@ export default function Login() {
           <input
             type="submit"
             value="Login"
-            class="w-full bg-[#0F766E] text-white font-bold py-2 rounded-lg cursor-pointer  "
+            className="w-full bg-[#0F766E] text-white font-bold py-2 rounded-lg cursor-pointer  "
           />
 
-          <p class="text-black text-center font-semibold">
+          <p className="text-black text-center font-semibold">
             Don't have an account?
-            <a href="" class="text-[#0F766E] font-bold hover:underline">
+            <a href="" className="text-[#0F766E] font-bold hover:underline">
               Sign Up
             </a>
           </p>

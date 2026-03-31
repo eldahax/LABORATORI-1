@@ -1,6 +1,6 @@
 import Navbar from "../../../LABORATORI-1/src/components/Navbar.jsx"
 import AboutSection  from "../../../LABORATORI-1/src/sections/AboutSection.jsx";
-import Stats from "../../../LABORATORI-1/src/sections/Stats.jsx";
+import Stats from "../../../LABORATORI-1/src/sections/Stats";
 import Slider from "../../../LABORATORI-1/src/components/Slider.jsx";
 import Mission from "../../../LABORATORI-1/src/sections/Mission.jsx";
 import Revitalize  from "../../../LABORATORI-1/src/sections/Revitalize.jsx";
@@ -37,7 +37,7 @@ export default function About() {
                   
                 />
 
-                <section className="py-20">
+                <section className="py-20 mb-[15px]">
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <Mission
@@ -58,10 +58,10 @@ export default function About() {
 
                 <Slider
                     
-                        img1= "/images/Staff3.jpg"
-                        img2= "/images/Staff7.jpg"
-                        img3= "/images/Staff1.jpg"
-                        img4= "/images/Staff6.jpg"
+                        img1= "https://i0.wp.com/pureaestheticdentistry.com/wp-content/uploads/2025/04/dentist-smile-tijuana-scaled.webp?fit=1371%2C1920&quality=80&ssl=1"
+                        img2= "https://i0.wp.com/pureaestheticdentistry.com/wp-content/uploads/2025/04/Dentist-smile-scaled.webp?fit=1371%2C1920&quality=80&ssl=1"
+                        img3= "https://i0.wp.com/pureaestheticdentistry.com/wp-content/uploads/2025/04/dentist-in-tijuana-black.jpeg?fit=%2C&quality=89&ssl=1"
+                        img4= "https://i0.wp.com/pureaestheticdentistry.com/wp-content/uploads/2025/04/tijuana-dentist-pro-scaled.webp?fit=1371%2C1920&quality=80&ssl=1"
                 
                 />
 
@@ -71,14 +71,11 @@ export default function About() {
                     feat1="Advanced dental technology"
                     feat2="Comfortable & safe environment"
                     feat3="Trusted by thousands of patients"
-                    image="/images/Team.jpg"
+                    image="https://i.pinimg.com/1200x/e5/c1/7d/e5c17d1200c5cc265979fbb2d8a56339.jpg"
                 />
 
                 <Footer
-                    support="FAQs, Appointments, Privacy Policy, Terms & Conditions"
-                    email="info@agusholli-dent.com"
-                    appointments="appointments@agusholli-dent.com"
-                    about="Our dental clinic provides top-quality care with expert dentists and modern facilities."
+                  
                 />
        
         </>

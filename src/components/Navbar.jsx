@@ -8,7 +8,7 @@ const Navbar = () => {
       <div className="flex justify-between items-center w-full">
       
         <h1 className="text-2xl font-bold text-[#0F766E] tracking-widest">
-          THE-CLINIC
+          AGUSHOLLI-DENT
         </h1>
 
         

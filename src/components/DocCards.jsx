@@ -1,27 +1,26 @@
 
 import Card from'./Card.jsx';
-import Staff1 from '../assets/images/Staff1.jpg'
 const docs=[
   {
     id:1,
     name:'Ledion Agusholli',
     speciality:'Dental Surgery',
      text:'Precise and modern surgical dental care focused on comfort and safety.',
-     img:'../assets/images/Staff1.jpg'
+     img:'src/assets/images/Staff6.jpg'
   },
    {
     id:2,
-    name:'Ledion Agusholli',
-    speciality:'Dental Surgery',
-     text:'Precise and modern surgical dental care focused on comfort and safety.' ,
-     img:'../assets/images/Staff1.jpg'
+    name:' Valza Agusholli',
+    speciality:'General Dentistry',
+     text:'Complete everyday dental care for healthy,confident smiles.' ,
+     img:'src/assets/images/Staff2.jpg'
   },
    {
     id:3,
-    name:'Ledion Agusholli',
-    speciality:'Dental Surgery',
-     text:'Precise and modern surgical dental care focused on comfort and safety.' ,
-     img:'../assets/images/Staff1.jpg'
+    name:'Shpend Agusholli',
+    speciality:'Orthodontics',
+     text:'Teeth-straightening treatments for balanced bites and aligned smile' ,
+     img:"src/assets/images/Staff7.jpg"
   }
 ]
 const DocCards = () => {

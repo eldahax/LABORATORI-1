@@ -14,7 +14,7 @@ const Card = ({ name, speciality, text,img }) => {
       <p className="text-gray-600 text-[16px] pl-[7px] mt-[4px]">
         {text}
       </p>
-      <button className="bg-[#0F766E] text-white px-6 py-2 rounded-lg mt-[10px]">
+      <button className="bg-[#0F766E] text-white px-6 py-2 rounded-lg mt-[10px] cursor-pointer">
         BOOK
       </button>
     </div>
