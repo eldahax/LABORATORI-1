@@ -41,7 +41,7 @@ const Contact = () => {
                             />
 
 
-                            <ContactForm buttonText="Send Message" />
+                           <ContactForm></ContactForm>
 
                         </div>
 

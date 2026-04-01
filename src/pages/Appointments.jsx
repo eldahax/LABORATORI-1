@@ -9,10 +9,16 @@ export default function Appointment() {
 
                 <div class="w-full h-full">
                     <h2 class="text-[40px] text-center font-bold text-gray-600 mb-[40px]">APPOINTMENTS</h2>
+                    <div className="flex justify-center items-center w-[100] h-full flex-wrap gap-8">
 
-                    <AppointmentCard></AppointmentCard>
-                    <AppointmentCard></AppointmentCard>
-                    <AppointmentCard></AppointmentCard>
+
+                        <AppointmentCard></AppointmentCard>
+                        <AppointmentCard></AppointmentCard>
+                        <AppointmentCard></AppointmentCard>
+                        <AppointmentCard></AppointmentCard>
+                        <AppointmentCard></AppointmentCard>
+                        <AppointmentCard></AppointmentCard>
+                    </div>
                 </div>
             </section>
         </>
