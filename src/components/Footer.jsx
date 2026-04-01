@@ -1,3 +1,7 @@
+import img1 from "../assets/images/icons8-facebook-50.png";
+import img2 from "../assets/images/icons8-instagram-logo-60.png";
+import img3 from "../assets/images/tiktok.png";
+
 const Footer = () => {
     return (
         <footer class="bg-white shadow-2xl text-gray-900 mt-10 p-10">
@@ -19,13 +23,13 @@ const Footer = () => {
                     <p>appointments@agusholli-dent.com</p>
                     <div class="flex justify-center md:justify-start space-x-4 mt-4">
                         <a href="https://facebook.com" target="_blank" class="hover:opacity-80 transition">
-                            <img src="./images/icons8-facebook-50.png" alt="Facebook" class="w-6 h-6" />
+                            <img src={img1} alt="Facebook" class="w-7 h-7" />
                         </a>
                         <a href="https://tiktok.com" target="_blank" class="hover:opacity-80 transition">
-                            <img src="./images/tiktok.png" alt="tiktok" class="w-6 h-6" />
+                            <img src={img2} alt="Instagram" class="w-7 h-7" />
                         </a>
                         <a href="https://instagram.com" target="_blank" class="hover:opacity-80 transition">
-                            <img src="./images/icons8-instagram-logo-60.png" alt="Instagram" class="w-6 h-6" />
+                            <img src={img3} alt="tiktok" class="w-7 h-7" />
                         </a>
                     </div>
                 </div>

@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import {Link} from 'react-router-dom'
+
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -57,10 +59,10 @@ export default function Login() {
                 setUsername(e.target.value);
                 setUserError("");
               }}
-              placeholder="Email"
+              placeholder="Username"
               aria-live="polite"
-              className={`border p-2 w-full rounded-[14px] ${
-                userError ? "border-red-500 " : "border-gray-300"
+              className={`border-2 p-2 w-full rounded-[14px] ${
+                userError ? "border-red-500 " : "border-[#0F766E]"
               }`}
             />
             <p className="text-red-500 text-sm ">{userError}</p>
@@ -79,8 +81,8 @@ export default function Login() {
               }}
               placeholder="Password"
               aria-live="polite"
-              className={`border p-2 w-full rounded-[14px] ${
-                passError ? "border-red-500 " : "border-gray-300"
+              className={`border-2 p-2 w-full rounded-[14px] ${
+                passError ? "border-red-500 " : "border-[#0F766E]"
               }`}
             />
             <p className="text-red-500 text-sm">{passError}</p>
@@ -94,9 +96,9 @@ export default function Login() {
 
           <p className="text-black text-center font-semibold">
             Don't have an account?
-            <a href="" className="text-[#0F766E] font-bold hover:underline">
+            <Link  className="text-[#0F766E] font-bold hover:underline" to="/Signup">
               Sign Up
-            </a>
+            </Link>
           </p>
         </form>
       </div>

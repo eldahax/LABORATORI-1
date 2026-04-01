@@ -24,11 +24,11 @@ const Revitalize = (props) => {
         <div className="relative">
           <img
             src={props.image}
-            className="rounded-2xl shadow-2xl w-full object-cover h-[400px]"
+            className="rounded-2xl shadow-xl w-full object-cover h-[450px]"
             alt="Dental Team"
           />
          
-          <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#0F766E]/10 rounded-full -z-10"></div>
+          <div className="absolute bottom-6 right-6 w-32 h-32 bg-[#0F766E]/10 rounded-full -z-10"></div>
         </div>
       </div>
     </section>

@@ -20,7 +20,7 @@ const Navbar = () => {
           <li><Link className="text-black font-bold px-2" to="/Appointments">APPOINTMENTS</Link></li>
           <li><Link className="text-black font-bold px-2" to="/">PROFILE</Link></li>
           <li>
-            <Link className="text-white font-semibold px-6 py-2 rounded-lg bg-[#0F766E] hover:bg-white hover:text-[#0F766E] transition ease-in-out" to="/">
+            <Link className="text-white font-semibold px-6 py-2 rounded-lg bg-[#0F766E] hover:bg-white hover:text-[#0F766E] transition ease-in-out" to="/Login">
               LOGIN
             </Link>
           </li>
@@ -47,7 +47,7 @@ const Navbar = () => {
           <li className=" mb-[10px]"> <Link className="text-black font-bold px-2" to="/Appointments">APPOINTMENTS</Link></li>
           <li className=" mb-[16px] "><Link className="text-black font-bold px-2" to="/Profile">PROFILE</Link></li>
           <li className=" mb-[10px] ">
-            <Link className="text-white font-semibold px-6 py-2 rounded-lg bg-[#0F766E] hover:bg-white hover:text-[#0F766E] transition ease-in-out" to="/">
+            <Link className="text-white font-semibold px-6 py-2 rounded-lg bg-[#0F766E] hover:bg-white hover:text-[#0F766E] transition ease-in-out" to="/Login">
               LOGIN
             </Link>
           </li>

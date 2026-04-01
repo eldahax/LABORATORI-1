@@ -5,6 +5,9 @@ import Slider from "../../../LABORATORI-1/src/components/Slider.jsx";
 import Mission from "../../../LABORATORI-1/src/sections/Mission.jsx";
 import Revitalize from "../../../LABORATORI-1/src/sections/Revitalize.jsx";
 import Footer from "../../../LABORATORI-1/src/components/Footer.jsx";
+import img2 from "../../../LABORATORI-1/src/assets/Pacient.jpg";
+import img3 from "../../../LABORATORI-1/src/assets/images/Photo.jpg";
+import img4 from "../../../LABORATORI-1/src/assets/images/Smile.jpg";
 
 export default function About() {
     return (
@@ -14,10 +17,10 @@ export default function About() {
 
             <AboutSection
 
-                img1="/images/Klinika.jpg"
-                img2="/images/Pacient.jpg"
-                img3="/images/Photo.jpg"
-                img4="/images/Smile.jpg"
+                img1="https://i.pinimg.com/736x/91/ca/d1/91cad141aa6e77434490f5b51974c41b.jpg"
+                img2={img2}
+                img3={img3}
+                img4={img4}
                 subtitle="About Us"
                 title="Creating Beautiful Smiles With Care"
                 description="A confident smile is the key to a healthy life. Our clinic combines modern technology with personalized care to provide the best dental experience for every patient."
