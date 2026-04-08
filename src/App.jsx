@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Services from "./pages/Services";
 import Appointments from "./pages/Appointments";
+import Profile from "./pages/Profile";
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
       <Route path='/Signup' element={<Signup/>}/>
       <Route path='/Services' element={<Services/>}/>
       <Route path='/Appointments' element={<Appointments/>}/>
+      <Route path='/Table' element={<Profile/>} />
     </Routes>
   );
 }

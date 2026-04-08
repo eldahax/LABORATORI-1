@@ -4,7 +4,7 @@ import img3 from "../assets/images/tiktok.png";
 
 const Footer = () => {
     return (
-        <footer class="bg-white shadow-2xl text-gray-900 mt-10 p-10">
+        <footer class="bg-white shadow-2xl shadow-gray-500 text-gray-900 mt-10 p-10">
             <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
                 <div>
                     <h4 class="text-xl font-bold mb-4">Support</h4>
@@ -47,7 +47,7 @@ const Footer = () => {
                 </div>
             </div>
 
-            <div class="mt-10 text-center border-t border-gray-200/50 pt-4 text-gray-600">
+            <div class="mt-10 text-center border-t border-[#0F766E] border-t-2 pt-4 text-gray-600">
                 <p>© 2025 Agusholli Dental Clinic — All Rights Reserved.</p>
             </div>
         </footer>

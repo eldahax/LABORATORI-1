@@ -10,8 +10,8 @@ const Contact = () => {
         <>
             <Navbar></Navbar>
 
-            <main className="pt-[80px]">
-                <section className="py-24 px-4 relative overflow-hidden">
+            <main className="pt-[40px] ">
+                <section className="py-35 px-4 relative overflow-hidden">
 
 
                     <div className="absolute top-[-100px] left-0 w-full h-[400px] 
@@ -37,7 +37,7 @@ const Contact = () => {
                                 address="Prishtina, Kosovo"
                                 phone="+383 38 000 000"
                                 email="info@agusholli-dent.com"
-                                emergencyNote="* Emergency dental services are available 24/7."
+                                emergencyNote=" Emergency dental services are available 24/7."
                             />
 
 

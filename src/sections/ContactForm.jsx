@@ -59,7 +59,7 @@ export default function ContactForm() {
 
 
     return (
-        <div className="bg-white p-8 rounded-3xl border border-gr shadow-md">
+        <div className="bg-white p-8 rounded-3xl shadow-md">
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label className="mb-1 font-semibold text-[#134E4A]">Full Name</label>
