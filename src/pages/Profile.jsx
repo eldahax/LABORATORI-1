@@ -1,6 +1,7 @@
 import Table from "../sections/Table";
 import TableCard from "../sections/TableCard";
 import Navbar from "../components/Navbar";
+import Sidebar from "../sections/sideBar";
 
 
 
@@ -8,17 +9,25 @@ export default function Profile (){
 
     return(
         <>
-       <body class='bg-gray-100'>
-        <Navbar></Navbar>
-         <div class="max-w-7xl mx-auto p-7 sm:p-6 mt-[80px]">
+    <Navbar></Navbar>
+       <div class=' min-h-screen'>
+
+         <div className="flex w-full min-h-screen mt-[50px]">
+     
+      <Sidebar />
+
+      <div className="w-3/4 bg-gray-100 p-10  ml-[25%]">
+       
+       
             <TableCard></TableCard>
          <Table></Table>
          <Table></Table>
          <Table></Table>
          
          </div>
+         </div>
          
-       </body>
+       </div>
         </>
     );
 }

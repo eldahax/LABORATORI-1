@@ -7,12 +7,15 @@ import Signup from "./pages/Signup";
 import Services from "./pages/Services";
 import Appointments from "./pages/Appointments";
 import Profile from "./pages/Profile";
+import PersonalProfile from "./pages/PersonalProfile"
 
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/Profile" element={<PersonalProfile />} />
+      <Route path="/Staff" element={<Profile />} />
       <Route path="/Home" element={<Home />} />
       <Route path="/About" element={<About />} />
       <Route path='/Contact' element={<Contact/>}/>

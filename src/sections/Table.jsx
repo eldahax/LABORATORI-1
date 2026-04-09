@@ -1,13 +1,13 @@
 export default function Table(props){
     return(
        
-            <div class="bg-white p-4 sm:p-6 rounded-xl shadow mb-8 overflow-x-auto">
-      <h2 class="text-lg sm:text-xl font-semibold text-[#0F766E] mb-4">
+            <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-8 overflow-x-auto">
+      <h1 class="text-lg sm:text-xl font-bold text-[#0F766E] mb-6">
         Appointments
-      </h2>
+      </h1>
 
-      <table class="min-w-full text-left text-sm sm:text-base">
-        <thead>
+      <table class="min-w-full text-left text-sm sm:text-base ">
+        <thead className="[&>tr>th]:py-4">
           <tr class="border-b">
             <th class="py-2">Patient</th>
             <th>Doctor</th>

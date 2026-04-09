@@ -1,7 +1,6 @@
 import Navbar from "../../../LABORATORI-1/src/components/Navbar.jsx"
 import AboutSection from "../../../LABORATORI-1/src/sections/AboutSection.jsx";
 import Stats from "../../../LABORATORI-1/src/sections/Stats";
-import Slider from "../../../LABORATORI-1/src/components/Slider.jsx";
 import Mission from "../../../LABORATORI-1/src/sections/Mission.jsx";
 import Revitalize from "../../../LABORATORI-1/src/sections/Revitalize.jsx";
 import Footer from "../../../LABORATORI-1/src/components/Footer.jsx";
@@ -59,14 +58,27 @@ export default function About() {
                 </div>
             </section>
 
-            <Slider
+           
 
-                img1="https://i0.wp.com/pureaestheticdentistry.com/wp-content/uploads/2025/04/dentist-smile-tijuana-scaled.webp?fit=1371%2C1920&quality=80&ssl=1"
-                img2="https://i0.wp.com/pureaestheticdentistry.com/wp-content/uploads/2025/04/Dentist-smile-scaled.webp?fit=1371%2C1920&quality=80&ssl=1"
-                img3="https://i0.wp.com/pureaestheticdentistry.com/wp-content/uploads/2025/04/dentist-in-tijuana-black.jpeg?fit=%2C&quality=89&ssl=1"
-                img4="https://i0.wp.com/pureaestheticdentistry.com/wp-content/uploads/2025/04/tijuana-dentist-pro-scaled.webp?fit=1371%2C1920&quality=80&ssl=1"
-
-            />
+             <div className="mt-20 overflow-hidden relative pb-10 rounded-2xl max-w-7xl mx-auto px-6">
+      <h2 className="text-[35px] font-bold mb-8 text-center">MEET THE TEAM</h2>
+      
+      <div className="flex gap-10 overflow-x-auto">
+      
+        <div className="flex-shrink-0 w-110 h-135 p-4">
+          <img src="https://i0.wp.com/pureaestheticdentistry.com/wp-content/uploads/2025/04/dentist-smile-tijuana-scaled.webp?fit=1371%2C1920&quality=80&ssl=1" className="w-full h-full object-cover rounded-lg shadow-lg" alt="Staff 1" />
+        </div>
+        <div className="flex-shrink-0 w-110 h-135 p-4">
+          <img src="https://i0.wp.com/pureaestheticdentistry.com/wp-content/uploads/2025/04/Dentist-smile-scaled.webp?fit=1371%2C1920&quality=80&ssl=1" className="w-full h-full object-cover rounded-lg shadow-lg" alt="Staff 2" />
+        </div>
+        <div className="flex-shrink-0 w-110 h-135 p-4">
+          <img src="https://i0.wp.com/pureaestheticdentistry.com/wp-content/uploads/2025/04/dentist-in-tijuana-black.jpeg?fit=%2C&quality=89&ssl=1" className="w-full h-full object-cover rounded-lg shadow-lg" alt="Staff 3" />
+        </div>
+        <div className="flex-shrink-0 w-110 h-135 p-4">
+          <img src="https://i0.wp.com/pureaestheticdentistry.com/wp-content/uploads/2025/04/tijuana-dentist-pro-scaled.webp?fit=1371%2C1920&quality=80&ssl=1" className="w-full h-full object-cover rounded-lg shadow-lg" alt="Staff 4" />
+        </div>
+      </div>
+    </div>
 
             <Revitalize
                 title="Revitalize Your Smile Today"
