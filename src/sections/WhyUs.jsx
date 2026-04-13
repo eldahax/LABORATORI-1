@@ -15,7 +15,7 @@ export default function WhyUs(){
         <div className="lg:w-[50%] relative">
 
           <h1 className="text-[20px] md:text-[45px] font-light mb-[16px] lg:-translate-x-40 relative">
-            it’s all in <span class="font-bold text-[#0F766E]">the details</span>
+            it’s all in <span className="font-bold text-[#0F766E]">the details</span>
           </h1>
 
           <p className="mb-[12px] text-gray-700">

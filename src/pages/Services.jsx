@@ -12,12 +12,12 @@ export default function Services() {
       <Navbar></Navbar>
       <Hero></Hero>
       <Book></Book>
-      <section class="mt-[100px] mb-[100px] w-[97%]  mx-auto min-h-[90vh] flex justify-center items-center flex-wrap flex-col md-flex-row">
-        <div class="">
-          <h1 class="text-center text-[#0F766E] font-bold text-[30px] mb-[60px]">
+      <section className="mt-[100px] mb-[100px] w-[97%]  mx-auto min-h-[90vh] flex justify-center items-center flex-wrap flex-col md-flex-row">
+        <div className="">
+          <h1 className="text-center text-[#0F766E] font-bold text-[30px] mb-[60px]">
             OUR SERVICES
           </h1>
-          <div class=" flex justify-center items-center gap-[170px] flex-wrap">
+          <div className=" flex justify-center items-center gap-[170px] flex-wrap">
             <Card
               image="https://i.pinimg.com/736x/06/aa/45/06aa45b72a325b21a45fb5b2f25ce30a.jpg"
               treatment="Routine check-up"

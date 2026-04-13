@@ -49,7 +49,7 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4" id="form">
           <div className="flex flex-col">
-            <label for="username" class="mb-1 font-semibold text-[#134E4A]">
+            <label htmlFor="username" className="mb-1 font-semibold text-[#134E4A]">
               Username
             </label>
             <input
@@ -69,7 +69,7 @@ export default function Login() {
           </div>
 
           <div className="flex flex-col">
-            <label for="password" class="mb-1 font-semibold text-[#134E4A]">
+            <label htmlFor="password" className="mb-1 font-semibold text-[#134E4A]">
               Password
             </label>
             <input

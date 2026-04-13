@@ -4,7 +4,7 @@ export default function Step(){
         <>
         
            <section
-      class="flex justify-center items-center  w-full min-h-[80vh] flex-col md:flex-row px-[10px] mt-[50px] md:mt-[20px]">
+      className="flex justify-center items-center  w-full min-h-[80vh] flex-col md:flex-row px-[10px] mt-[50px] md:mt-[20px]">
       <div className=" mt-[30px] mb-[40px]">
         <h1 className="text-black text-[40px] font-bold text-center">STEP <span
             className="text-[#0F766E] text-[40px] font-bold text-center">INSIDE</span></h1>
