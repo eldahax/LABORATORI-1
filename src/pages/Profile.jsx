@@ -10,7 +10,7 @@ export default function Profile (){
     return(
         <>
     <Navbar></Navbar>
-       <div class=' min-h-screen'>
+       <div className=' min-h-screen'>
 
          <div className="flex w-full min-h-screen mt-[50px]">
      
@@ -21,8 +21,7 @@ export default function Profile (){
        
             <TableCard></TableCard>
          <Table></Table>
-         <Table></Table>
-         <Table></Table>
+       
          
          </div>
          </div>

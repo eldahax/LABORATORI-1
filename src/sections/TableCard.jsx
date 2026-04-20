@@ -2,7 +2,7 @@ export default function TableCard(){
 
     return(
         <>
-           <h1 class="text-2xl sm:text-3xl font-bold text-[#0F766E] mb-6">
+           <h1 className="text-2xl sm:text-3xl font-bold text-[#0F766E] mb-6">
       welcome ,emriUser-it!
     </h1>
 

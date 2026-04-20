@@ -3,8 +3,8 @@ export default function Card(props){
 
     return(
         <>
-            <div className="holder w-[340px] h-[560px] border-none ">
-            <div className="img w-full h-[500px] border-black border-[1px] rounded-[100px] ">
+            <div className="holder w-[340px] h-[460px] border-none ">
+            <div className="img w-full h-[400px] border-black border-[1px] rounded-[100px] ">
                 <img src={props.image} alt="" className="  shadow-md rounded-[100px] w-full h-full object-cover overflow-hidden"/>
             </div>
             <div className="text">
