@@ -1,55 +1,55 @@
 import { useState } from "react";
 
-import {Link} from 'react-router-dom'
+import { Link } from "react-router-dom";
 
 export default function Signup() {
   const [name, setName] = useState("");
+  const [lastname, setLastName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [phone, setPhone] = useState("");
 
+  const [signupErr, setSignupErr]=useState("");
   const [nameErr, setNameErr] = useState("");
-  const [usernameErr, setUsernameErr] = useState("");
+  const [phoneErr, setPhoneErr] = useState("");
+  const [lastNameErr, setLastNameerr] = useState("");
   const [emailErr, setEmailErr] = useState("");
   const [passwordErr, setPasswordErr] = useState("");
   const [confirmErr, setConfirmErr] = useState("");
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
-  const nameRegex = /^[A-Za-z]{6,10}$/;
-  const userregex = /^[A-Za-z0-9!./_]{5,12}$/;
+  const nameRegex = /^[A-Za-z]{3,15}$/;
   const passRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!.@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
 
-  const handleSubmit = (e) => {
-    e.preventDefault(); 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setNameErr("");
-    setUsernameErr("");
+    setLastNameerr("");
+
     setEmailErr("");
     setPasswordErr("");
     setConfirmErr("");
-    
-    let hasError = false;
 
+    let hasError = false;
 
     if (name.trim() === "") {
       setNameErr("Name is required");
       hasError = true;
     } else if (!nameRegex.test(name)) {
-      setNameErr("Name should only contain letters (6-10 characters)");
+      setNameErr("Name should only contain letters (3-15 characters)");
+      hasError = true;
+    }
+    if (lastname.trim() === "") {
+      setLastNameerr("Last Name is required");
+      hasError = true;
+    } else if (!nameRegex.test(lastname)) {
+      setLastNameerr("Last Name should only contain letters (6-10 characters)");
       hasError = true;
     }
 
- 
-    if (username.trim() === "") {
-      setUsernameErr("Username is required");
-      hasError = true;
-    } else if (!userregex.test(username)) {
-      setUsernameErr("Username should be 5-12 characters and can contain letters, numbers, !./_");
-      hasError = true;
-    }
-
-  
     if (email.trim() === "") {
       setEmailErr("Email is required");
       hasError = true;
@@ -58,18 +58,16 @@ export default function Signup() {
       hasError = true;
     }
 
- 
     if (password.trim() === "") {
       setPasswordErr("Password is required");
       hasError = true;
     } else if (!passRegex.test(password)) {
       setPasswordErr(
-        "Password must have uppercase, lowercase, number, and symbol (8-20 characters)"
+        "Password must have uppercase, lowercase, number, and symbol (8-20 characters)",
       );
       hasError = true;
     }
 
-  
     if (confirm.trim() === "") {
       setConfirmErr("Please confirm your password");
       hasError = true;
@@ -78,8 +76,39 @@ export default function Signup() {
       hasError = true;
     }
 
-    
-   
+    if (hasError) return;
+
+    try {
+      const res = await fetch("http://localhost:5000/api/users/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          first_name: name,
+          last_name: lastname,
+          email: email,
+          phone: phone,
+          password: password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+       setSignupErr(data.error)
+        return;
+      }
+
+      alert("User created successfully!");
+      setName("");
+      setLastName("");
+      setEmail("");
+      setPassword("");
+      setConfirm("");
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -94,24 +123,24 @@ export default function Signup() {
             <input
               name="name"
               type="text"
-              placeholder="name"
+              placeholder="first name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A]"
             />
-            <p className='text-red-500 pl-[4px] font-sm'>{nameErr}</p>
+            <p className="text-red-500 pl-[4px] font-sm">{nameErr}</p>
           </div>
 
-          <div className="flex flex-col">
+          <div className="flex flex-col ">
             <input
-              name="username"
+              name="name"
               type="text"
-              placeholder="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              placeholder="last name"
+              value={lastname}
+              onChange={(e) => setLastName(e.target.value)}
               className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A]"
             />
-            <p className='text-red-500 pl-[4px] font-sm'>{usernameErr}</p>
+            <p className="text-red-500 pl-[4px] font-sm">{lastNameErr}</p>
           </div>
 
           <div className="flex flex-col">
@@ -123,7 +152,16 @@ export default function Signup() {
               onChange={(e) => setEmail(e.target.value)}
               className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A]"
             />
-            <p className='text-red-500 pl-[4px] font-sm'>{emailErr}</p>
+            <p className="text-red-500 pl-[4px] font-sm">{emailErr}</p>
+          </div>
+          <div className="flex flex-col">
+            <input
+              type="text"
+              placeholder="phone number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A]"
+            />
           </div>
 
           <div className="flex flex-col">
@@ -135,7 +173,7 @@ export default function Signup() {
               onChange={(e) => setPassword(e.target.value)}
               className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A]"
             />
-            <p className='text-red-500 pl-[4px] font-sm'>{passwordErr}</p>
+            <p className="text-red-500 pl-[4px] font-sm">{passwordErr}</p>
           </div>
 
           <div className="flex flex-col">
@@ -147,8 +185,13 @@ export default function Signup() {
               onChange={(e) => setConfirm(e.target.value)}
               className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A]"
             />
-            <p className='text-red-500 pl-[4px] font-sm'>{confirmErr}</p>
+            <p className="text-red-500 pl-[4px] font-sm">{confirmErr}</p>
           </div>
+          {signupErr && (
+            <p className="text-red-500 text-center font-semibold">
+              {signupErr}
+            </p>
+          )}
 
           <button
             type="submit"
@@ -159,7 +202,10 @@ export default function Signup() {
 
           <p className="text-black text-center font-semibold">
             Already have an account?
-            <Link className="text-[#0F766E] font-bold hover:underline ml-1" to="/Login">
+            <Link
+              className="text-[#0F766E] font-bold hover:underline ml-1"
+              to="/Login"
+            >
               Login
             </Link>
           </p>
