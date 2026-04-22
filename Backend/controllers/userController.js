@@ -1,4 +1,4 @@
-const userService = require("../services/userService");
+const userService = require("../cruds/userCrud");
 const bcrypt = require("bcryptjs");
 
 const login = async (req, res) => {
