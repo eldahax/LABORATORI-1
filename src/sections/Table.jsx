@@ -1,64 +1,75 @@
-export default function Table(props){
-    return(
-       
-            <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-8 overflow-x-auto">
-      <h1 class="text-lg sm:text-xl font-bold text-[#0F766E] mb-6">
-        Appointments
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+export default function Table() {
+  const [users, setUsers] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/users")
+      .then(res => res.json())
+      .then(data => setUsers(data))
+      .catch(err => console.log(err));
+  }, []);
+
+  const handleDelete = async (id) => {
+  try {
+    await fetch(`http://localhost:5000/api/users/${id}`, {
+      method: "DELETE",
+    });
+
+    setUsers(users.filter(user => user.Id !== id));
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+  return (
+    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-8 overflow-x-auto">
+      <h1 className="text-lg sm:text-xl font-bold text-[#0F766E] mb-6">
+        Patients
       </h1>
 
-      <table class="min-w-full text-left text-sm sm:text-base ">
-        <thead className="[&>tr>th]:py-4">
-          <tr class="border-b">
-            <th class="py-2">Patient</th>
-            <th>Doctor</th>
-            <th>Date</th>
-            <th>Status</th>
-            <th>Action</th>
+      <table className="min-w-full text-left text-sm sm:text-base text-black">
+        <thead>
+          <tr className="border-b">
+            <th className="py-3 pl-4">ID</th>
+            <th className="py-2">First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Actions</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr class="border-b hover:bg-gray-50">
-            <td class="py-2">Elda</td>
-            <td>Dr. Shpend Agusholli</td>
-            <td>10 Apr</td>
-            <td>
-              <span class="bg-gray-500 text-white px-2 py-1 rounded text-xs sm:text-sm">
-                Pending
-              </span>
-            </td>
-            <td class="flex flex-wrap gap-2">
-              <button class="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg">
-                Delete
-              </button>
-              <button class="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg">
-                Update
-              </button>
-            </td>
-          </tr>
+          {users.map((user) => (
+            <tr key={user.Id} className="border-b hover:bg-gray-50">
+              <td className="py-4 pl-4">{user.Id}</td>
+              <td className="py-2">{user.FirstName}</td>
+              <td>{user.LastName}</td>
+              <td>{user.Email}</td>
+              <td>{user.PhoneNumber}</td>
 
-          <tr class="border-b hover:bg-gray-50">
-            <td class="py-2">Doan</td>
-            <td>Dr. Shpend Agusholli</td>
-            <td>11 Apr</td>
-            <td>
-              <span class="bg-green-500 text-white px-2 py-1 rounded text-xs sm:text-sm">
-                Completed
-              </span>
-            </td>
-            <td class="flex flex-wrap gap-2">
-              <button class="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg">
-                Delete
-              </button>
-              <button class="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg">
-                Update
-              </button>
-            </td>
-          </tr>
+              <td className="flex gap-2">
+                <button
+                  onClick={() => handleDelete(user.Id)}
+                  className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
+                >
+                  Delete
+                </button>
+  
+                <button
+                  onClick={() => navigate(`/users/edit/${user.Id}`)}
+                  className="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg"
+                >
+                  Update
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
-
-     
-    )
+  );
 }

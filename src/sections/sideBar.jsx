@@ -14,7 +14,7 @@ const Sidebar = () => {
         ☰
       </button>
 
-      <div className=" mt-[50px] hidden md:flex fixed top-0 left-0 h-screen w-1/4 bg-gradient-to-b from-[#134E4A] via-[#0F766E] to-[#5EEAD4] text-white flex-col items-center p-6 z-[40] sm:w-[100px]">
+      <div className=" mt-[50px] hidden md:flex fixed top-0 left-0 h-screen w-1/4 bg-gradient-to-b from-[#134E4A] via-[#0F766E] to-[#5EEAD4] text-white flex-col items-center p-6 z-[40]">
 
         <img
           src="../../src/assets/images/Staff2.jpg"
