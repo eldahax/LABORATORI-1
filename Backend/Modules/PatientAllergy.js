@@ -7,9 +7,9 @@ class PatientAllergy extends Model {
 
 module.exports = (sequelize) => {
   PatientAllergy.init({
-    Id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'allergy_id' },
-    PatientId: { type: DataTypes.INTEGER, allowNull: false, field: 'patient_id' },
-    AllergyName: { type: DataTypes.STRING(100), allowNull: false, field: 'allergy_name' },
+    allergy_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'allergy_id' },
+    patient_id: { type: DataTypes.INTEGER, allowNull: false, field: 'patient_id' },
+    allergy_name: { type: DataTypes.STRING(100), allowNull: false, field: 'allergy_name' },
   }, { sequelize, tableName: 'patient_allergies', timestamps: false });
   return PatientAllergy;
 };

@@ -10,6 +10,9 @@ const sequelize = require("./config/database");
 
 const userRoutes = require("./routes/user.router");
 app.use("/api/users", userRoutes);
+const patientrouter = require("./routes/patient.router");
+app.use("/api/patients", patientrouter);
+
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");

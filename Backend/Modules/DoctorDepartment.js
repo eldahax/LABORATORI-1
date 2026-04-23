@@ -5,8 +5,8 @@ class DoctorDepartment extends Model {
 
 module.exports = (sequelize) => {
   DoctorDepartment.init({
-    DoctorId: { type: DataTypes.INTEGER, primaryKey: true, field: 'doctor_id' },
-    DepartmentId: { type: DataTypes.INTEGER, primaryKey: true, field: 'department_id' },
+    doctor_id: { type: DataTypes.INTEGER, primaryKey: true, field: 'doctor_id' },
+    department_id: { type: DataTypes.INTEGER, primaryKey: true, field: 'department_id' },
   }, { sequelize, tableName: 'doctor_departments', timestamps: false });
   return DoctorDepartment;
 };

@@ -13,8 +13,8 @@ class Department extends Model {
 
 module.exports = (sequelize) => {
   Department.init({
-    Id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'department_id' },
-    DepartmentName: { type: DataTypes.STRING(100), allowNull: false, field: 'department_name' },
+   department_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'department_id' },
+   department_name: { type: DataTypes.STRING(100), allowNull: false, field: 'department_name' },
   }, { sequelize, tableName: 'department', timestamps: false });
   return Department;
 };
