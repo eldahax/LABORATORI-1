@@ -16,14 +16,14 @@ class Doctor extends Model {
 
 module.exports = (sequelize) => {
   Doctor.init({
-    Id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'doctor_id' },
-    UserId: { type: DataTypes.INTEGER, allowNull: false, unique: true, field: 'user_id' },
-    Specialization: { type: DataTypes.STRING(100), allowNull: false, field: 'specialization' },
-    LicenseNumber: { type: DataTypes.STRING(255), allowNull: false, unique: true, field: 'license_number' },
-    YearsExperience: { type: DataTypes.INTEGER, allowNull: false, field: 'years_experience' },
-    PhotoUrl: { type: DataTypes.STRING(255), allowNull: true, field: 'photo_url' },
-    Description: { type: DataTypes.STRING(100), allowNull: false, field: 'description' },
-    Status: { type: DataTypes.ENUM('active', 'on_leave', 'retired'), defaultValue: 'active', field: 'status' },
+    doctor_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'doctor_id' },
+    user_id: { type: DataTypes.INTEGER, allowNull: false, unique: true, field: 'user_id' },
+    specialization_id: { type: DataTypes.STRING(100), allowNull: false, field: 'specialization' },
+    license_number: { type: DataTypes.STRING(255), allowNull: false, unique: true, field: 'license_number' },
+    years_experience: { type: DataTypes.INTEGER, allowNull: false, field: 'years_experience' },
+    photo_url: { type: DataTypes.STRING(255), allowNull: true, field: 'photo_url' },
+    description: { type: DataTypes.STRING(100), allowNull: false, field: 'description' },
+    status: { type: DataTypes.ENUM('active', 'on_leave', 'retired'), defaultValue: 'active', field: 'status' },
   }, { sequelize, tableName: 'doctor', timestamps: false });
   return Doctor;
 };

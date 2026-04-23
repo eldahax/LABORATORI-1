@@ -18,55 +18,55 @@ class User extends Model {
 module.exports = (sequelize) => {
   User.init(
     {
-      Id: {
+      user_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         field: "user_id",
       },
-      FirstName: {
+      first_name: {
         type: DataTypes.STRING(50),
         allowNull: false,
         field: "first_name",
       },
-      LastName: {
+      last_name: {
         type: DataTypes.STRING(50),
         allowNull: false,
         field: "last_name",
       },
-      Email: {
+      email: {
         type: DataTypes.STRING(255),
         allowNull: false,
         unique: true,
         field: "email",
       },
-      PasswordHash: {
+      password_hash: {
         type: DataTypes.STRING(255),
         allowNull: false,
         field: "password_hash",
       },
-      PhoneNumber: { type: DataTypes.STRING(20), field: "phone_number" },
-      AccessFailedCount: {
+      phone_number: { type: DataTypes.STRING(20), field: "phone_number" },
+      acces_failed_count: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
         field: "access_failed_count",
       },
-      EmailConfirmed: {
+      email_confirmed: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
         field: "email_confirmed",
       },
-      LockoutEnabled: {
+      lockout_enabled: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
         field: "lockout_enabled",
       },
-      CreatedAt: {
+      created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
         field: "created_at",
       },
-      Status: {
+      status: {
         type: DataTypes.ENUM("active", "suspended", "deleted"),
         defaultValue: "active",
         field: "status",

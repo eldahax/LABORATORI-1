@@ -3,8 +3,8 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('invoices', {
-      1: {
+    await queryInterface.createTable('appointments', {
+      appointment_id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
@@ -20,12 +20,22 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      appointment_id: {
+      doctor_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'appointments',
-          key: 'appointment_id'
+          model: 'doctor',
+          key: 'doctor_id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
+      room_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'rooms',
+          key: 'room_id'
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
@@ -35,20 +45,27 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       },
-      invoice_status: {
-        type: Sequelize.ENUM('done', 'pending'),
+      appointment_date_time: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      duration: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      appointment_status: {
+        type: Sequelize.ENUM('confirmed', 'pending', 'cancelled', 'complete'),
         defaultValue: 'pending',
         allowNull: false
       },
-      payment_method: {
-        type: Sequelize.ENUM('cash', 'card', 'insurance'),
-        defaultValue: 'cash',
+      description: {
+        type: Sequelize.STRING(100),
         allowNull: false
       }
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('invoices');
+    await queryInterface.dropTable('appointments');
   }
 };

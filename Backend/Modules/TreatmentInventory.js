@@ -5,9 +5,9 @@ class TreatmentInventory extends Model {
 
 module.exports = (sequelize) => {
   TreatmentInventory.init({
-    TreatmentId: { type: DataTypes.INTEGER, primaryKey: true, field: 'treatment_id' },
-    InventoryId: { type: DataTypes.INTEGER, primaryKey: true, field: 'inventory_id' },
-    QuantityUsed: { type: DataTypes.INTEGER, field: 'quantity_used' },
+    treatment_id: { type: DataTypes.INTEGER, primaryKey: true, field: 'treatment_id' },
+    inventory_id: { type: DataTypes.INTEGER, primaryKey: true, field: 'inventory_id' },
+    quantity_used: { type: DataTypes.INTEGER, field: 'quantity_used' },
   }, { sequelize, tableName: 'treatment_inventory', timestamps: false });
   return TreatmentInventory;
 };

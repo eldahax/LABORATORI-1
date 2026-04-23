@@ -3,8 +3,8 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('appointments', {
-      appointment_id: {
+    await queryInterface.createTable('dental_records', {
+      dental_record_id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
@@ -24,48 +24,43 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'doctors',
+          model: 'doctor',
           key: 'doctor_id'
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      room_id: {
+      appointment_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'rooms',
-          key: 'room_id'
+          model: 'appointments',
+          key: 'appointment_id'
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      created_at: {
+      tooth: {
+        type: Sequelize.STRING(50),
+        allowNull: false
+      },
+      dental_condition: {
+        type: Sequelize.STRING(100),
+        allowNull: false
+      },
+      notes: {
+        type: Sequelize.STRING(255),
+        allowNull: false
+      },
+      record_date: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-      },
-      appointment_date_time: {
-        type: Sequelize.DATE,
-        allowNull: false
-      },
-      duration: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      appointment_status: {
-        type: Sequelize.ENUM('confirmed', 'pending', 'cancelled', 'complete'),
-        defaultValue: 'pending',
-        allowNull: false
-      },
-      description: {
-        type: Sequelize.STRING(100),
-        allowNull: false
       }
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('appointments');
+    await queryInterface.dropTable('dental_records');
   }
 };

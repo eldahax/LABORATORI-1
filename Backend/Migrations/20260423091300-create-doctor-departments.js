@@ -3,35 +3,33 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('rooms', {
-      room_id: {
+    await queryInterface.createTable('doctor_departments', {
+      doctor_id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
-        allowNull: false
-      },
-      room_name: {
-        type: Sequelize.STRING(100),
-        allowNull: false
-      },
-      department_id: {
-        type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'departments',
-          key: 'department_id'
+          model: 'doctor',
+          key: 'doctor_id'
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      chair_number: {
+      department_id: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        primaryKey: true,
+        allowNull: false,
+        references: {
+          model: 'department',
+          key: 'department_id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       }
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('rooms');
+    await queryInterface.dropTable('doctor_departments');
   }
 };
