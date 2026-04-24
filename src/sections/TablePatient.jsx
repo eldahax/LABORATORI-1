@@ -32,9 +32,17 @@ export default function TablePatient() {
 
     return (
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-8 overflow-x-auto">
-            <h1 className="text-lg sm:text-xl font-bold text-[#0F766E] mb-6">
-                Patients
-            </h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-lg sm:text-xl font-bold text-[#0F766E]">
+                    Patients
+                </h1>
+                <button
+                    onClick={() => navigate("/addP")}
+                    className="bg-[#0F766E] text-white px-4 py-2 rounded-lg hover:bg-[#0D665F] transition-colors"
+                >
+                    + Add Patient
+                </button>
+            </div>
 
             <table className="min-w-full text-left text-sm sm:text-base text-black">
                 <thead>

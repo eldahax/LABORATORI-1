@@ -8,6 +8,7 @@ export default function AddPatient() {
     const [password, setPassword] = useState("");
     const [phone, setPhone] = useState("");
     const [dateOfBirth, setDateOfBirth] = useState("");
+    const [allergy, setAllergy] = useState("");
 
     const [error, setError] = useState("");
 
@@ -32,7 +33,7 @@ export default function AddPatient() {
         }
 
         try {
-            const res = await fetch("http://localhost:5000/api/patients", {
+            const res = await fetch("http://localhost:5000/api/patients/add", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -63,6 +64,7 @@ export default function AddPatient() {
             setPassword("");
             setPhone("");
             setDateOfBirth("");
+            setAllergy("");
         } catch (err) {
             console.log(err);
             setError("Server error");
@@ -119,6 +121,12 @@ export default function AddPatient() {
                         type="date"
                         value={dateOfBirth}
                         onChange={(e) => setDateOfBirth(e.target.value)}
+                        className="w-full border p-2 rounded"
+                    />
+                    <input
+                        placeholder=" allergys"
+                        value={allergy}
+                        onChange={(e) => setAllergy(e.target.value)}
                         className="w-full border p-2 rounded"
                     />
 

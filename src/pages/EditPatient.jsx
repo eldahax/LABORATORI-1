@@ -21,63 +21,30 @@ export default function EditPatient() {
   const nameRegex = /^[A-Za-z]{3,15}$/;
 
   useEffect(() => {
-    const getPatient = async () => {
-      const res = await fetch(`http://localhost:5000/api/patients/${id}`);
-      const data = await res.json();
+    fetch(`http://localhost:5000/api/patients/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
 
-      setForm({
-        first_name: data.User?.first_name || "",
-        last_name: data.User?.last_name || "",
-        email: data.User?.email || "",
-        phone_number: data.User?.phone_number || "",
-        allergy_name: data.User?.allergy_name || "",
-      });
-    };
-
-    getPatient();
+        setForm({
+          first_name: data.User?.first_name || "",
+          last_name: data.User?.last_name || "",
+          email: data.User?.email || "",
+          phone_number: data.User?.phone_number || "",
+          allergy_name: data.allergy_name || "",
+        });
+      })
+      .catch(() => { });
   }, [id]);
 
-
   const handleChange = (e) => {
-    if (e.target.name === "first_name") {
-      setForm({
-        first_name: e.target.value,
-        last_name: form.last_name,
-        email: form.email,
-        phone_number: form.phone_number,
-        allergy_name: form.allergy_name,
-      });
-    }
-
-    if (e.target.name === "last_name") {
-      setForm({
-        first_name: form.first_name,
-        last_name: e.target.value,
-        email: form.email,
-        phone_number: form.phone_number,
-        allergy_name: form.allergy_name,
-      });
-    }
-
-    if (e.target.name === "email") {
-      setForm({
-        first_name: form.first_name,
-        last_name: form.last_name,
-        email: e.target.value,
-        phone_number: form.phone_number,
-        allergy_name: form.allergy_name,
-      });
-    }
-
-    if (e.target.name === "phone_number") {
-      setForm({
-        first_name: form.first_name,
-        last_name: form.last_name,
-        email: form.email,
-        phone_number: e.target.value,
-        allergy_name: form.allergy_name,
-      });
-    }
+    setForm({
+      first_name: form.first_name,
+      last_name: form.last_name,
+      email: form.email,
+      phone_number: form.phone_number,
+      allergy_name: form.allergy_name,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -89,72 +56,114 @@ export default function EditPatient() {
 
     let hasError = false;
 
-    if (!form.first_name || !nameRegex.test(form.first_name)) {
-      setNameErr("Invalid first name");
+    if (!form.first_name.trim()) {
+      setNameErr("First name is required");
+      hasError = true;
+    } else if (!nameRegex.test(form.first_name)) {
+      setNameErr("First name must be 3-15 letters only");
       hasError = true;
     }
 
-    if (!form.last_name || !nameRegex.test(form.last_name)) {
-      setLastNameErr("Invalid last name");
+    if (!form.last_name.trim()) {
+      setLastNameErr("Last name is required");
+      hasError = true;
+    } else if (!nameRegex.test(form.last_name)) {
+      setLastNameErr("Last name must be 3-15 letters only");
       hasError = true;
     }
 
-    if (!form.email || !emailRegex.test(form.email)) {
-      setEmailErr("Invalid email");
+    if (!form.email.trim()) {
+      setEmailErr("Email is required");
+      hasError = true;
+    } else if (!emailRegex.test(form.email)) {
+      setEmailErr("Invalid email format");
       hasError = true;
     }
 
     if (hasError) return;
 
-    const res = await fetch(`http://localhost:5000/api/patients/${id}`, {
+    await fetch(`http://localhost:5000/api/patients/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.log(data.error);
-      return;
-    }
-
-    navigate("/patients");
+    navigate("/Staff");
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center">
-      <form onSubmit={handleSubmit} className="p-6 bg-white space-y-3">
+    <div className="min-h-screen flex justify-center items-center bg-gray-50">
+      <form
+        onSubmit={handleSubmit}
+        className="w-[450px] bg-white p-8 rounded-2xl shadow-lg space-y-4"
+      >
+        <h1 className="text-3xl font-bold text-[#134E4A] text-center">
+          Edit Patient
+        </h1>
 
-        <input
-          name="first_name"
-          value={form.first_name}
-          onChange={handleChange}
-          placeholder="First Name"
-        />
+        <div>
+          <label className="text-sm font-medium text-gray-700">First Name</label>
+          <input
+            name="first_name"
+            value={form.first_name}
+            onChange={handleChange}
+            placeholder="First Name"
+            className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
+          />
+          <p className="text-red-500 text-sm h-5">{nameErr}</p>
+        </div>
 
-        <input
-          name="last_name"
-          value={form.last_name}
-          onChange={handleChange}
-          placeholder="Last Name"
-        />
+        <div>
+          <label className="text-sm font-medium text-gray-700">Last Name</label>
+          <input
+            name="last_name"
+            value={form.last_name}
+            onChange={handleChange}
+            placeholder="Last Name"
+            className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
+          />
+          <p className="text-red-500 text-sm h-5">{lastNameErr}</p>
+        </div>
 
-        <input
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          placeholder="Email"
-        />
+        <div>
+          <label className="text-sm font-medium text-gray-700">Email Address</label>
+          <input
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="Email"
+            className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
+          />
+          <p className="text-red-500 text-sm h-5">{emailErr}</p>
+        </div>
 
-        <input
-          name="phone_number"
-          value={form.phone_number}
-          onChange={handleChange}
-          placeholder="Phone"
-        />
+        <div>
+          <label className="text-sm font-medium text-gray-700">Phone Number</label>
+          <input
+            name="phone_number"
+            value={form.phone_number}
+            onChange={handleChange}
+            placeholder="Phone Number"
+            className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
+          />
+          <div className="h-5"></div>
+        </div>
 
-        <button type="submit">Update</button>
+        <div>
+          <label className="text-sm font-medium text-gray-700">Allergies</label>
+          <input
+            name="allergy_name"
+            value={form.allergy_name}
+            onChange={handleChange}
+            placeholder="Allergies"
+            className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
+          />
+          <div className="h-5"></div>
+        </div>
+
+        <button className="w-full bg-[#0F766E] text-white py-3 rounded-lg font-semibold hover:bg-[#134E4A] transition-colors">
+          Update Patient
+        </button>
       </form>
     </div>
   );
