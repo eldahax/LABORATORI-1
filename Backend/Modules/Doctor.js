@@ -18,7 +18,7 @@ module.exports = (sequelize) => {
   Doctor.init({
     doctor_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'doctor_id' },
     user_id: { type: DataTypes.INTEGER, allowNull: false, unique: true, field: 'user_id' },
-    specialization_id: { type: DataTypes.STRING(100), allowNull: false, field: 'specialization' },
+    specialization: { type: DataTypes.STRING(100), allowNull: false, field: 'specialization' },
     license_number: { type: DataTypes.STRING(255), allowNull: false, unique: true, field: 'license_number' },
     years_experience: { type: DataTypes.INTEGER, allowNull: false, field: 'years_experience' },
     photo_url: { type: DataTypes.STRING(255), allowNull: true, field: 'photo_url' },
