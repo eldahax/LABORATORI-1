@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import TableCard from "./TableCard";
+import Navbar from "../../components/Navbar";
+import Sidebar from "../sideBar"
 export default function TableTreatment() {
     const [treatments, setTreatments] = useState([]);
     const navigate = useNavigate();
@@ -32,6 +34,18 @@ export default function TableTreatment() {
     };
 
     return (
+        <div className="bg-white p-4 sm:p-6 rounded-xl  mb-8 overflow-x-auto">
+                   <Navbar></Navbar>
+            <div className=' min-h-screen'>
+
+                <div className="flex w-full min-h-screen mt-[50px]">
+
+                    <Sidebar />
+
+                    <div className="w-3/4  p-10  ml-[25%]">
+
+
+                        <TableCard></TableCard>
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-8 overflow-x-auto">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-lg sm:text-xl font-bold text-[#0F766E]">
@@ -99,6 +113,10 @@ export default function TableTreatment() {
                     ))}
                 </tbody>
             </table>
+        </div>
+        </div>
+        </div>
+        </div>
         </div>
     );
 }

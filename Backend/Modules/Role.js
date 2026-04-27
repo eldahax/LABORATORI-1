@@ -11,10 +11,10 @@ class Role extends Model {
 
 module.exports = (sequelize) => {
   Role.init({
-    Id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'role_id' },
-    RoleName: { type: DataTypes.STRING(50), allowNull: false, unique: true, field: 'role_name' },
-    Description: { type: DataTypes.STRING(255), allowNull: false, field: 'description' },
-    NormalizedName: { type: DataTypes.STRING(255), allowNull: false, field: 'normalized_name' },
+    role_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'role_id' },
+    role_name: { type: DataTypes.STRING(50), allowNull: false, unique: true, field: 'role_name' },
+    description: { type: DataTypes.STRING(255), allowNull: false, field: 'description' },
+    normalized_name: { type: DataTypes.STRING(255), allowNull: false, field: 'normalized_name' },
   }, { 
     sequelize, 
     tableName: 'roles', 

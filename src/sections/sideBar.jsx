@@ -15,31 +15,35 @@ const Sidebar = () => {
       </button>
 
       <div className=" mt-[50px] hidden md:flex fixed top-0 left-0 h-screen w-1/4 bg-gradient-to-b from-[#134E4A] via-[#0F766E] to-[#5EEAD4] text-white flex-col items-center p-6 z-[40]">
-
-        <img
-          src="../../src/assets/images/Staff2.jpg"
-          className="w-[250px] h-[250px] rounded-full object-cover mb-4 border-2 border-white"
-        />
-
-        <h3 className="font-semibold text-lg">Aurela Domniku</h3>
-        <p className="text-sm opacity-80 mb-8">Dentist</p>
-
         <div className="w-full space-y-3">
           <Link to="/Profile" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
             Personal Information
           </Link>
 
-          <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-            Staff Portal
+          <Link to="/Users" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+           Users
           </Link>
-
-          <Link to="/Notification" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-            Notification
+          <Link to="/Patients" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+           Patients
           </Link>
-
-          <div className="text-center p-3 rounded-lg hover:bg-white hover:text-black cursor-pointer">
-            Log Out
-          </div>
+          <Link to="/Doctors" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Doctors
+          </Link>
+          <Link to="/Treatments" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+           Treatments
+          </Link>
+            <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+           Appointment's
+          </Link>
+            <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Dental History
+          </Link>
+            <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+           Work Schedule
+          </Link>
+           <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+           Reminders and Notificatiosn
+          </Link>
         </div>
       </div>
 

@@ -88,7 +88,7 @@ export default function Signup() {
           first_name: name,
           last_name: lastname,
           email: email,
-          phone: phone,
+          phone_number: phone,
           password: password,
         }),
       });

@@ -99,7 +99,7 @@ export default function EditTreatment() {
             body: JSON.stringify(form),
         });
 
-        navigate("/treatments");
+        navigate("/Staff");
     };
 
     return (

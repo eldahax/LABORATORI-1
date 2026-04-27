@@ -24,7 +24,7 @@ export default function EditPatient() {
     fetch(`http://localhost:5000/api/patients/${id}`)
       .then((res) => res.json())
       .then((data) => {
-
+        
         setForm({
           first_name: data.User?.first_name || "",
           last_name: data.User?.last_name || "",
@@ -33,7 +33,7 @@ export default function EditPatient() {
           allergy_name: data.allergy_name || "",
         });
       })
-      .catch(() => { });
+    .catch(() => {});
   }, [id]);
 
   const handleChange = (e) => {
@@ -95,7 +95,7 @@ export default function EditPatient() {
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
       <form
         onSubmit={handleSubmit}
-        className="w-[450px] bg-white p-8 rounded-2xl shadow-lg space-y-4"
+        className="w-[450px] bg-white rounded-2xl  space-y-2"
       >
         <h1 className="text-3xl font-bold text-[#134E4A] text-center">
           Edit Patient

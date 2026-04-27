@@ -23,9 +23,9 @@ export default function EditUser() {
       .then((res) => res.json())
       .then((data) => {
         setForm({
-          first_name: data.FirstName,
-          last_name: data.LastName,
-          email: data.Email,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
         });
       })
       .catch(() => {});
@@ -33,9 +33,9 @@ export default function EditUser() {
 
   const handleChange = (e) => {
     setForm({
-      first_name: form.FirstName,
-      last_name: form.LastName,
-      email: form.Email,
+      first_name: form.first_name,
+      last_name: form.last_name,
+      email: form.email,
       [e.target.name]: e.target.value,
     });
   };
