@@ -5,9 +5,9 @@ class OfferTreatment extends Model {
 
 module.exports = (sequelize) => {
   OfferTreatment.init({
-    Id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'offers_treatment_id' },
-    OffersId: { type: DataTypes.INTEGER, allowNull: false, field: 'offers_id' },
-    TreatmentId: { type: DataTypes.INTEGER, allowNull: false, field: 'treatment_id' },
+    offers_treatment_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'offers_treatment_id' },
+    offers_id: { type: DataTypes.INTEGER, allowNull: false, field: 'offers_id' },
+    treatment_id: { type: DataTypes.INTEGER, allowNull: false, field: 'treatment_id' },
   }, { sequelize, tableName: 'offers_treatment', timestamps: false });
   return OfferTreatment;
 };
