@@ -8,7 +8,14 @@ export default function EditRoom() {
     const [roomName, setRoomName] = useState("");
     const [chairNumber, setChairNumber] = useState("");
     const [department, setDepartment] = useState("");
-    const [errors, setErrors] = useState({});
+
+    const [signupErr, setSignupErr] = useState("");
+
+    const [roomErr, setRoomErr] = useState("");
+    const [chairErr, setChairErr] = useState("");
+    const [departmentErr, setDepartmentErr] = useState("");
+
+    const nameRegex = /^[A-Za-z0-9\s]{3,50}$/;
 
     const departments = [
         "General Dentistry",
@@ -19,8 +26,6 @@ export default function EditRoom() {
         "Pediatric Dentistry"
     ];
 
-    const nameRegex = /^[A-Za-z0-9\s]{3,50}$/;
-
     useEffect(() => {
         fetch(`http://localhost:5000/api/rooms/${id}`)
             .then((res) => res.json())
@@ -29,30 +34,38 @@ export default function EditRoom() {
                 setChairNumber(data.chair_number || "");
                 setDepartment(data.Department?.department_name || "");
             })
-            .catch((err) => console.log("Error fetching room:", err));
+            .catch((err) => console.log(err));
     }, [id]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const newErrors = {};
+        setRoomErr("");
+        setChairErr("");
+        setDepartmentErr("");
+        setSignupErr("");
 
-        if (!roomName.trim()) {
-            newErrors.roomName = "Room name is required";
+        let hasError = false;
+
+        if (roomName.trim() === "") {
+            setRoomErr("Room name is required");
+            hasError = true;
         } else if (!nameRegex.test(roomName)) {
-            newErrors.roomName = "Invalid room name";
+            setRoomErr("Invalid room name");
+            hasError = true;
         }
 
-        if (!chairNumber || Number(chairNumber) <= 0) {
-            newErrors.chairNumber = "Chair number must be greater than 0";
+        if (chairNumber === "" || Number(chairNumber) <= 0) {
+            setChairErr("Chair number must be greater than 0");
+            hasError = true;
         }
 
-        if (!department) {
-            newErrors.department = "Department is required";
+        if (department === "") {
+            setDepartmentErr("Department is required");
+            hasError = true;
         }
 
-        setErrors(newErrors);
-        if (Object.keys(newErrors).length > 0) return;
+        if (hasError) return;
 
         try {
             const res = await fetch(`http://localhost:5000/api/rooms/${id}`, {
@@ -65,91 +78,92 @@ export default function EditRoom() {
                 }),
             });
 
+            const data = await res.json();
+
             if (!res.ok) {
-                alert("Update failed");
+                setSignupErr(data.error || "Update failed");
                 return;
             }
 
-            alert("Room updated successfully");
+            alert("Room updated successfully!");
             navigate("/rooms");
+
         } catch (err) {
-            console.error(err);
-            alert("Server error");
+            console.log(err);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
-            <form
-                onSubmit={handleSubmit}
-                className="w-full max-w-3xl bg-white p-6 rounded-xl shadow-lg flex flex-col gap-4"
-            >
-                <h1 className="text-2xl font-bold text-[#0F766E] text-center uppercase">
-                    Edit Room #{id}
+        <div className="flex justify-center items-center w-full h-screen">
+            <div className="w-full max-w-md p-8 rounded-xl">
+
+                <h1 className="text-[36px] font-bold text-[#0F766E] text-center tracking-widest mb-5">
+                    EDIT ROOM
                 </h1>
 
-                <div className="flex flex-col">
-                    <label className="text-xs font-semibold text-gray-500 ml-1">
-                        Room Name
-                    </label>
-                    <input
-                        type="text"
-                        value={roomName}
-                        onChange={(e) => setRoomName(e.target.value)}
-                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-                    />
-                    <p className="text-red-500 text-sm">{errors.roomName}</p>
-                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
 
-                <div className="flex flex-col">
-                    <label className="text-xs font-semibold text-gray-500 ml-1">
-                        Chair Number
-                    </label>
-                    <input
-                        type="number"
-                        value={chairNumber}
-                        onChange={(e) => setChairNumber(e.target.value)}
-                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-                    />
-                    <p className="text-red-500 text-sm">{errors.chairNumber}</p>
-                </div>
+                    <div className="flex flex-col pt-4">
+                        <input
+                            type="text"
+                            placeholder="room name"
+                            value={roomName}
+                            onChange={(e) => setRoomName(e.target.value)}
+                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
+                        />
+                        <p className="text-red-500 pl-[4px]">{roomErr}</p>
+                    </div>
 
-                <div className="flex flex-col">
-                    <label className="text-xs font-semibold text-gray-500 ml-1">
-                        Department
-                    </label>
-                    <select
-                        value={department}
-                        onChange={(e) => setDepartment(e.target.value)}
-                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-                    >
-                        <option value="">Select Department</option>
-                        {departments.map((d, i) => (
-                            <option key={i} value={d}>
-                                {d}
-                            </option>
-                        ))}
-                    </select>
-                    <p className="text-red-500 text-sm">{errors.department}</p>
-                </div>
+                    <div className="flex flex-col">
+                        <input
+                            type="number"
+                            placeholder="chair number"
+                            value={chairNumber}
+                            onChange={(e) => setChairNumber(e.target.value)}
+                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
+                        />
+                        <p className="text-red-500 pl-[4px]">{chairErr}</p>
+                    </div>
 
-                <div className="flex gap-4">
-                    <button
-                        type="button"
-                        onClick={() => navigate("/rooms")}
-                        className="w-1/2 border-2 border-gray-300 text-gray-600 py-2 rounded-lg font-bold hover:bg-gray-100"
-                    >
-                        Cancel
-                    </button>
+                    <div className="flex flex-col">
+                        <select
+                            value={department}
+                            onChange={(e) => setDepartment(e.target.value)}
+                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
+                        >
+                            <option value="">select department</option>
+                            {departments.map((d, i) => (
+                                <option key={i} value={d}>{d}</option>
+                            ))}
+                        </select>
+                        <p className="text-red-500 pl-[4px]">{departmentErr}</p>
+                    </div>
 
-                    <button
-                        type="submit"
-                        className="w-1/2 bg-[#0F766E] text-white py-2 rounded-lg font-bold hover:bg-[#134E4A]"
-                    >
-                        Save Changes
-                    </button>
-                </div>
-            </form>
+                    {signupErr && (
+                        <p className="text-red-500 text-center font-semibold">
+                            {signupErr}
+                        </p>
+                    )}
+
+                    <div className="flex gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={() => navigate("/rooms")}
+                            className="w-1/2 border-[2px] border-gray-300 text-gray-600 py-2 rounded-lg font-bold hover:bg-gray-100"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            className="w-1/2 bg-[#0F766E] text-white font-bold py-2 rounded-lg hover:bg-[#134E4A]"
+                        >
+                            Save
+                        </button>
+                    </div>
+
+                </form>
+            </div>
         </div>
     );
 }

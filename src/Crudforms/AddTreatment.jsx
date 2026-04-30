@@ -1,6 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function AddTreatment() {
+
+    const navigate = useNavigate();
+
     const [treatmentName, setTreatmentName] = useState("");
     const [price, setPrice] = useState("");
     const [description, setDescription] = useState("");
@@ -91,6 +95,7 @@ export default function AddTreatment() {
             }
 
             alert("Treatment created successfully!");
+            navigate("/Treatments");
 
             setTreatmentName("");
             setPrice("");

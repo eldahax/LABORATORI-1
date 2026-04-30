@@ -5,13 +5,13 @@ export default function EditTreatment() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const [form, setForm] = useState({
-        treatment_name: "",
-        price: "",
-        description: "",
-        average_duration: "",
-        department_name: "",
-    });
+    const [treatmentName, setTreatmentName] = useState("");
+    const [price, setPrice] = useState("");
+    const [description, setDescription] = useState("");
+    const [averageDuration, setAverageDuration] = useState("");
+    const [departmentName, setDepartmentName] = useState("");
+
+    const [signupErr, setSignupErr] = useState("");
 
     const [nameErr, setNameErr] = useState("");
     const [priceErr, setPriceErr] = useState("");
@@ -34,23 +34,14 @@ export default function EditTreatment() {
         fetch(`http://localhost:5000/api/treatments/${id}`)
             .then((res) => res.json())
             .then((data) => {
-                setForm({
-                    treatment_name: data.treatment_name,
-                    price: data.price,
-                    description: data.description,
-                    average_duration: data.average_duration,
-                    department_name: data.Department?.department_name || "",
-                });
+                setTreatmentName(data.treatment_name || "");
+                setPrice(data.price || "");
+                setDescription(data.description || "");
+                setAverageDuration(data.average_duration || "");
+                setDepartmentName(data.Department?.department_name || "");
             })
-            .catch(() => { });
+            .catch((err) => console.log(err));
     }, [id]);
-
-    const handleChange = (e) => {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value,
-        });
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -60,125 +51,161 @@ export default function EditTreatment() {
         setDescriptionErr("");
         setDurationErr("");
         setDepartmentErr("");
+        setSignupErr("");
 
         let hasError = false;
 
-        if (!form.treatment_name.trim()) {
+        if (treatmentName.trim() === "") {
             setNameErr("Treatment name is required");
             hasError = true;
-        } else if (!nameRegex.test(form.treatment_name)) {
+        } else if (!nameRegex.test(treatmentName)) {
             setNameErr("Invalid treatment name");
             hasError = true;
         }
 
-        if (!form.price) {
+        if (price === "") {
             setPriceErr("Price is required");
             hasError = true;
         }
 
-        if (!form.description.trim()) {
+        if (description.trim() === "") {
             setDescriptionErr("Description is required");
             hasError = true;
         }
 
-        if (!form.average_duration) {
+        if (averageDuration === "") {
             setDurationErr("Duration is required");
             hasError = true;
         }
 
-        if (!form.department_name) {
+        if (departmentName === "") {
             setDepartmentErr("Department is required");
             hasError = true;
         }
 
         if (hasError) return;
 
-        await fetch(`http://localhost:5000/api/treatments/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(form),
-        });
+        try {
+            const res = await fetch(`http://localhost:5000/api/treatments/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    treatment_name: treatmentName,
+                    price: price,
+                    description: description,
+                    average_duration: averageDuration,
+                    department_name: departmentName
+                }),
+            });
 
-        navigate("/Staff");
+            const data = await res.json();
+
+            if (!res.ok) {
+                setSignupErr(data.error || "Update failed");
+                return;
+            }
+
+            alert("Treatment updated successfully!");
+            navigate("/Treatments");
+
+        } catch (err) {
+            console.log(err);
+        }
     };
 
     return (
-        <div className="min-h-screen flex justify-center items-center bg-gray-50">
-            <form
-                onSubmit={handleSubmit}
-                className="w-[450px] bg-white p-8 rounded-2xl shadow-lg space-y-4"
-            >
-                <h1 className="text-3xl font-bold text-[#134E4A] text-center">
-                    Edit Treatment
+        <div className="flex justify-center items-center w-full h-screen">
+            <div className="w-full max-w-md p-8 rounded-xl">
+
+                <h1 className="text-[36px] font-bold text-[#0F766E] text-center tracking-widest mb-5">
+                    EDIT TREATMENT
                 </h1>
 
-                <div>
-                    <input
-                        name="treatment_name"
-                        value={form.treatment_name}
-                        onChange={handleChange}
-                        placeholder="Treatment Name"
-                        className="p-3 border w-full rounded-lg"
-                    />
-                    <p className="text-red-500 text-sm">{nameErr}</p>
-                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
 
-                <div>
-                    <input
-                        type="number"
-                        name="price"
-                        value={form.price}
-                        onChange={handleChange}
-                        placeholder="Price"
-                        className="p-3 border w-full rounded-lg"
-                    />
-                    <p className="text-red-500 text-sm">{priceErr}</p>
-                </div>
+                    <div className="flex flex-col pt-4">
+                        <input
+                            type="text"
+                            placeholder="treatment name"
+                            value={treatmentName}
+                            onChange={(e) => setTreatmentName(e.target.value)}
+                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
+                        />
+                        <p className="text-red-500 pl-[4px]">{nameErr}</p>
+                    </div>
 
-                <div>
-                    <input
-                        name="description"
-                        value={form.description}
-                        onChange={handleChange}
-                        placeholder="Description"
-                        className="p-3 border w-full rounded-lg"
-                    />
-                    <p className="text-red-500 text-sm">{descriptionErr}</p>
-                </div>
+                    <div className="flex flex-col">
+                        <input
+                            type="number"
+                            placeholder="price"
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
+                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
+                        />
+                        <p className="text-red-500 pl-[4px]">{priceErr}</p>
+                    </div>
 
-                <div>
-                    <input
-                        type="number"
-                        name="average_duration"
-                        value={form.average_duration}
-                        onChange={handleChange}
-                        placeholder="Average Duration"
-                        className="p-3 border w-full rounded-lg"
-                    />
-                    <p className="text-red-500 text-sm">{durationErr}</p>
-                </div>
+                    <div className="flex flex-col">
+                        <input
+                            type="text"
+                            placeholder="description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
+                        />
+                        <p className="text-red-500 pl-[4px]">{descriptionErr}</p>
+                    </div>
 
-                <div>
-                    <select
-                        name="department_name"
-                        value={form.department_name}
-                        onChange={handleChange}
-                        className="p-3 border w-full rounded-lg"
-                    >
-                        <option value="">Select Department</option>
-                        {departments.map((d, i) => (
-                            <option key={i} value={d}>
-                                {d}
-                            </option>
-                        ))}
-                    </select>
-                    <p className="text-red-500 text-sm">{departmentErr}</p>
-                </div>
+                    <div className="flex flex-col">
+                        <input
+                            type="number"
+                            placeholder="average duration"
+                            value={averageDuration}
+                            onChange={(e) => setAverageDuration(e.target.value)}
+                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
+                        />
+                        <p className="text-red-500 pl-[4px]">{durationErr}</p>
+                    </div>
 
-                <button className="w-full bg-[#0F766E] text-white py-3 rounded-lg font-semibold">
-                    Update Treatment
-                </button>
-            </form>
+                    <div className="flex flex-col">
+                        <select
+                            value={departmentName}
+                            onChange={(e) => setDepartmentName(e.target.value)}
+                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
+                        >
+                            <option value="">select department</option>
+                            {departments.map((d, i) => (
+                                <option key={i} value={d}>{d}</option>
+                            ))}
+                        </select>
+                        <p className="text-red-500 pl-[4px]">{departmentErr}</p>
+                    </div>
+
+                    {signupErr && (
+                        <p className="text-red-500 text-center font-semibold">
+                            {signupErr}
+                        </p>
+                    )}
+
+                    <div className="flex gap-3">
+                        <button
+                            type="button"
+                            onClick={() => navigate("/Staff")}
+                            className="w-1/2 border-[2px] border-gray-300 text-gray-600 py-2 rounded-lg font-bold hover:bg-gray-100"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            className="w-1/2 bg-[#0F766E] text-white font-bold py-2 rounded-lg hover:bg-[#134E4A]"
+                        >
+                            Save
+                        </button>
+                    </div>
+
+                </form>
+            </div>
         </div>
     );
 }
