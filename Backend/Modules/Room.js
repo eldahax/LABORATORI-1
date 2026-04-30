@@ -8,10 +8,10 @@ class Room extends Model {
 
 module.exports = (sequelize) => {
   Room.init({
-    Id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'room_id' },
-    RoomName: { type: DataTypes.STRING(100), allowNull: false, field: 'room_name' },
-    DepartmentId: { type: DataTypes.INTEGER, allowNull: false, field: 'department_id' },
-    ChairNumber: { type: DataTypes.INTEGER, allowNull: false, field: 'chair_number' },
+    room_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'room_id' },
+    room_name: { type: DataTypes.STRING(100), allowNull: false, field: 'room_name' },
+    department_id: { type: DataTypes.INTEGER, allowNull: false, field: 'department_id' },
+    chair_number: { type: DataTypes.INTEGER, allowNull: false, field: 'chair_number' },
   }, { sequelize, tableName: 'rooms', timestamps: false });
   return Room;
 };
