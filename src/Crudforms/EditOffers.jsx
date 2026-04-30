@@ -19,7 +19,6 @@ export default function EditOffer() {
             .then(data => {
                 setOfferName(data.offers_name || "");
                 setPrice(data.price || "");
-
                 setStartDate(data.start_date || "");
                 setEndDate(data.end_date || "");
 
@@ -47,9 +46,7 @@ export default function EditOffer() {
                 selectedTreatments.filter(id => id !== treatment_id)
             );
         } else {
-            setSelectedTreatments(
-                [...selectedTreatments, treatment_id]
-            );
+            setSelectedTreatments([...selectedTreatments, treatment_id]);
         }
     };
 
@@ -69,10 +66,10 @@ export default function EditOffer() {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    offers_name: offers_name,
-                    price: price,
-                    start_date: start_date,
-                    end_date: end_date,
+                    offers_name,
+                    price,
+                    start_date,
+                    end_date,
                     treatment_ids: selectedTreatments
                 })
             });
@@ -94,58 +91,79 @@ export default function EditOffer() {
     };
 
     return (
-        <div>
-            <form onSubmit={handleSubmit}>
+        <div className="flex justify-center items-center w-full h-screen">
+            <div className="w-full max-w-md p-8 rounded-xl">
 
-                <input
-                    value={offers_name}
-                    onChange={(e) => setOfferName(e.target.value)}
-                    placeholder="Offer name"
-                />
+                <h1 className="text-[32px] font-bold text-[#0F766E] text-center mb-6">
+                    EDIT OFFER
+                </h1>
 
-                <input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="Price"
-                />
+                <form onSubmit={handleSubmit} className="space-y-4">
 
-                <input
-                    type="date"
-                    value={start_date}
-                    onChange={(e) => setStartDate(e.target.value)}
-                />
+                    <input
+                        type="text"
+                        placeholder="Offer name"
+                        value={offers_name}
+                        onChange={(e) => setOfferName(e.target.value)}
+                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+                    />
 
-                <input
-                    type="date"
-                    value={end_date}
-                    onChange={(e) => setEndDate(e.target.value)}
-                />
+                    <input
+                        type="number"
+                        placeholder="Price"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+                    />
 
-                <div>
-                    {treatments.map(t => (
-                        <label key={t.treatment_id}>
-                            <input
-                                type="checkbox"
-                                checked={selectedTreatments.includes(t.treatment_id)}
-                                onChange={() => handleCheckbox(t.treatment_id)}
-                            />
-                            {t.treatment_name}
-                        </label>
-                    ))}
-                </div>
+                    <input
+                        type="date"
+                        value={start_date}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+                    />
 
-                {error && <p>{error}</p>}
+                    <input
+                        type="date"
+                        value={end_date}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+                    />
 
-                <button type="button" onClick={() => navigate("/offers")}>
-                    Cancel
-                </button>
+                    <div className="border p-3 rounded">
+                        <h3>Select Treatments</h3>
 
-                <button type="submit">
-                    Save
-                </button>
+                        {treatments.map(t => (
+                            <label key={t.treatment_id} className="block">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedTreatments.includes(t.treatment_id)}
+                                    onChange={() => handleCheckbox(t.treatment_id)}
+                                />
+                                {t.treatment_name}
+                            </label>
+                        ))}
+                    </div>
 
-            </form>
+                    {error && <p className="text-red-500 text-center">{error}</p>}
+
+                    <button
+                        type="button"
+                        onClick={() => navigate("/offers")}
+                        className="w-full bg-gray-400 text-white py-2 rounded-lg"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        className="w-full bg-[#0F766E] text-white py-2 rounded-lg"
+                    >
+                        Save
+                    </button>
+
+                </form>
+            </div>
         </div>
     );
 }
