@@ -11,16 +11,16 @@ class Inventory extends Model {
 
 module.exports = (sequelize) => {
   Inventory.init({
-    Id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'inventory_id' },
-    ItemName: { type: DataTypes.STRING(100), allowNull: false, field: 'item_name' },
-    Category: { 
+    inventory_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'inventory_id' },
+    item_name: { type: DataTypes.STRING(100), allowNull: false, field: 'item_name' },
+    category: { 
       type: DataTypes.ENUM('consumable', 'instrument', 'anesthetic', 'medication', 'other'), 
       allowNull: false, 
       field: 'category' 
     },
-    Cost: { type: DataTypes.DECIMAL(10, 2), allowNull: false, field: 'cost' },
-    Quantity: { type: DataTypes.INTEGER, allowNull: false, field: 'quantity' },
-    Description: { type: DataTypes.STRING(100), allowNull: false, field: 'description' },
+    cost: { type: DataTypes.DECIMAL(10, 2), allowNull: false, field: 'cost' },
+    quantity: { type: DataTypes.INTEGER, allowNull: false, field: 'quantity' },
+    description: { type: DataTypes.STRING(100), allowNull: false, field: 'description' },
   }, { sequelize, tableName: 'inventory', timestamps: false });
   return Inventory;
 };
