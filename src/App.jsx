@@ -18,6 +18,15 @@ import TablePatient from "./sections/Tables/TablePatient";
 import TableTreatment from "./sections/Tables/TableTreatment";
 import Table from "./sections/Tables/Table";
 import DoctorTable from "./sections/Tables/DoctorTable";
+import TableRoom from "./sections/Tables/TableRoom";
+import AddRoom from "./Crudforms/AddRoom";
+import EditRoom from "./Crudforms/EditRoom";
+import OfferTable from "./sections/Tables/OfferTable";
+import AddOffers from "./Crudforms/AddOffers";
+import EditOffers from "./Crudforms/EditOffers";
+import InventoryTable from "./sections/Tables/InventoryTable";
+import AddInventory from "./Crudforms/AddInventory";
+import EditInventory from "./Crudforms/EditInventory";
 function App() {
   return (
     <Routes>
@@ -25,10 +34,21 @@ function App() {
       <Route path='/Treatments' element={<TableTreatment />} />
       <Route path='/Users' element={<Table />} />
       <Route path='/Doctors' element={<DoctorTable />} />
+      <Route path="/rooms" element={<TableRoom />} />
+      <Route path="/offers" element={<OfferTable />} />
+      <Route path="/inventory" element={<InventoryTable />} />
 
+
+
+      <Route path="/addI" element={<AddInventory />} />
+      <Route path="/addO" element={<AddOffers />} />
+      <Route path="/addRoom" element={<AddRoom />} />
       <Route path="/addP" element={<AddPartient />} />
       <Route path="/add" element={<AddDoc />} />
       <Route path="/addT" element={<AddTreatment />} />
+      <Route path="/inventory/edit/:id" element={<EditInventory />} />
+      <Route path="/offers/edit/:id" element={<EditOffers />} />
+      <Route path="/rooms/edit/:id" element={<EditRoom />} />
       <Route path="/treatments/edit/:id" element={<EditTreatment />} />
       <Route path="/users/edit/:id" element={<EditUser />} />
       <Route path="/patients/edit/:id" element={<EditPatient />} />
@@ -42,6 +62,8 @@ function App() {
       <Route path='/Signup' element={<Signup />} />
       <Route path='/Services' element={<Services />} />
       <Route path='/Appointments' element={<Appointments />} />
+      <Route path='/add' element={<Appointments />} />
+
 
     </Routes>
   );

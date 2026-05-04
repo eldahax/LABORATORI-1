@@ -23,6 +23,12 @@ app.use("/api/treatments", tretRouter);
 const offerRouter = require("./routes/offer.router");
 app.use("/api/offers", offerRouter);
 
+const roomRouter = require("./routes/room.router");
+app.use("/api/rooms", roomRouter);
+
+const inventoryRouter = require("./routes/inventory.router");
+app.use("/api/inventory", inventoryRouter);
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });

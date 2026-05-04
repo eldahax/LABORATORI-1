@@ -6,7 +6,7 @@ const Sidebar = () => {
 
   return (
     <>
-    
+
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="md:hidden fixed top-[70px] left-4 text-3xl text-[#134E4A] z-[60]"
@@ -21,42 +21,51 @@ const Sidebar = () => {
           </Link>
 
           <Link to="/Users" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-           Users
+            Users
           </Link>
           <Link to="/Patients" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-           Patients
+            Patients
           </Link>
           <Link to="/Doctors" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
             Doctors
           </Link>
           <Link to="/Treatments" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-           Treatments
+            Treatments
           </Link>
-            <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-           Appointment's
+          <Link to="/Rooms" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Rooms
           </Link>
-            <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+          <Link to="/Offers" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Offers
+          </Link>
+          <Link to="/Inventory" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Inventory
+          </Link>
+          <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Appointment's
+          </Link>
+          <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
             Dental History
           </Link>
-            <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-           Work Schedule
+          <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Work Schedule
           </Link>
-           <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-           Reminders and Notificatiosn
+          <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Reminders and Notificatiosn
           </Link>
         </div>
       </div>
 
-     
+
       {isOpen && (
         <>
-         
+
           <div
             onClick={() => setIsOpen(false)}
             className="fixed inset-0 bg-black/40 z-[50] md:hidden"
           />
 
-        
+
           <div className="fixed top-[60px] left-0 w-full bg-[#0F766E] text-white z-[60] md:hidden">
             <ul className="flex flex-col items-center gap-4 py-6">
 
