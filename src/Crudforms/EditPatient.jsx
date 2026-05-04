@@ -30,7 +30,7 @@ export default function EditPatient() {
           last_name: data.User?.last_name || "",
           email: data.User?.email || "",
           phone_number: data.User?.phone_number || "",
-          allergy_name: data.allergy_name || "",
+          allergy_name: data.PatientAllergies[0].allergy_name 
         });
       })
     .catch(() => {});

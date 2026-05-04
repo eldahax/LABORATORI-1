@@ -1,4 +1,4 @@
-const { User, Patient, PatientAllergy } = require("../models");
+const { User, Patient, PatientAllergy,Role,UserRole } = require("../models");
 const { createUser, updateUser } = require("./userCrud");
 
 const bcrypt = require('bcryptjs')
@@ -32,14 +32,23 @@ const addPatient = async (
         patient_id: patient.patient_id,
         allergy_name
     });
-
+    const role = await Role.findOne({
+          where: { role_name: "patient" }
+        
+        });
+    
+        if (!role) throw new Error("Patient role not found");
+    
+        await UserRole.create({
+          user_id: user.user_id,
+          role_id: role.role_id
+        });
     return {
         user_id: user.user_id,
         patient_id: patient.patient_id,
         allergy_name: patient.allergy_name
     };
 };
-
 
 
 const getAllPatients = async () => {
@@ -63,6 +72,9 @@ const getPatientById = async (patient_id) => {
             {
                 model: User,
                 attributes: ["user_id", "first_name", "last_name", "email", "phone_number"]
+            },{
+                model: PatientAllergy,
+                attributes: ["allergy_name"]
             }
         ]
     });
@@ -81,6 +93,7 @@ const updatePatient = async (patient_id, data) => {
         throw new Error("Patient not found");
     }
 
+
     await updateUser(patient.user_id, {
         first_name: data.first_name,
         last_name: data.last_name,
@@ -92,33 +105,20 @@ const updatePatient = async (patient_id, data) => {
         date_of_birth: data.date_of_birth ?? patient.date_of_birth,
         allergy_name: data.allergy_name ?? patient.allergy_name
     });
+   await PatientAllergy.destroy({
+  where: { patient_id: patient.patient_id }
+});
 
-    if (data.allergy_name !== undefined) {
-        const allergyRecord = await PatientAllergy.findOne({
-            where: { patient_id: patient.patient_id }
-        });
-
-        if (allergyRecord) {
-            await allergyRecord.update({
-                allergy_name: data.allergy_name
-            });
-        } else {
-            await PatientAllergy.create({
-                patient_id: patient.patient_id,
-                allergy_name: data.allergy_name
-            });
-        }
-    }
+await PatientAllergy.create({
+  patient_id: patient.patient_id,
+  allergy_name: data.allergy_name
+});
 
     return {
         patient_id: patient.patient_id,
         user_id: patient.user_id,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        email: data.email,
-        phone_number: data.phone_number,
-        date_of_birth: data.date_of_birth,
-        allergy_name: data.allergy_name
+        date_of_birth: patient.date_of_birth,
+        allergy_name: patient.allergy_name
     };
 };
 
