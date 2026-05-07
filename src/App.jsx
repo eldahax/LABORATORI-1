@@ -27,6 +27,10 @@ import EditOffers from "./Crudforms/EditOffers";
 import InventoryTable from "./sections/Tables/InventoryTable";
 import AddInventory from "./Crudforms/AddInventory";
 import EditInventory from "./Crudforms/EditInventory";
+import ContactForm from "./sections/ContactForm";
+import AddContact from "./Crudforms/AddContact";
+import ContactTable from "./sections/Tables/ContactTable";
+
 function App() {
   return (
     <Routes>
@@ -38,7 +42,9 @@ function App() {
       <Route path="/offers" element={<OfferTable />} />
       <Route path="/inventory" element={<InventoryTable />} />
 
-
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/contacts" element={<ContactTable />} />
+      <Route path="/add-contact" element={<AddContact />} />
 
       <Route path="/addI" element={<AddInventory />} />
       <Route path="/addO" element={<AddOffers />} />
@@ -63,7 +69,6 @@ function App() {
       <Route path='/Services' element={<Services />} />
       <Route path='/Appointments' element={<Appointments />} />
       <Route path='/add' element={<Appointments />} />
-
 
     </Routes>
   );

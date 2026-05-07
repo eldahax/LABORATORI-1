@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 export default function ContactForm() {
+
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
@@ -14,8 +15,10 @@ export default function ContactForm() {
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     const phoneRegex = /^[0-9+\-\s]{8,15}$/;
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
+
         e.preventDefault();
+
         let hasError = false;
 
         setNameError("");
@@ -27,6 +30,7 @@ export default function ContactForm() {
             setNameError("Name is required");
             hasError = true;
         }
+
         if (email.trim() === "") {
             setEmailError("Email is required");
             hasError = true;
@@ -35,6 +39,7 @@ export default function ContactForm() {
             setEmailError("Invalid email format");
             hasError = true;
         }
+
         if (phone.trim() === "") {
             setPhoneError("Phone is required");
             hasError = true;
@@ -43,26 +48,63 @@ export default function ContactForm() {
             setPhoneError("Invalid phone number");
             hasError = true;
         }
+
         if (message.trim() === "") {
             setMessageError("Message is required");
             hasError = true;
         }
 
-        if (!hasError) {
+        if (hasError) return;
+
+        try {
+
+            const res = await fetch("http://localhost:5000/api/contacts", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                },
+
+                body: JSON.stringify({
+                    fullname: name,
+                    email: email,
+                    phone_number: phone,
+                    message: message,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.error || "Failed to send message");
+                return;
+            }
+
             alert("Message sent successfully!");
+
             setName("");
             setEmail("");
             setPhone("");
             setMessage("");
+
+        } catch (err) {
+
+            console.log(err);
+            alert("Server error");
         }
     };
 
-
     return (
         <div className="bg-white p-8 rounded-3xl shadow-md">
+
             <form onSubmit={handleSubmit} className="space-y-4">
+
                 <div>
-                    <label className="mb-1 font-semibold text-[#134E4A]">Full Name</label>
+                    <label className="mb-1 font-semibold text-[#134E4A]">
+                        Full Name
+                    </label>
+
                     <input
                         type="text"
                         value={name}
@@ -71,13 +113,22 @@ export default function ContactForm() {
                             setNameError("");
                         }}
                         placeholder="Full Name"
-                        className={`w-full px-4 py-3 rounded-xl border ${nameError ? "border-red-500" : "border-gray-200"} focus:ring-2 focus:ring-[#0F766E] outline-none`}
+                        className={`w-full px-4 py-3 rounded-xl border ${nameError
+                                ? "border-red-500"
+                                : "border-gray-200"
+                            } focus:ring-2 focus:ring-[#0F766E] outline-none`}
                     />
-                    <span className="text-red-500 text-sm mt-1 block">{nameError}</span>
+
+                    <span className="text-red-500 text-sm mt-1 block">
+                        {nameError}
+                    </span>
                 </div>
 
                 <div>
-                    <label className="mb-1 font-semibold text-[#134E4A]">Email</label>
+                    <label className="mb-1 font-semibold text-[#134E4A]">
+                        Email
+                    </label>
+
                     <input
                         type="email"
                         value={email}
@@ -86,12 +137,22 @@ export default function ContactForm() {
                             setEmailError("");
                         }}
                         placeholder="Email"
-                        className={`w-full px-4 py-3 rounded-xl border ${emailError ? "border-red-500" : "border-gray-200"} focus:ring-2 focus:ring-[#0F766E] outline-none`}
+                        className={`w-full px-4 py-3 rounded-xl border ${emailError
+                                ? "border-red-500"
+                                : "border-gray-200"
+                            } focus:ring-2 focus:ring-[#0F766E] outline-none`}
                     />
-                    <span className="text-red-500 text-sm mt-1 block">{emailError}</span>
+
+                    <span className="text-red-500 text-sm mt-1 block">
+                        {emailError}
+                    </span>
                 </div>
+
                 <div>
-                    <label className="mb-1 font-semibold text-[#134E4A]">Phone</label>
+                    <label className="mb-1 font-semibold text-[#134E4A]">
+                        Phone
+                    </label>
+
                     <input
                         type="tel"
                         value={phone}
@@ -100,12 +161,22 @@ export default function ContactForm() {
                             setPhoneError("");
                         }}
                         placeholder="Phone"
-                        className={`w-full px-4 py-3 rounded-xl border ${phoneError ? "border-red-500" : "border-gray-200"} focus:ring-2 focus:ring-[#0F766E] outline-none`}
+                        className={`w-full px-4 py-3 rounded-xl border ${phoneError
+                                ? "border-red-500"
+                                : "border-gray-200"
+                            } focus:ring-2 focus:ring-[#0F766E] outline-none`}
                     />
-                    <span className="text-red-500 text-sm mt-1 block">{phoneError}</span>
+
+                    <span className="text-red-500 text-sm mt-1 block">
+                        {phoneError}
+                    </span>
                 </div>
+
                 <div>
-                    <label className="mb-1 font-semibold text-[#134E4A]">Message</label>
+                    <label className="mb-1 font-semibold text-[#134E4A]">
+                        Message
+                    </label>
+
                     <textarea
                         rows="4"
                         value={message}
@@ -114,18 +185,25 @@ export default function ContactForm() {
                             setMessageError("");
                         }}
                         placeholder="Your message"
-                        className={`w-full px-4 py-3 rounded-xl border ${messageError ? "border-red-500" : "border-gray-200"} focus:ring-2 focus:ring-[#0F766E] outline-none`}
+                        className={`w-full px-4 py-3 rounded-xl border ${messageError
+                                ? "border-red-500"
+                                : "border-gray-200"
+                            } focus:ring-2 focus:ring-[#0F766E] outline-none`}
                     ></textarea>
-                    <span className="text-red-500 text-sm mt-1 block">{messageError}</span>
+
+                    <span className="text-red-500 text-sm mt-1 block">
+                        {messageError}
+                    </span>
                 </div>
+
                 <button
                     type="submit"
                     className="w-full bg-[#0F766E] text-white font-bold py-3 rounded-full hover:scale-105 transition"
                 >
                     Send Message
                 </button>
+
             </form>
         </div>
     );
-};
-
+}

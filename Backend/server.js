@@ -29,6 +29,9 @@ app.use("/api/rooms", roomRouter);
 const inventoryRouter = require("./routes/inventory.router");
 app.use("/api/inventory", inventoryRouter);
 
+const contactRouter = require("./routes/contact.router");
+app.use("/api/contacts", contactRouter);
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });

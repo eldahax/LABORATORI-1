@@ -41,6 +41,9 @@ const Sidebar = () => {
           <Link to="/Inventory" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
             Inventory
           </Link>
+          <Link to="/contacts" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Contacts
+          </Link>
           <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
             Appointment's
           </Link>

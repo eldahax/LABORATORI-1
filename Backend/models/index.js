@@ -1,11 +1,11 @@
-const  sequelize  = require('../config/database');
+const sequelize = require('../config/database');
 
 const User = require('../Modules/User')(sequelize);
 const Role = require('../Modules/Role')(sequelize);
 const Patient = require('../Modules/Patient')(sequelize);
 const Doctor = require('../Modules/Doctor')(sequelize);
 const Department = require('../Modules/Department')(sequelize);
-const DoctorDepartment=require("../Modules/DoctorDepartment")(sequelize);
+const DoctorDepartment = require("../Modules/DoctorDepartment")(sequelize);
 const Room = require('../Modules/Room')(sequelize);
 const Treatment = require('../Modules/Treatment')(sequelize);
 const Appointment = require('../Modules/Appointment')(sequelize);
@@ -29,14 +29,15 @@ const UserRole = require('../Modules/UserRole')(sequelize);
 const UserClaim = require('../Modules/UserClaim')(sequelize);
 const UserToken = require('../Modules/UserToken')(sequelize);
 const RefreshToken = require('../Modules/RefreshToken')(sequelize);
+const Contact = require('../Modules/Contact')(sequelize);
 
 const db = {
-  User, Role, Patient, Doctor, Department,DoctorDepartment, Room, Treatment,
+  User, Role, Patient, Doctor, Department, DoctorDepartment, Room, Treatment,
   Appointment, DentalRecord, PatientAllergy, PatientTreatment,
   Inventory, TreatmentInventory, Invoice, InvoiceItem, Payment,
   WorkSchedule, Review, Offer, OfferTreatment, Insurance,
   MedicalHistory, Reminder, Certification, UserRole, UserClaim,
-  UserToken, RefreshToken, sequelize
+  UserToken, RefreshToken, Contact, sequelize
 };
 
 Object.keys(db).forEach((modelName) => {
