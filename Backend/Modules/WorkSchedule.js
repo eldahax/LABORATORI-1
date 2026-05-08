@@ -8,15 +8,15 @@ class WorkSchedule extends Model {
 
 module.exports = (sequelize) => {
   WorkSchedule.init({
-    Id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'work_schedule_id' },
-    DoctorId: { type: DataTypes.INTEGER, allowNull: false, field: 'doctor_id' },
-    ScheduleDay: { 
-      type: DataTypes.ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'), 
-      field: 'schedule_day' 
+    work_schedule_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'work_schedule_id' },
+    doctor_id: { type: DataTypes.INTEGER, allowNull: false, field: 'doctor_id' },
+    schedule_day: {
+      type: DataTypes.ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
+      field: 'schedule_day'
     },
-    StartTime: { type: DataTypes.TIME, allowNull: false, field: 'start_time' },
-    EndTime: { type: DataTypes.TIME, allowNull: false, field: 'end_time' },
-    Status: { type: DataTypes.ENUM('active', 'inactive'), defaultValue: 'inactive', field: 'status' },
+    start_time: { type: DataTypes.TIME, allowNull: false, field: 'start_time' },
+    end_time: { type: DataTypes.TIME, allowNull: false, field: 'end_time' },
+    status: { type: DataTypes.ENUM('active', 'inactive'), defaultValue: 'inactive', field: 'status' },
   }, { sequelize, tableName: 'work_schedule', timestamps: false });
   return WorkSchedule;
 };

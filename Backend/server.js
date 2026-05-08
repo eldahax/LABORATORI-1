@@ -32,6 +32,9 @@ app.use("/api/inventory", inventoryRouter);
 const contactRouter = require("./routes/contact.router");
 app.use("/api/contacts", contactRouter);
 
+const workScheduleRouter = require("./routes/workSchedule.router");
+app.use("/api/work-schedules", workScheduleRouter);
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });

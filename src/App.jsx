@@ -30,10 +30,15 @@ import EditInventory from "./Crudforms/EditInventory";
 import ContactForm from "./sections/ContactForm";
 import AddContact from "./Crudforms/AddContact";
 import ContactTable from "./sections/Tables/ContactTable";
+import TableWorkSchedule from "./sections/Tables/TableWorkSchedule";
+import AddWorkSchedule from "./Crudforms/AddWorkSchedule";
+import EditWorkSchedule from "./Crudforms/EditWorkSchedule";
+
 
 function App() {
   return (
     <Routes>
+      <Route path="/work-schedules" element={<TableWorkSchedule />} />
       <Route path='/Patients' element={<TablePatient />} />
       <Route path='/Treatments' element={<TableTreatment />} />
       <Route path='/Users' element={<Table />} />
@@ -42,16 +47,19 @@ function App() {
       <Route path="/offers" element={<OfferTable />} />
       <Route path="/inventory" element={<InventoryTable />} />
 
+
       <Route path="/contact" element={<Contact />} />
       <Route path="/contacts" element={<ContactTable />} />
       <Route path="/add-contact" element={<AddContact />} />
 
+      <Route path="/add-work-schedule" element={<AddWorkSchedule />} />
       <Route path="/addI" element={<AddInventory />} />
       <Route path="/addO" element={<AddOffers />} />
       <Route path="/addRoom" element={<AddRoom />} />
       <Route path="/addP" element={<AddPartient />} />
       <Route path="/add" element={<AddDoc />} />
       <Route path="/addT" element={<AddTreatment />} />
+      <Route path="/work-schedules/edit/:id" element={<EditWorkSchedule />} />
       <Route path="/inventory/edit/:id" element={<EditInventory />} />
       <Route path="/offers/edit/:id" element={<EditOffers />} />
       <Route path="/rooms/edit/:id" element={<EditRoom />} />
