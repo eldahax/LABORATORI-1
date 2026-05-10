@@ -28,6 +28,20 @@ export default function EditWorkSchedule() {
         "Saturday",
         "Sunday"
     ];
+     const [allDoctors, setAllDoctors] = useState([]);
+    
+        useEffect(() => {
+            const fetchDoctors = async () => {
+                try {
+                    const res = await fetch("http://localhost:5000/api/doctors");
+                    const data = await res.json();
+                    setAllDoctors(data);
+                } catch (err) {
+                    console.error("Failed to fetch doctors:", err);
+                }
+            };
+            fetchDoctors();
+        }, []);
 
     useEffect(() => {
         fetch(`http://localhost:5000/api/work-schedules/${id}`)
@@ -125,18 +139,22 @@ export default function EditWorkSchedule() {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
 
-                    <div className="flex flex-col pt-4">
-                        <input
-                            type="number"
-                            placeholder="doctor id"
-                            value={doctorId}
-                            onChange={(e) => setDoctorId(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
-                        />
-                        <p className="text-red-500 pl-[4px]">
-                            {doctorErr}
-                        </p>
-                    </div>
+                  <div className="flex flex-col">
+            <label className="text-xs font-semibold text-gray-500 mb-1">Assigned Doctor</label>
+            <select
+              value={doctorId}
+              onChange={(e) => setDoctorId(e.target.value)}
+              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2 outline-none"
+            >
+              <option value="">Select Doctor</option>
+              {allDoctors.map((doc) => (
+                <option key={doc.doctor_id} value={doc.doctor_id}>
+                  Dr. {doc.User?.first_name} {doc.User?.last_name} ({doc.specialization})
+                </option>
+              ))}
+            </select>
+          
+          </div>
 
                     <div className="flex flex-col">
                         <select

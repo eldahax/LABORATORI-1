@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function AddWorkSchedule() {
@@ -17,7 +17,20 @@ export default function AddWorkSchedule() {
     const [dayErr, setDayErr] = useState("");
     const [startTimeErr, setStartTimeErr] = useState("");
     const [endTimeErr, setEndTimeErr] = useState("");
+ const [allDoctors, setAllDoctors] = useState([]);
 
+    useEffect(() => {
+        const fetchDoctors = async () => {
+            try {
+                const res = await fetch("http://localhost:5000/api/doctors");
+                const data = await res.json();
+                setAllDoctors(data);
+            } catch (err) {
+                console.error("Failed to fetch doctors:", err);
+            }
+        };
+        fetchDoctors();
+    }, []);
     const daysOfWeek = [
         "Monday",
         "Tuesday",
@@ -117,19 +130,22 @@ export default function AddWorkSchedule() {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
 
-                    <div className="flex flex-col pt-4">
-                        <input
-                            type="number"
-                            placeholder="doctor id"
-                            value={doctorId}
-                            onChange={(e) => setDoctorId(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A]"
-                        />
-                        <p className="text-red-500 pl-[4px] text-sm">
-                            {doctorErr}
-                        </p>
-                    </div>
-
+                   <div className="flex flex-col">
+            <label className="text-xs font-semibold text-gray-500 mb-1">Assigned Doctor</label>
+            <select
+              value={doctorId}
+              onChange={(e) => setDoctorId(e.target.value)}
+              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2 outline-none"
+            >
+              <option value="">Select Doctor</option>
+              {allDoctors.map((doc) => (
+                <option key={doc.doctor_id} value={doc.doctor_id}>
+                  Dr. {doc.User?.first_name} {doc.User?.last_name} ({doc.specialization})
+                </option>
+              ))}
+            </select>
+          
+          </div>
                     <div className="flex flex-col">
                         <select
                             value={scheduleDay}
