@@ -16,50 +16,49 @@ class Appointment extends Model {
 module.exports = (sequelize) => {
   Appointment.init(
     {
-      Id: {
+      appointment_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         field: "appointment_id",
       },
-      PatientId: {
+      patient_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: "patient_id",
       },
-      DoctorId: {
+      doctor_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: "doctor_id",
       },
-      RoomId: { type: DataTypes.INTEGER, allowNull: false, field: "room_id" },
+      created_at: { type: DataTypes.INTEGER, allowNull: false, field: "room_id" },
       CreatedAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
         field: "created_at",
       },
-      AppointmentDateTime: {
+      appointment_date_time: {
         type: DataTypes.DATE,
         allowNull: false,
         field: "appointment_date_time",
       },
-      Duration: {
+      duration: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: "duration",
       },
-      Status: {
+      appointment_status: {
         type: DataTypes.ENUM("confirmed", "pending", "cancelled", "complete"),
         defaultValue: "pending",
         field: "appointment_status",
       },
-      Description: {
+      description: {
         type: DataTypes.STRING(100),
         allowNull: false,
         field: "description",
       },
     },
-    { sequelize, tableName: "appointments", timestamps: false },
-  );
+    { sequelize,tableName: 'appointments',timestamps: true, createdAt: 'created_at', updatedAt: false})
   return Appointment;
 };
