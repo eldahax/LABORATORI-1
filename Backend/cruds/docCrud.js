@@ -1,4 +1,4 @@
-const { User, Doctor, DoctorDepartment, Department, Role, UserRole } = require("../models");
+const { User, Doctor, DoctorDepartment, Department, Role, UserRole,Certification } = require("../models");
 const bcrypt = require("bcryptjs");
 
 const createDoc = async (first_name,
@@ -10,11 +10,16 @@ const createDoc = async (first_name,
       license_number,
       years_experience,
       description,
-      department_name)=> {
+      department_name,
+      certifications)=> {
 
   try {
     const hashed = await bcrypt.hash(password, 10);
 
+      const exist=await User.findOne({where:{email}});
+      if(exist){
+        throw new error("this user already exists");
+      }
     const user = await User.create({
       first_name,
       last_name,
@@ -43,7 +48,17 @@ const createDoc = async (first_name,
       description,
       status: "active"
     });
+ if (certifications && certifications.length > 0) {
+  const certData = certifications.map((c) => ({
+    certification_name: c.certification_name,
+    certification_type: c.certification_type,
+    certification_date: c.certification_date,
+    organization: c.organization,
+    doctor_id: doctor.doctor_id
+  }));
 
+  await Certification.bulkCreate(certData);
+}
     const department = await Department.findOne({
       where: { department_name }
      
@@ -81,15 +96,20 @@ const readallDocs = async () => {
     include: [
       {
         model: User,
-        attributes: ["first_name", "last_name", "email", "phone_number"]
-      }
-    ]
+        attributes: ["first_name", "last_name", "email", "phone_number"],
+      },
+      {
+        model: Department,
+        attributes: ["department_id", "department_name"],
+        through: { attributes: [] } 
+      },
+    ],
   });
 };
 
 const getId = async (id) => {
   const doctor = await Doctor.findByPk(id, {
-    include: [User, Department]
+    include: [User, Department,Certification]
   });
   if (!doctor) throw new Error("Doctor not found");
   return doctor;
@@ -100,7 +120,6 @@ const updateDoc = async (id, data) => {
   if (!doctor) throw new Error("Doctor not found");
 
   const user = await User.findByPk(doctor.user_id);
-
   await user.update({
     first_name: data.first_name,
     last_name: data.last_name,
@@ -115,8 +134,19 @@ const updateDoc = async (id, data) => {
     description: data.description
   });
 
+    
+  await DoctorDepartment.destroy({
+  where: { doctor_id: doctor.doctor_id }
+});
 
-  return { message: "Doctor updated" };
+await DoctorDepartment.create({
+  doctor_id: doctor.doctor_id,
+  department_id: data.department_id
+});
+   
+
+
+  return { message: "Doctor updated successfully" };
 };
 
 const deleteDoc = async (id) => {
@@ -124,6 +154,7 @@ const deleteDoc = async (id) => {
   if (!doctor) throw new Error("Doctor not found");
 
   await DoctorDepartment.destroy({ where: { doctor_id: doctor.doctor_id } });
+  await Certification.destroy({where:{doctor_id:doctor.doctor_id}})
   await Doctor.destroy({ where: { doctor_id: doctor.doctor_id } });
   await User.destroy({ where: { user_id: doctor.user_id } });
 

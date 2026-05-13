@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AddDoc() {
   const [name, setName] = useState("");
@@ -11,6 +11,9 @@ export default function AddDoc() {
   const [experience, setExperience] = useState("");
   const [description, setDescription] = useState("");
   const [department, setDepartment] = useState("");
+  const [deps, setDeps] = useState([]);
+
+  const [certifications, setCertifications] = useState([]);
 
   const [errors, setErrors] = useState({});
 
@@ -18,6 +21,36 @@ export default function AddDoc() {
   const nameRegex = /^[A-Za-z]{3,15}$/;
   const passRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!.@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
+
+  const addCertification = () => {
+    const updated = certifications.slice();
+    updated.push({
+      certification_name: "",
+      certification_type: "",
+      certification_date: "",
+      organization: "",
+    });
+    setCertifications(updated);
+  };
+
+  const updateCertification = (index, field, value) => {
+    const updated = certifications.slice();
+    updated[index][field] = value;
+    setCertifications(updated);
+  };
+
+  const removeCertification = (index) => {
+    setCertifications(certifications.filter((_, i) => i !== index));
+  };
+
+  useEffect(() => {
+    const fetchD = async () => {
+      const res = await fetch("http://localhost:5000/api/departments");
+      const data = await res.json();
+      setDeps(data);
+    };
+    fetchD();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,60 +62,59 @@ export default function AddDoc() {
     if (!emailRegex.test(email)) newErrors.email = "Invalid email";
     if (!passRegex.test(password)) newErrors.password = "Weak password";
     if (!speciality) newErrors.speciality = "speciality is required";
-    if (!license) newErrors.license = "lisence number is required";
-    if (!experience) newErrors.experience = "years of experience are required";
-    if (!description) newErrors.description = "description is required";
-    if(!department)newErrors.department='department is required'
+    if (!license) newErrors.license = "license number is required";
+    if (!experience) newErrors.experience = "experience required";
+    if (!description) newErrors.description = "description required";
+    if (!department) newErrors.department = "department required";
 
     setErrors(newErrors);
-
     if (Object.keys(newErrors).length > 0) return;
 
-  try {
- const res = await fetch("http://localhost:5000/api/doctors", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      first_name: name,
-      last_name: lastname,
-      email: email,
-      phone_number: phone,
-      password: password,
-      specialization: speciality,
-      license_number: license,
-      years_experience: experience,
-      description: description,
-      department_name: department
-    }),
-  });
+    try {
+      const res = await fetch("http://localhost:5000/api/doctors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: name,
+          last_name: lastname,
+          email: email,
+          phone_number: phone,
+          password: password,
+          specialization: speciality,
+          license_number: license,
+          years_experience: experience,
+          description: description,
+          department_name: department,
+          certifications: certifications,
+        }),
+      });
 
-  const data = await res.json();
+      const data = await res.json();
 
-  if (!res.ok) {
-    alert(data.error);
-    return;
-  }
+      if (!res.ok) {
+        alert(data.error);
+        return;
+      }
 
-  alert("Doctor created successfully");
+      alert("Doctor created successfully");
 
-  setName("");
-  setLastName("");
-  setEmail("");
-  setPhone("");
-  setPassword("");
-  setSpeciality("");
-  setLicense("");
-  setExperience("");
-  setDescription("");
-  setDepartment("");
-  setErrors({});
-} catch (err) {
-  console.log(err);
-  alert("Server error");
-}
-  
-
-}
+      setName("");
+      setLastName("");
+      setEmail("");
+      setPhone("");
+      setPassword("");
+      setSpeciality("");
+      setLicense("");
+      setExperience("");
+      setDescription("");
+      setDepartment("");
+      setCertifications([]);
+      setErrors({});
+    } catch (err) {
+      console.log(err);
+      alert("Server error");
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -94,140 +126,181 @@ export default function AddDoc() {
           ADD DOCTOR
         </h1>
 
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex gap-4">
           <div className="flex flex-col w-full">
             <input
-              type="text"
               placeholder="First Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+              className="border p-2 rounded"
             />
             <p className="text-red-500 text-sm">{errors.name}</p>
           </div>
 
           <div className="flex flex-col w-full">
             <input
-              type="text"
               placeholder="Last Name"
               value={lastname}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+              className="border p-2 rounded"
             />
             <p className="text-red-500 text-sm">{errors.lastname}</p>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex flex-col w-full">
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            />
-            <p className="text-red-500 text-sm">{errors.email}</p>
-          </div>
-
-          <div className="flex flex-col w-full">
-            <input
-              type="text"
-              placeholder="Phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex flex-col w-full">
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            />
-            <p className="text-red-500 text-sm">{errors.password}</p>
-          </div>
-
-          <div className="flex flex-col w-full">
-            <input
-              type="text"
-              placeholder="License Number"
-              value={license}
-              onChange={(e) => setLicense(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            />
-            <p className="text-red-500 text-sm">{errors.license}</p>
-          </div>
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex flex-col w-full">
-            <select
-              value={speciality}
-              onChange={(e) => setSpeciality(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            >
-              <option value="">Speciality</option>
-              <option value="General Dentistry">General Dentistry</option>
-              <option value="Orthodontics">Orthodontics</option>
-              <option value="Oral Surgery">Oral Surgery</option>
-              <option value="Cosmetic">Cosmetic</option>
-            </select>
-            <p className="text-red-500 text-sm">{errors.speciality}</p>
-          </div>
-
-          <div className="flex flex-col w-full">
-            <input
-              type="number"
-              placeholder="Years Experience"
-              value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            />
-            <p className="text-red-500 text-sm">{errors.experience}</p>
-          </div>
-        </div>
-
-          <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex flex-col w-full">
-          <select
-  value={department}
-  onChange={(e) => setDepartment(e.target.value)}
-  className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
->
-  <option value="">Choose a Department</option>
-  <option value="General Dentistry">General Dentistry</option>
-  <option value="Orthodontics">Orthodontics</option>
-  <option value="Endodontics">Endodontics</option>
-  <option value="Prosthodontics">Prosthodontics</option>
-  <option value="Pediatric Dentistry">Pediatric Dentistry</option>
-  <option value="Cosmetic Dentistry">Cosmetic Dentistry</option>
-</select>
-            <p className="text-red-500 text-sm">{errors.department}</p>
-          </div>
-
-          
-        </div>
-
-        <div className="flex flex-col">
-          <textarea
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+        <div className="flex gap-4">
+          <input
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="border p-2 rounded w-full"
           />
-          <p className="text-red-500 text-sm">{errors.description}</p>
+
+          <input
+            placeholder="Phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="border p-2 rounded w-full"
+          />
         </div>
 
-        <button
-          type="submit"
-          className="bg-[#0F766E] text-white py-2 rounded-lg font-bold hover:bg-[#134E4A]"
+        <div className="flex gap-4">
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="border p-2 rounded w-full"
+          />
+
+          <input
+            placeholder="License"
+            value={license}
+            onChange={(e) => setLicense(e.target.value)}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+
+        <div className="flex gap-4">
+          <select
+            value={department}
+            onChange={(e) => setSpeciality(e.target.value)}
+            className="border p-2 rounded w-full"
+          >
+            <option value="">Select a Speciality</option>
+
+            {deps.map((d) => (
+              <option value={d.department_name} key={d.department_id}>
+                {d.department_name}
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="number"
+            placeholder="Experience"
+            value={experience}
+            onChange={(e) => setExperience(e.target.value)}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+
+        <select
+          value={department}
+          onChange={(e) => setDepartment(e.target.value)}
+          className="border p-2 rounded"
         >
+          <option value="">Select Department</option>
+
+          {deps.map((d) => (
+            <option value={d.department_name} key={d.department_id}>
+              {d.department_name}
+            </option>
+          ))}
+        </select>
+
+        <textarea
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="border p-2 rounded"
+        />
+
+        <div className="flex flex-col gap-3">
+          <div className="flex justify-between">
+            <h2 className="font-bold text-[#0F766E]">Certifications</h2>
+
+            <button
+              type="button"
+              onClick={addCertification}
+              className="bg-[#0F766E] text-white px-3 py-1 rounded"
+            >
+              Add
+            </button>
+          </div>
+
+          {certifications.map((c, index) => (
+            <div key={index} className="grid grid-cols-2 gap-2">
+              <input
+                placeholder="Name"
+                value={c.certification_name}
+                onChange={(e) =>
+                  updateCertification(
+                    index,
+                    "certification_name",
+                    e.target.value,
+                  )
+                }
+                className="border p-2 rounded"
+              />
+
+              <input
+                placeholder="Type"
+                value={c.certification_type}
+                onChange={(e) =>
+                  updateCertification(
+                    index,
+                    "certification_type",
+                    e.target.value,
+                  )
+                }
+                className="border p-2 rounded"
+              />
+
+              <input
+                type="date"
+                value={c.certification_date}
+                onChange={(e) =>
+                  updateCertification(
+                    index,
+                    "certification_date",
+                    e.target.value,
+                  )
+                }
+                className="border p-2 rounded"
+              />
+
+              <input
+                placeholder="Organization"
+                value={c.organization}
+                onChange={(e) =>
+                  updateCertification(index, "organization", e.target.value)
+                }
+                className="border p-2 rounded"
+              />
+
+              <button
+                type="button"
+                onClick={() => removeCertification(index)}
+                className="bg-red-500 text-white rounded px-2"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <button className="bg-[#0F766E] text-white p-2 rounded">
           Create Doctor
         </button>
       </form>

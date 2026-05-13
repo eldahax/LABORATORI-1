@@ -4,7 +4,7 @@ const userService = require("../cruds/userCrud.js");
 const add = async (req, res) => {
   try {
 
-    const{first_name,last_name,email,phone_number,password,specialization,license_number,years_experience,description,department_name}=req.body
+    const{first_name,last_name,email,phone_number,password,specialization,license_number,years_experience,description,department_name,certifications}=req.body
     const result = await docService.createDoc(
       first_name,
       last_name,
@@ -15,7 +15,8 @@ const add = async (req, res) => {
       license_number,
       years_experience,
       description,
-      department_name
+      department_name,
+      certifications
     );
     res.json(result);
   } catch (err) {

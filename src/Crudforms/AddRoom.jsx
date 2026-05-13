@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState , useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function AddRoom() {
@@ -17,14 +17,15 @@ export default function AddRoom() {
 
     const nameRegex = /^[A-Za-z0-9\s]{3,50}$/;
 
-    const departments = [
-        "General Dentistry",
-        "Orthodontics",
-        "Endodontics",
-        "Prosthodontics",
-        "Cosmetic Dentistry",
-        "Pediatric Dentistry"
-    ];
+   const [departments,setDep]=useState([]);
+    useEffect(()=>{
+        const fetchD=async()=>{
+        const res=await fetch("http://localhost:5000/api/departments");
+        const data= await res.json();
+        setDep(data)
+        }
+        fetchD();
+    },[])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -128,9 +129,9 @@ export default function AddRoom() {
                         >
                             <option value="">select department</option>
 
-                            {departments.map((d, i) => (
-                                <option key={i} value={d}>
-                                    {d}
+                            {departments.map((d) => (
+                                <option key={d.department_id} value={d.department_name}>
+                                    {d.department_name}
                                 </option>
                             ))}
                         </select>

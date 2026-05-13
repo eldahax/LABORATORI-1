@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function AddTreatment() {
@@ -21,14 +21,16 @@ export default function AddTreatment() {
 
     const nameRegex = /^[A-Za-z0-9\s]{3,50}$/;
 
-    const departments = [
-        "General Dentistry",
-        "Orthodontics",
-        "Endodontics",
-        "Prosthodontics",
-        "Cosmetic Dentistry",
-        "Pediatric Dentistry"
-    ];
+   const [deps,setDeps]=useState([]);
+
+   useEffect(()=>{
+    const fetchD=async()=>{
+        const d=await fetch("http://localhost:5000/api/departments");
+        const res=await d.json();
+        setDeps(res);
+    }
+    fetchD();
+   },[])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -169,9 +171,9 @@ export default function AddTreatment() {
                         >
                             <option value="">select department</option>
 
-                            {departments.map((d, i) => (
-                                <option key={i} value={d}>
-                                    {d}
+                            {deps.map((d) => (
+                                <option key={d.department_id} value={d.department_name}>
+                                    {d.department_name}
                                 </option>
                             ))}
                         </select>

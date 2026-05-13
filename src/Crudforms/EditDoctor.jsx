@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 export default function EditDoctor() {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -13,14 +13,17 @@ export default function EditDoctor() {
   const [license, setLicense] = useState("");
   const [experience, setExperience] = useState("");
   const [description, setDescription] = useState("");
-  const [department, setDepartment] = useState("");
+  const [departmentId, setDepartmentId] = useState("");
+
+  const [allDepartments, setAllDepartments] = useState([]);
+
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
+    
     fetch(`http://localhost:5000/api/doctors/${id}`)
       .then((res) => res.json())
       .then((data) => {
-        
         setName(data.User?.first_name || "");
         setLastName(data.User?.last_name || "");
         setEmail(data.User?.email || "");
@@ -29,45 +32,78 @@ export default function EditDoctor() {
         setLicense(data.license_number || "");
         setExperience(data.years_experience || "");
         setDescription(data.description || "");
-       
-        setDepartment(data.Departments?.[0]?.department_name || "");
+        setDepartmentId(data.Departments?.[0]?.department_id || "");
       })
-      .catch((err) => console.log("Error fetching doctor:", err));
+      .catch((err) => console.log(err));
+
+    
+    fetch("http://localhost:5000/api/departments")
+      .then((res) => res.json())
+      .then((data) => {
+        setAllDepartments(data);
+      })
+      .catch((err) => console.log(err));
+
   }, [id]);
 
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
-  const nameRegex = /^[A-Za-z]{3,15}$/;
+  const validate = () => {
+    const newErrors = {};
+
+    if (!name || name.length < 3)
+      newErrors.name = "Invalid first name";
+
+    if (!lastname || lastname.length < 3)
+      newErrors.lastname = "Invalid last name";
+
+    const emailRegex =
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!emailRegex.test(email))
+      newErrors.email = "Invalid email";
+
+    if (!speciality)
+      newErrors.speciality = "Required";
+
+    if (!license)
+      newErrors.license = "Required";
+
+    if (!experience)
+      newErrors.experience = "Required";
+
+    if (!departmentId)
+      newErrors.department = "Required";
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newErrors = {};
 
-    if (!nameRegex.test(name)) newErrors.name = "Invalid first name";
-    if (!nameRegex.test(lastname)) newErrors.lastname = "Invalid last name";
-    if (!emailRegex.test(email)) newErrors.email = "Invalid email";
-    if (!speciality) newErrors.speciality = "Speciality is required";
-    if (!license) newErrors.license = "License number is required";
-    if (!experience) newErrors.experience = "Experience is required";
-    
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+    if (!validate()) return;
 
     try {
-       
-      const res = await fetch(`http://localhost:5000/api/doctors/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          first_name: name,
-          last_name: lastname,
-          email: email,
-          phone_number: phone,
-          specialization: speciality,
-          license_number: license,
-          years_experience: experience,
-          description: description
-        }),
-      });
+      const res = await fetch(
+        `http://localhost:5000/api/doctors/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            first_name: name,
+            last_name: lastname,
+            email,
+            phone_number: phone,
+            specialization: speciality,
+            license_number: license,
+            years_experience: experience,
+            description,
+            department_id: departmentId,
+          }),
+        }
+      );
 
       const data = await res.json();
 
@@ -77,7 +113,9 @@ export default function EditDoctor() {
       }
 
       alert("Doctor updated successfully");
-      navigate("/Staff"); 
+
+      navigate("/Doctors");
+
     } catch (err) {
       console.error(err);
       alert("Server error");
@@ -95,45 +133,66 @@ export default function EditDoctor() {
         </h1>
 
         <div className="flex flex-col md:flex-row gap-4">
+          
           <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">First Name</label>
+            <label className="text-xs font-semibold text-gray-500 ml-1">
+              First Name
+            </label>
+
             <input
-              type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
             />
-            <p className="text-red-500 text-sm">{errors.name}</p>
+
+            <p className="text-red-500 text-sm">
+              {errors.name}
+            </p>
           </div>
 
+          
           <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">Last Name</label>
+            <label className="text-xs font-semibold text-gray-500 ml-1">
+              Last Name
+            </label>
+
             <input
-              type="text"
               value={lastname}
               onChange={(e) => setLastName(e.target.value)}
               className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
             />
-            <p className="text-red-500 text-sm">{errors.lastname}</p>
+
+            <p className="text-red-500 text-sm">
+              {errors.lastname}
+            </p>
           </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-4">
+          
           <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">Email</label>
+            <label className="text-xs font-semibold text-gray-500 ml-1">
+              Email
+            </label>
+
             <input
-              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
             />
-            <p className="text-red-500 text-sm">{errors.email}</p>
+
+            <p className="text-red-500 text-sm">
+              {errors.email}
+            </p>
           </div>
 
+          
           <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">Phone</label>
+            <label className="text-xs font-semibold text-gray-500 ml-1">
+              Phone
+            </label>
+
             <input
-              type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
@@ -142,51 +201,113 @@ export default function EditDoctor() {
         </div>
 
         <div className="flex flex-col md:flex-row gap-4">
+          
           <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">License Number</label>
+            <label className="text-xs font-semibold text-gray-500 ml-1">
+              License Number
+            </label>
+
             <input
-              type="text"
               value={license}
               onChange={(e) => setLicense(e.target.value)}
               className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
             />
-            <p className="text-red-500 text-sm">{errors.license}</p>
+
+            <p className="text-red-500 text-sm">
+              {errors.license}
+            </p>
           </div>
 
+          
           <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">Years of Experience</label>
+            <label className="text-xs font-semibold text-gray-500 ml-1">
+              Years of Experience
+            </label>
+
             <input
               type="number"
               value={experience}
               onChange={(e) => setExperience(e.target.value)}
               className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
             />
-            <p className="text-red-500 text-sm">{errors.experience}</p>
+
+            <p className="text-red-500 text-sm">
+              {errors.experience}
+            </p>
           </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-4">
+          
           <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">Speciality</label>
+            <label className="text-xs font-semibold text-gray-500 ml-1">
+              Speciality
+            </label>
+
             <select
               value={speciality}
               onChange={(e) => setSpeciality(e.target.value)}
               className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
             >
-              <option value="">Speciality</option>
-              <option value="General Dentistry">General Dentistry</option>
-              <option value="Orthodontics">Orthodontics</option>
-              <option value="Oral Surgery">Oral Surgery</option>
-              <option value="Cosmetic">Cosmetic</option>
+              <option value="">Select</option>
+              <option value="General Dentistry">
+                General Dentistry
+              </option>
+              <option value="Orthodontics">
+                Orthodontics
+              </option>
+              <option value="Oral Surgery">
+                Oral Surgery
+              </option>
+              <option value="Cosmetic">
+                Cosmetic
+              </option>
             </select>
-            <p className="text-red-500 text-sm">{errors.speciality}</p>
+
+            <p className="text-red-500 text-sm">
+              {errors.speciality}
+            </p>
           </div>
 
-         
+          
+          <div className="flex flex-col w-full">
+            <label className="text-xs font-semibold text-gray-500 ml-1">
+              Department
+            </label>
+
+            <select
+              value={departmentId}
+              onChange={(e) =>
+                setDepartmentId(Number(e.target.value))
+              }
+              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+            >
+              <option value="">
+                Select Department
+              </option>
+
+              {allDepartments.map((dept) => (
+                <option
+                  key={dept.department_id}
+                  value={dept.department_id}
+                >
+                  {dept.department_name}
+                </option>
+              ))}
+            </select>
+
+            <p className="text-red-500 text-sm">
+              {errors.department}
+            </p>
+          </div>
         </div>
 
+        
         <div className="flex flex-col">
-          <label className="text-xs font-semibold text-gray-500 ml-1">Description</label>
+          <label className="text-xs font-semibold text-gray-500 ml-1">
+            Description
+          </label>
+
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -194,6 +315,7 @@ export default function EditDoctor() {
           />
         </div>
 
+        
         <div className="flex gap-4">
           <button
             type="button"
@@ -202,6 +324,7 @@ export default function EditDoctor() {
           >
             Cancel
           </button>
+
           <button
             type="submit"
             className="w-1/2 bg-[#0F766E] text-white py-2 rounded-lg font-bold hover:bg-[#134E4A]"

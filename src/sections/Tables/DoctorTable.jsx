@@ -58,7 +58,7 @@ export default function DoctorTable() {
             <th className="py-3 pl-4">ID</th>
             <th className="py-2">First Name</th>
             <th>Last Name</th>
-            <th>Department</th>
+            <th>Speciality</th>
             <th>Experience</th>
             <th>Email</th>
             <th>Phone</th>
@@ -79,7 +79,7 @@ export default function DoctorTable() {
 
               <td className="flex gap-2">
                 <button
-                  onClick={() => handleDelete(doc.doctor_id)}
+                  onClick={() => (doc.doctor_id)}
                   className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
                 >
                   Delete
