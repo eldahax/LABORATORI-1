@@ -35,6 +35,10 @@ app.use("/api/contacts", contactRouter);
 const workScheduleRouter = require("./routes/workSchedule.router");
 app.use("/api/work-schedules", workScheduleRouter);
 
+const DentalRecordRouter = require('./routes/dentalrecord.router');
+app.use("/api/dental-history", DentalRecordRouter);
+
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });

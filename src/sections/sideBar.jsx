@@ -19,7 +19,9 @@ const Sidebar = () => {
           <Link to="/Profile" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
             Personal Information
           </Link>
-
+          <Link to="/dental-history" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Dental History
+          </Link>
           <Link to="/Users" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
             Users
           </Link>
@@ -46,9 +48,6 @@ const Sidebar = () => {
           </Link>
           <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
             Appointment's
-          </Link>
-          <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-            Dental History
           </Link>
           <Link to="/Staff" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
             Work Schedule

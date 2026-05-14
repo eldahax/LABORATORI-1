@@ -33,6 +33,8 @@ import ContactTable from "./sections/Tables/ContactTable";
 import TableWorkSchedule from "./sections/Tables/TableWorkSchedule";
 import AddWorkSchedule from "./Crudforms/AddWorkSchedule";
 import EditWorkSchedule from "./Crudforms/EditWorkSchedule";
+import EditDentalRecord from "./Crudforms/EditDentalRecord";
+import DentalTable from "./sections/Tables/DentalTable";
 
 
 function App() {
@@ -46,6 +48,9 @@ function App() {
       <Route path="/rooms" element={<TableRoom />} />
       <Route path="/offers" element={<OfferTable />} />
       <Route path="/inventory" element={<InventoryTable />} />
+      <Route path="/dental-history" element={<DentalTable />} />
+      <Route path="/dental-history/edit/:id" element={<EditDentalRecord />}
+      />
 
 
       <Route path="/contact" element={<Contact />} />
