@@ -1,10 +1,16 @@
+require('dotenv').config(); 
 const express = require("express");
 const cors = require("cors");
-
+const cookieParser = require("cookie-parser");
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", 
+  credentials: true
+}));
+
 app.use(express.json());
+app.use(cookieParser())
 
 const sequelize = require("./config/database");
 
@@ -29,6 +35,16 @@ app.use("/api/rooms", roomRouter);
 const inventoryRouter = require("./routes/inventory.router");
 app.use("/api/inventory", inventoryRouter);
 
+const depRouter=require("./routes/dep.router");
+app.use("/api/departments",depRouter)
+
+const appRouter=require("./routes/appointment.router");
+app.use("/api/appointments",appRouter);
+
+
+const workScheduleRouter = require("./routes/workSchedule.router");
+app.use("/api/work-schedules", workScheduleRouter);
+
 const contactRouter = require("./routes/contact.router");
 app.use("/api/contacts", contactRouter);
 
@@ -38,7 +54,7 @@ app.use("/api/work-schedules", workScheduleRouter);
 const DentalRecordRouter = require('./routes/dentalrecord.router');
 app.use("/api/dental-history", DentalRecordRouter);
 
-
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
