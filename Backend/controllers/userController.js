@@ -1,5 +1,9 @@
 const userService = require("../cruds/userCrud");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const db = require("../models/index");
+const RefreshToken = db.RefreshToken;
+
 
 const login = async (req, res) => {
   try {
@@ -17,18 +21,48 @@ const login = async (req, res) => {
       return res.status(400).json({ error: "Invalid username or password" });
     }
 
+
+    const roles = user.Roles ? user.Roles.map(r => r.role_name) : [];
+
+    const accessToken = jwt.sign(
+      {
+        user_id: user.user_id,
+        email: user.email,
+        roles: roles
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+
+
+    
+
+    res.cookie("token", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path:"/",
+      maxAge: 60 * 60 * 1000
+    });
+
+ 
+   
     res.json({
       message: "Login successful",
       user: {
         user_id: user.user_id,
         email: user.email,
-        first_name: user.first_name
+        first_name: user.first_name,
+        roles: roles
       }
     });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 const signup = async (req, res) => {
   try {
@@ -47,8 +81,12 @@ const signup = async (req, res) => {
 };
 
 const getAllUsers = async (req, res) => {
-  const users = await userService.getAllUsers();
-  res.json(users);
+ try {
+    const users = await userService.getAllUsers();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 const getUserById = async (req, res) => {
@@ -66,6 +104,15 @@ const deleteUser = async (req, res) => {
   res.json(result);
 };
 
-module.exports={
-    login,signup,getAllUsers,getUserById,updateUser,deleteUser
-}
+
+
+
+
+module.exports = {
+  login,
+  signup,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser
+};

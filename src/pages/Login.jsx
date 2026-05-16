@@ -1,7 +1,5 @@
 import { useState } from "react";
-
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -13,14 +11,11 @@ export default function Login() {
   const [serverError, setServerError] = useState("");
 
   const userregex = /^[A-Za-z0-9.-_!]+@[a-zA-Z-_]+\.[a-z]{3}$/;
-  const passRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
+  const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     let hasError = false;
-
     setUserError("");
     setPassError("");
 
@@ -36,9 +31,7 @@ export default function Login() {
       setPassError("Password is required");
       hasError = true;
     } else if (!passRegex.test(password)) {
-      setPassError(
-        "Password must have uppercase, lowercase, number, and symbol",
-      );
+      setPassError("Password must have uppercase, lowercase, number, and symbol");
       hasError = true;
     }
 
@@ -48,6 +41,7 @@ export default function Login() {
       const res = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           email: username,
           password: password,
@@ -61,26 +55,26 @@ export default function Login() {
         return;
       }
 
-      navigate("/Profile");
+      if (data.user && data.user.roles && data.user.roles.length > 0) {
+localStorage.setItem("userRole", JSON.stringify(data.user.roles));
+      }
+      navigate("/Home");
     } catch (err) {
-  console.error("Connection Refused or Logic Error:", err);
-  alert("Could not connect to the server.");
-}
+      console.error(err);
+      alert("Could not connect to the server.");
+    }
   };
 
   return (
-    <div className="flex justify-center items-center w-full h-screen relative <font-serif">
-      <div className=" w-full max-w-md p-8 rounded-xl    ">
+    <div className="flex justify-center items-center w-full h-screen relative font-serif">
+      <div className=" w-full max-w-md p-8 rounded-xl">
         <h1 className="text-[36px] font-bold text-[#0F766E] text-center tracking-widest mb-6">
           LOG-IN
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4" id="form">
           <div className="flex flex-col">
-            <label
-              htmlFor="username"
-              className="mb-1 font-semibold text-[#134E4A]"
-            >
+            <label htmlFor="username" className="mb-1 font-semibold text-[#134E4A]">
               Username
             </label>
             <input
@@ -91,7 +85,6 @@ export default function Login() {
                 setUserError("");
               }}
               placeholder="Username"
-              aria-live="polite"
               className={`border-2 p-2 w-full rounded-[14px] ${
                 userError ? "border-red-500 " : "border-[#0F766E]"
               }`}
@@ -100,10 +93,7 @@ export default function Login() {
           </div>
 
           <div className="flex flex-col">
-            <label
-              htmlFor="password"
-              className="mb-1 font-semibold text-[#134E4A]"
-            >
+            <label htmlFor="password" className="mb-1 font-semibold text-[#134E4A]">
               Password
             </label>
             <input
@@ -114,7 +104,6 @@ export default function Login() {
                 setPassError("");
               }}
               placeholder="Password"
-              aria-live="polite"
               className={`border-2 p-2 w-full rounded-[14px] ${
                 passError ? "border-red-500 " : "border-[#0F766E]"
               }`}
@@ -125,8 +114,9 @@ export default function Login() {
           <input
             type="submit"
             value="Login"
-            className="w-full bg-[#0F766E] text-white font-bold py-2 rounded-lg cursor-pointer  "
+            className="w-full bg-[#0F766E] text-white font-bold py-2 rounded-lg cursor-pointer"
           />
+          
           {serverError && (
             <p className="text-red-500 text-center font-semibold">
               {serverError}
@@ -134,11 +124,8 @@ export default function Login() {
           )}
 
           <p className="text-black text-center font-semibold">
-            Don't have an account?
-            <Link
-              className="text-[#0F766E] font-bold hover:underline"
-              to="/Signup"
-            >
+            Don't have an account?{" "}
+            <Link className="text-[#0F766E] font-bold hover:underline" to="/Signup">
               Sign Up
             </Link>
           </p>

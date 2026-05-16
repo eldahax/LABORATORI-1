@@ -2,13 +2,19 @@ const express = require("express");
 const router = express.Router();
 
 const userController = require("../controllers/userController");
+const { protect, authorize } = require("../auth/authMiddleWear");
 
 router.post("/login", userController.login);
 router.post("/signup", userController.signup);
 
-router.get("/", userController.getAllUsers);
-router.get("/:id", userController.getUserById);
-router.put("/:id", userController.updateUser);
-router.delete("/:id", userController.deleteUser);
+router.get("/me", protect, (req, res) => {
+  res.json(req.user);
+});
+
+router.get("/", protect, authorize("admin"), userController.getAllUsers);
+router.delete("/:id", protect, authorize("admin"), userController.deleteUser);
+router.get("/:id", protect, userController.getUserById);
+router.put("/:id", protect, userController.updateUser);
+
 
 module.exports = router;

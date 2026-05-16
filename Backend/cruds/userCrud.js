@@ -1,4 +1,4 @@
-const { User } = require("../models");
+const { User, UserRole, Role } = require("../models");
 const bcrypt = require("bcryptjs");
 
 const createUser = async (first_name, last_name, email, phone_number, password) => {
@@ -20,7 +20,17 @@ const createUser = async (first_name, last_name, email, phone_number, password) 
 };
 
 const getUserByEmail = async (email) => {
-  return await User.findOne({ where: { email } });
+  const user = await User.findOne({ where: { email } });
+  if (!user) return null;
+
+  const userFind = await UserRole.findAll({ 
+    where: { user_id: user.user_id },
+    include: [{ model: Role, attributes: ["role_name"] }]
+  });
+
+  user.Roles = userFind.map(conn => conn.Role).filter(r => r !== null);
+
+  return user;
 };
 
 const getAllUsers = async () => {

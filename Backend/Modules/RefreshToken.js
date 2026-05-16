@@ -7,12 +7,12 @@ class RefreshToken extends Model {
 
 module.exports = (sequelize) => {
   RefreshToken.init({
-    Id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'refresh_token_id' },
-    UserId: { type: DataTypes.INTEGER, allowNull: false, field: 'user_id' },
-    Token: { type: DataTypes.STRING(512), allowNull: false, field: 'token' },
-    Expires: { type: DataTypes.DATE, allowNull: false, field: 'expires' },
-    Created: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, field: 'created' },
-    Revoked: { type: DataTypes.DATE, allowNull: true, field: 'revoked' },
+    refresh_token_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'refresh_token_id' },
+    user_id: { type: DataTypes.INTEGER, allowNull: false, field: 'user_id' },
+    token: { type: DataTypes.STRING(512), allowNull: false, field: 'token' },
+    expires: { type: DataTypes.DATE, allowNull: false, field: 'expires' },
+    created: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, field: 'created' },
+    revoked: { type: DataTypes.DATE, allowNull: true, field: 'revoked' },
   }, { 
     sequelize, 
     tableName: 'refresh_tokens', 
