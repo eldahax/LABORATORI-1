@@ -17,4 +17,9 @@ router.get("/:id", protect, userController.getUserById);
 router.put("/:id", protect, userController.updateUser);
 
 
+
+router.post("/logout", userController.logout);
+router.post("/refresh", userController.refresh);
+
+
 module.exports = router;
