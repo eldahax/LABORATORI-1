@@ -6,6 +6,7 @@ import Sidebar from "../sideBar"
 
 export default function Table() {
   const [users, setUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,6 +38,19 @@ export default function Table() {
   }
 };
 
+  const filteredUsers = users.filter((user) => {
+    const firstName = user.first_name?.toLowerCase() || "";
+    const lastName = user.last_name?.toLowerCase() || "";
+    const email = user.email?.toLowerCase() || "";
+    const lowerSearch = searchTerm.toLowerCase();
+
+    return (
+      firstName.includes(lowerSearch) ||
+      lastName.includes(lowerSearch) ||
+      email.includes(lowerSearch)
+    );
+  });
+
   return (
     <div className="bg-white p-4 sm:p-6 rounded-xl mb-8 overflow-x-auto">
       <Navbar />
@@ -53,6 +67,16 @@ export default function Table() {
                 USERS
               </h1>
 
+                <div className="w-1/2 max-w-sm">
+                  <input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#0F766E] border-gray-300 shadow-sm"
+                  />
+                </div>
+
               <table className="min-w-full text-left text-sm sm:text-base text-black">
                 <thead>
                   <tr className="border-b">
@@ -66,7 +90,7 @@ export default function Table() {
                 </thead>
 
                 <tbody>
-                  {users.map((user) => (
+                  {filteredUsers.map((user) => (
                     <tr
                       key={user.user_id}
                       className="border-b hover:bg-gray-50"
@@ -96,6 +120,13 @@ export default function Table() {
                       </td>
                     </tr>
                   ))}
+                  {filteredUsers.length === 0 && (
+                    <tr>
+                      <td colSpan="6" className="text-center py-8 text-gray-500">
+                        No matching users found.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
