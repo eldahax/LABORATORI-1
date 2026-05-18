@@ -25,7 +25,7 @@ const readAllDentalRecords = async () => {
         ],
       },
     ],
-    order: [["createdAt", "DESC"]],
+    
   });
 };
 
