@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TableCard from "./TableCard";
 import Navbar from "../../components/Navbar";
-import Sidebar from "../sideBar"
+import Sidebar from "../sideBar";
+
 export default function TableTreatment() {
     const [treatments, setTreatments] = useState([]);
+    const [search, setSearch] = useState("");
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -16,6 +19,7 @@ export default function TableTreatment() {
 
     const handleDelete = async (treatment_id) => {
         if (!window.confirm("Are you sure?")) return;
+
         try {
             const res = await fetch(
                 `http://localhost:5000/api/treatments/${treatment_id}`,
@@ -26,7 +30,10 @@ export default function TableTreatment() {
 
             if (res.ok) {
                 setTreatments((prev) =>
-                    prev.filter((t) => t.treatment_id !== treatment_id)
+                    prev.filter(
+                        (t) =>
+                            t.treatment_id !== treatment_id
+                    )
                 );
             }
         } catch (err) {
@@ -34,37 +41,68 @@ export default function TableTreatment() {
         }
     };
 
+    const filteredTreatments = treatments.filter((t) => {
+        const name = (t.treatment_name || "").toLowerCase();
+
+        const department = (
+            t.Department?.department_name || ""
+        ).toLowerCase();
+
+        const s = search.toLowerCase();
+
+        return (
+            name.includes(s) ||
+            department.includes(s)
+        );
+    });
+
     return (
-        <div className="bg-white p-4 sm:p-6 rounded-xl  mb-8 overflow-x-auto">
-            <Navbar></Navbar>
-            <div className=' min-h-screen'>
+        <div className="bg-white p-4 sm:p-6 rounded-xl mb-8 overflow-x-auto">
+            <Navbar />
 
+            <div className="min-h-screen">
                 <div className="flex w-full min-h-screen mt-[50px]">
-
                     <Sidebar />
 
-                    <div className="w-3/4  p-10  ml-[25%]">
+                    <div className="w-3/4 p-10 ml-[25%]">
+                        <TableCard />
 
-
-                        <TableCard></TableCard>
                         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-8 overflow-x-auto">
                             <div className="flex justify-between items-center mb-6">
                                 <h1 className="text-lg sm:text-xl font-bold text-[#0F766E]">
                                     Treatments
                                 </h1>
+
                                 <button
-                                    onClick={() => navigate("/addT")}
+                                    onClick={() =>
+                                        navigate("/addT")
+                                    }
                                     className="bg-[#0F766E] text-white px-4 py-2 rounded-lg hover:bg-[#0D665F] transition-colors"
                                 >
                                     + Add Treatment
                                 </button>
                             </div>
 
+                            {/* SEARCH INPUT */}
+                            <div className="w-1/2 max-w-sm mb-6">
+                                <input
+                                    type="text"
+                                    placeholder="Search by name or department..."
+                                    value={search}
+                                    onChange={(e) =>
+                                        setSearch(e.target.value)
+                                    }
+                                    className="w-full px-4 py-2 border rounded-lg text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#0F766E] border-gray-300 shadow-sm"
+                                />
+                            </div>
+
                             <table className="min-w-full text-left text-sm sm:text-base text-black">
                                 <thead>
                                     <tr className="border-b">
-                                        <th className="py-3 pl-4">ID</th>
-                                        <th className="py-2">Name</th>
+                                        <th className="py-3 pl-4">
+                                            ID
+                                        </th>
+                                        <th>Name</th>
                                         <th>Description</th>
                                         <th>Price</th>
                                         <th>Duration</th>
@@ -74,7 +112,7 @@ export default function TableTreatment() {
                                 </thead>
 
                                 <tbody>
-                                    {treatments.map((t) => (
+                                    {filteredTreatments.map((t) => (
                                         <tr
                                             key={t.treatment_id}
                                             className="border-b hover:bg-gray-50"
@@ -88,13 +126,16 @@ export default function TableTreatment() {
                                             <td>{t.price}</td>
                                             <td>{t.average_duration}</td>
                                             <td>
-                                                {t.Department?.department_name}
+                                                {t.Department?.department_name ||
+                                                    "N/A"}
                                             </td>
 
                                             <td className="flex gap-2 py-2">
                                                 <button
                                                     onClick={() =>
-                                                        handleDelete(t.treatment_id)
+                                                        handleDelete(
+                                                            t.treatment_id
+                                                        )
                                                     }
                                                     className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
                                                 >
@@ -103,7 +144,9 @@ export default function TableTreatment() {
 
                                                 <button
                                                     onClick={() =>
-                                                        navigate(`/treatments/edit/${t.treatment_id}`)
+                                                        navigate(
+                                                            `/treatments/edit/${t.treatment_id}`
+                                                        )
                                                     }
                                                     className="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg"
                                                 >
@@ -112,6 +155,17 @@ export default function TableTreatment() {
                                             </td>
                                         </tr>
                                     ))}
+
+                                    {filteredTreatments.length === 0 && (
+                                        <tr>
+                                            <td
+                                                colSpan="7"
+                                                className="text-center py-8 text-gray-500"
+                                            >
+                                                No matching treatments found.
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
