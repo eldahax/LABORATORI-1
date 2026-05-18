@@ -19,7 +19,9 @@ export default function EditUser() {
   const nameRegex = /^[A-Za-z]{3,15}$/;
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/users/${id}`)
+    fetch(`http://localhost:5000/api/users/${id}`, {
+  credentials: "include",
+})
       .then((res) => res.json())
       .then((data) => {
         setForm({
@@ -75,11 +77,27 @@ export default function EditUser() {
 
     if (hasError) return;
 
-    await fetch(`http://localhost:5000/api/users/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+   const res = await fetch(
+  `http://localhost:5000/api/users/${id}`,
+  {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(form),
+  }
+);
+
+const data = await res.json();
+
+if (!res.ok) {
+  alert(data.error || "Update failed");
+  return;
+}
+
+alert("User updated successfully");
+
 
     navigate("/Staff");
   };

@@ -14,10 +14,31 @@ export default function EditDoctor() {
   const [experience, setExperience] = useState("");
   const [description, setDescription] = useState("");
   const [departmentId, setDepartmentId] = useState("");
+  const[certifications,setCertifications]=useState([]);
 
   const [allDepartments, setAllDepartments] = useState([]);
 
   const [errors, setErrors] = useState({});
+  const addCertification = () => {
+    const updated = certifications.slice();
+    updated.push({
+      certification_name: "",
+      certification_type: "",
+      certification_date: "",
+      organization: "",
+    });
+    setCertifications(updated);
+  };
+
+  const updateCertification = (index, field, value) => {
+    const updated = certifications.slice();
+    updated[index][field] = value;
+    setCertifications(updated);
+  };
+
+  const removeCertification = (index) => {
+    setCertifications(certifications.filter((_, i) => i !== index));
+  };
 
   useEffect(() => {
     
@@ -33,6 +54,7 @@ export default function EditDoctor() {
         setExperience(data.years_experience || "");
         setDescription(data.description || "");
         setDepartmentId(data.Departments?.[0]?.department_id || "");
+setCertifications(Array.isArray(data.Certifications) ? data.Certifications : []);
       })
       .catch((err) => console.log(err));
 
@@ -91,17 +113,18 @@ export default function EditDoctor() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            first_name: name,
-            last_name: lastname,
-            email,
-            phone_number: phone,
-            specialization: speciality,
-            license_number: license,
-            years_experience: experience,
-            description,
-            department_id: departmentId,
-          }),
+         body: JSON.stringify({
+  first_name: name,
+  last_name: lastname,
+  email,
+  phone_number: phone,
+  specialization: speciality,
+  license_number: license,
+  years_experience: experience,
+  description,
+  department_id: departmentId,
+  certifications: certifications,
+}),
         }
       );
 
@@ -129,7 +152,7 @@ export default function EditDoctor() {
         className="w-full max-w-3xl bg-white p-6 rounded-xl shadow-lg flex flex-col gap-4"
       >
         <h1 className="text-2xl font-bold text-[#0F766E] text-center uppercase">
-          Edit Doctor #{id}
+          Edit Doctor 
         </h1>
 
         <div className="flex flex-col md:flex-row gap-4">
@@ -314,7 +337,80 @@ export default function EditDoctor() {
             className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2 h-24"
           />
         </div>
+  
+        <div className="flex flex-col gap-3">
+          <div className="flex justify-between">
+            <h2 className="font-bold text-[#0F766E]">Certifications</h2>
 
+            <button
+              type="button"
+              onClick={addCertification}
+              className="bg-[#0F766E] text-white px-3 py-1 rounded"
+            >
+              Add
+            </button>
+          </div>
+
+          {certifications.map((c, index) => (
+            <div key={index} className="grid grid-cols-2 gap-2">
+              <input
+                placeholder="Name"
+                value={c.certification_name}
+                onChange={(e) =>
+                  updateCertification(
+                    index,
+                    "certification_name",
+                    e.target.value,
+                  )
+                }
+                className="border p-2 rounded"
+              />
+
+              <input
+                placeholder="Type"
+                value={c.certification_type}
+                onChange={(e) =>
+                  updateCertification(
+                    index,
+                    "certification_type",
+                    e.target.value,
+                  )
+                }
+                className="border p-2 rounded"
+              />
+
+              <input
+                type="date"
+                value={c.certification_date}
+                onChange={(e) =>
+                  updateCertification(
+                    index,
+                    "certification_date",
+                    e.target.value,
+                  )
+                }
+                className="border p-2 rounded"
+              />
+
+              <input
+                placeholder="Organization"
+                value={c.organization}
+                onChange={(e) =>
+                  updateCertification(index, "organization", e.target.value)
+                }
+                className="border p-2 rounded"
+              />
+
+              <button
+                type="button"
+                onClick={() => removeCertification(index)}
+                className="bg-red-500 text-white rounded px-2"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
         
         <div className="flex gap-4">
           <button

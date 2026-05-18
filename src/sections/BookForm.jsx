@@ -1,36 +1,65 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function BForm() {
   const [name, setName] = useState("");
   const [doc, setDoc] = useState("");
+  const [reason, setReason] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [date, setDate] = useState("");
-  const [reason, setReason] = useState("");
+
+  const [doctors, setDoctors] = useState([]);
+  const [treatments, setTreatments] = useState([]);
 
   const [nameError, setNameError] = useState("");
   const [docError, setDocError] = useState("");
+  const [reasonError, setReasonError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [dateError, setDateError] = useState("");
-  const [reasonError, setReasonError] = useState("");
+  const [signupErr, setSignupErr] = useState("");
 
-  const nameRegex = /^[A-Za-z\s]{5,30}$/;
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/doctors");
+        const data = await res.json();
+        setDoctors(data);
+      } catch (err) {
+        console.error("Failed to fetch doctors:", err);
+      }
+    };
+
+    const fetchTreatments = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/treatments");
+        const data = await res.json();
+        setTreatments(data);
+      } catch (err) {
+        console.error("Failed to fetch treatments:", err);
+      }
+    };
+
+    fetchDoctors();
+    fetchTreatments();
+  }, []);
+
+  const nameRegex = /^[A-Za-z\s'-]{5,30}$/;
   const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
   const phoneRegex = /^[0-9+\-\s]{8,15}$/;
-  const reasonRegex = /^[a-zA-Z0-9._/]{10,100}$/;
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     let hasError = false;
 
     setNameError("");
     setDocError("");
+    setReasonError("");
     setEmailError("");
     setPhoneError("");
     setDateError("");
-    setReasonError("");
-
+    setSignupErr("");
 
     if (name.trim() === "") {
       setNameError("Name is required");
@@ -40,13 +69,16 @@ export default function BForm() {
       hasError = true;
     }
 
-  
     if (doc === "") {
       setDocError("Please select a doctor");
       hasError = true;
     }
 
- 
+    if (reason === "") {
+      setReasonError("Please select a treatment");
+      hasError = true;
+    }
+
     if (email.trim() === "") {
       setEmailError("Email is required");
       hasError = true;
@@ -55,7 +87,6 @@ export default function BForm() {
       hasError = true;
     }
 
- 
     if (phone.trim() === "") {
       setPhoneError("Phone is required");
       hasError = true;
@@ -77,22 +108,54 @@ export default function BForm() {
       } else if (selectedDate.getDay() === 0) {
         setDateError("Closed on Sunday");
         hasError = true;
-      } else if (selectedDate.getHours() < 9 || selectedDate.getHours() >= 17) {
+      } else if (
+        selectedDate.getHours() < 9 ||
+        selectedDate.getHours() >= 17
+      ) {
         setDateError("Working hours: 09:00 - 17:00");
         hasError = true;
       }
     }
 
-    if (reason.trim() === "") {
-      setReasonError("Reason is required");
-      hasError = true;
-    } else if (!reasonRegex.test(reason)) {
-      setReasonError("Reason must be 10–100 characters");
-      hasError = true;
-    }
+    if (hasError) return;
 
-  
+    try {
+      const res = await fetch("http://localhost:5000/api/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          full_name: name,
+          doctor: doc,
+          email: email,
+          phone_number: phone,
+          appointment_date_time: date,
+          description: reason,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setSignupErr(data.error || "Something went wrong");
+        return;
+      }
+
+      alert("Appointment created successfully");
+
+      setName("");
+      setDoc("");
+      setReason("");
+      setEmail("");
+      setPhone("");
+      setDate("");
+    } catch (err) {
+      console.error(err);
+      setSignupErr("Failed to connect to the server.");
+    }
   };
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -100,25 +163,31 @@ export default function BForm() {
     >
       <div className="w-full sm:w-[300px] md:w-[60%] p-2">
         <div className="flex flex-col">
-          <label className="mb-1 font-bold text-black">Full Name</label>
+          <label className="mb-1 font-bold text-black">
+            Full Name
+          </label>
+
           <input
             type="text"
-            placeholder="name"
             value={name}
             onChange={(e) => {
               setName(e.target.value);
               setNameError("");
             }}
-            aria-live="polite"
-            className={`w-full border-2 rounded-lg px-3 py-2 focus:outline-none  ${
-              nameError ? "border-red-500 " : "border-black"
+            className={`w-full border-2 rounded-lg px-3 py-2 ${
+              nameError ? "border-red-500" : "border-black"
             }`}
           />
-          <span className="text-red-600 text-[14px]">{nameError}</span>
+
+          <span className="text-red-600 text-[14px]">
+            {nameError}
+          </span>
         </div>
 
         <div className="flex flex-col mt-3">
-          <label className="mb-1 font-bold text-black">Doctor</label>
+          <label className="mb-1 font-bold text-black">
+            Doctor
+          </label>
 
           <select
             value={doc}
@@ -131,93 +200,129 @@ export default function BForm() {
             }`}
           >
             <option value="">Select a doctor</option>
-            <option value="Shpend Agusholli">Dr. Shpend Agusholli</option>
-            <option value="Valza Agusholli">Dr. Valza Agusholli</option>
-            <option value="Ledion Agusholli">Dr. Ledion Agusholli</option>
-            <option value="Erisa Lamaxhem">Dr. Erisa Lamaxhema</option>
-            <option value="Altea Gora">Dr. Altea Gora</option>
-            <option value="Roni Lleshi">Dr. Roni Lleshi</option>
-            <option value="Riad Devolli">Dr. Riad Devolli</option>
+
+            {doctors.map((d) => (
+              <option
+                key={d.doctor_id}
+                value={d.doctor_id}
+              >
+                {d.User?.first_name} {d.User?.last_name}
+              </option>
+            ))}
           </select>
-          <span className="text-red-500 text-[14px]">{docError}</span>
+
+          <span className="text-red-500 text-[14px]">
+            {docError}
+          </span>
         </div>
       </div>
 
       <div className="w-full sm:w-[300px] md:w-[60%] p-2">
         <div className="flex flex-col">
-          <label className="mb-1 font-bold text-black">Email</label>
+          <label className="mb-1 font-bold text-black">
+            Email
+          </label>
+
           <input
             type="text"
-            placeholder="email"
-            
             value={email}
-            onChange={(e)=>{
+            onChange={(e) => {
               setEmail(e.target.value);
               setEmailError("");
             }}
-             aria-live="polite"
-            className={`w-full border-2 rounded-lg px-3 py-2 focus:outline-none  ${
-              emailError ? "border-red-500 " : "border-black"
+            className={`w-full border-2 rounded-lg px-3 py-2 ${
+              emailError ? "border-red-500" : "border-black"
             }`}
           />
-          <span className="text-red-500 text-[14px]">{emailError}</span>
+
+          <span className="text-red-500 text-[14px]">
+            {emailError}
+          </span>
         </div>
 
         <div className="flex flex-col mt-3">
-          <label className="mb-1 font-semibold text-black">Phone Number</label>
+          <label className="mb-1 font-semibold text-black">
+            Phone Number
+          </label>
+
           <input
             type="text"
-            placeholder="phone number"
-             value={phone}
-            onChange={(e)=>{
+            value={phone}
+            onChange={(e) => {
               setPhone(e.target.value);
               setPhoneError("");
             }}
-             aria-live="polite"
-            className={`w-full border-2 rounded-lg px-3 py-2 focus:outline-none  ${
-              phoneError ? "border-red-500 " : "border-black"
+            className={`w-full border-2 rounded-lg px-3 py-2 ${
+              phoneError ? "border-red-500" : "border-black"
             }`}
           />
-          <span className="text-red-500 text-[14px]">{phoneError}</span>
+
+          <span className="text-red-500 text-[14px]">
+            {phoneError}
+          </span>
         </div>
       </div>
 
       <div className="w-full sm:w-[300px] md:w-[60%] p-2">
         <div className="flex flex-col">
-          <label className="mb-1 font-bold text-black">Date and time</label>
+          <label className="mb-1 font-bold text-black">
+            Date and Time
+          </label>
+
           <input
             type="datetime-local"
-           
-           value={date}
-            onChange={(e)=>{
+            value={date}
+            onChange={(e) => {
               setDate(e.target.value);
               setDateError("");
             }}
-             aria-live="polite"
-            className={`w-full border-2 rounded-lg px-3 py-2 focus:outline-none  ${
-              dateError ? "border-red-500 " : "border-black"
+            className={`w-full border-2 rounded-lg px-3 py-2 ${
+              dateError ? "border-red-500" : "border-black"
             }`}
           />
-          <span className="text-red-500 text-[14px]">{dateError}</span>
+
+          <span className="text-red-500 text-[14px]">
+            {dateError}
+          </span>
         </div>
 
         <div className="flex flex-col mt-3">
-          <label className="mb-1 font-bold text-black">Reason</label>
-          <input
-            type="text"
-            placeholder="reason"
-             value={reason}
-            onChange={(e)=>{
+          <label className="mb-1 font-bold text-black">
+            Treatment
+          </label>
+
+          <select
+            value={reason}
+            onChange={(e) => {
               setReason(e.target.value);
               setReasonError("");
             }}
-             aria-live="polite"
-            className={`w-full border-2 rounded-lg px-3 py-2 focus:outline-none  ${
-              reasonError ? "border-red-500 " : "border-black"
+            className={`w-full border-2 rounded-lg px-3 py-2 ${
+              reasonError ? "border-red-500" : "border-black"
             }`}
-          />
-          <span className="text-red-500 text-[14px]">{reasonError}</span>
+          >
+            <option value="">Select a treatment</option>
+
+            {treatments.map((t) => (
+              <option
+                key={t.treatment_id}
+                value={t.treatment_name}
+              >
+                {t.treatment_name}
+              </option>
+            ))}
+          </select>
+
+          <span className="text-red-500 text-[14px]">
+            {reasonError}
+          </span>
         </div>
+
+        {signupErr && (
+          <p className="text-red-600 text-center mt-3">
+            {signupErr}
+          </p>
+        )}
 
         <div className="w-full text-center mt-4">
           <input
