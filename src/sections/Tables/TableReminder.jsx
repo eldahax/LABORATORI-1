@@ -128,13 +128,7 @@ export default function TableReminder() {
     );
   });
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-[#0F766E]">
-        Loading reminders...
-      </div>
-    );
-  }
+ 
 
   if (error) {
     return (
@@ -156,9 +150,9 @@ export default function TableReminder() {
         <main className="w-full pt-[90px] px-4 sm:px-6 lg:px-8 pb-10">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-[#0F766E]">
-              Reminder Management
+              Reminders and notification's
             </h1>
-            <p className="text-gray-500">Manage all reminders</p>
+          
           </div>
 
           <div className="bg-white p-4 rounded-xl shadow mb-6 flex flex-col md:flex-row gap-3">
@@ -193,7 +187,7 @@ export default function TableReminder() {
                 >
                   <div className="flex justify-between mb-4">
                     <h2 className="font-bold text-[#0F766E]">
-                      Reminder #{r.reminder_id}
+                      Reminder 
                     </h2>
 
                     <span className="text-xs px-3 py-1 rounded-full">

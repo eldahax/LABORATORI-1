@@ -310,7 +310,7 @@ const updateAppointment = async (appointment_id, updateData) => {
         appointment_id: appointment.appointment_id,
         patient_id: appointment.patient_id,
         reminder_date: new Date(
-          new Date(newStart).getTime() - 41 * 60 * 60 * 1000
+          new Date(newStart).getTime() - 24 * 60 * 60 * 1000
         ),
          message: `Reminder: Appointment in 24 hours  ${finalDescription} at ${newStart.toLocaleString()}`,
         sent: false,

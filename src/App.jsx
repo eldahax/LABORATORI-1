@@ -39,13 +39,16 @@ import EditWorkSchedule from "./Crudforms/EditWorkSchedule";
 import RouteProtect from "./components/RouteProtect";
 import TableReminder from "./sections/Tables/TableReminder";
 import EditReminder from "./Crudforms/EditReminder";
-
-
+import ContactTable from "./sections/Tables/ContactTable";
+import AddContact from "./Crudforms/AddContact";
+import DentalTable from "./sections/Tables/DentalTable";
 function App() {
   return (
     <Routes>
 
       <Route path="/work-schedules/edit/:id" element={<EditWorkSchedule />} />
+      
+      <Route path="dental-history" element={<DentalTable />} />
       <Route path="/add-work-schedule" element={<AddWorkSchedule />} />
       <Route path="/work-schedules" element={<TableWorkSchedule />} />
       <Route path="/addApointment" element={<AddApointment />} />
@@ -78,6 +81,8 @@ function App() {
         <Route path="/addT" element={<AddTreatment />} />
         <Route path="/treatments/edit/:id" element={<EditTreatment />} />
         <Route path="/appointments" element={<AppointmentTable />} />
+         <Route path="/contacts" element={<ContactTable />} />
+         <Route path="/add-contact" element={<AddContact />} />
       </Route>
 
       <Route element={<RouteProtect allowedRoles={["admin"]} />}>

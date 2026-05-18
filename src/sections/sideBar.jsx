@@ -29,41 +29,45 @@ const Sidebar = () => {
       </button>
 
 
-      <div className="mt-[50px] hidden md:flex fixed top-0 left-0 h-screen w-1/4 bg-gradient-to-b from-[#134E4A] via-[#0F766E] to-[#5EEAD4] text-white flex-col items-center p-6 z-[40]">
-        <div className="w-full space-y-3">
+      <div className="mt-[40px] h-screen hidden md:flex fixed top-0 left-0 w-1/4 bg-gradient-to-b from-[#134E4A] via-[#0F766E] to-[#5EEAD4] text-white flex-col items-center p-6 z-[40]">
+        <div className="w-full  space-y-1 ">
 
 
-          <Link to="/Profile" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+          <Link to="/Profile" className="block text-center font-bold p-3 rounded-lg hover:bg-white hover:text-black">
             Personal Information
           </Link>
-          <Link to="/reminders" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-            Reminders
-          </Link>
+          
 
 
           {roles.includes("admin") && (
             <>
-              <Link to="/Users" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+              <Link to="/Users" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Users
               </Link>
-              <Link to="/appointments" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">appointments</Link>
+              <Link to="/appointments" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">appointments</Link>
 
-              <Link to="/inventory" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+              <Link to="/inventory" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Inventory
               </Link>
 
 
-              <Link to="/rooms" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+              <Link to="/rooms" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Rooms and Departments
               </Link>
 
-              <Link to="/offers" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-                Offers
+              <Link to="/offers" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                Offers and Treatments
               </Link>
 
-              <Link to="/work-schedules" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+              <Link to="/work-schedules" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Work Schedule
               </Link>
+              <Link to="/reminders" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Reminders
+          </Link>
+          <Link to="/contacts" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Contact Messagees
+          </Link>
 
 
 
@@ -73,17 +77,19 @@ const Sidebar = () => {
 
           {(roles.includes("doctor") || roles.includes("admin")) && (
             <>
-              <Link to="/Patients" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+              <Link to="/Patients" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Patients
               </Link>
 
-              <Link to="/Doctors" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+              <Link to="/Doctors" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Doctors
               </Link>
-
-              <Link to="/Treatments" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-                Treatments
+               <Link to="/dental-history" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                Dental Records
               </Link>
+
+
+              
             </>
           )}
 
