@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import CustomAlert from "../components/CustomAlert";
 
 export default function BForm() {
   const [name, setName] = useState("");
@@ -18,6 +19,8 @@ export default function BForm() {
   const [phoneError, setPhoneError] = useState("");
   const [dateError, setDateError] = useState("");
   const [signupErr, setSignupErr] = useState("");
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -50,6 +53,9 @@ export default function BForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (loading) return;
+    setLoading(true);
 
     let hasError = false;
 
@@ -117,7 +123,10 @@ export default function BForm() {
       }
     }
 
-    if (hasError) return;
+    if (hasError) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch("http://localhost:5000/api/appointments", {
@@ -139,6 +148,7 @@ export default function BForm() {
 
       if (!res.ok) {
         setSignupErr(data.error || "Something went wrong");
+        setLoading(false);
         return;
       }
 
@@ -150,24 +160,27 @@ export default function BForm() {
       setEmail("");
       setPhone("");
       setDate("");
+
+      setLoading(false);
     } catch (err) {
       console.error(err);
       setSignupErr("Failed to connect to the server.");
+      setLoading(false);
     }
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full flex justify-center items-center a flex-wrap mt-[60px]"
+      className="w-full flex justify-center items-center flex-wrap mt-[60px]"
     >
       <div className="w-full sm:w-[300px] md:w-[60%] p-2 mx-auto">
-        <h1 className="text-center text-[30px] font-bold mb-[5px]">ADD APOINTMENT</h1>
-        <div className="flex flex-col  w-[70%] mx-auto">
-          <label className=" mb-1 font-bold text-black">
-            Full Name
-          </label>
+        <h1 className="text-center text-[30px] font-bold mb-[5px]">
+          ADD APPOINTMENT
+        </h1>
 
+        <div className="flex flex-col w-[70%] mx-auto">
+          <label className="mb-1 font-bold">Full Name</label>
           <input
             type="text"
             value={name}
@@ -175,55 +188,37 @@ export default function BForm() {
               setName(e.target.value);
               setNameError("");
             }}
-            className={`w-full border-2 rounded-lg px-3 py-2 mx-auto ${
-              nameError ? "border-red-500" : "border-black"
-            }`}
+            className={`border-2 rounded-lg px-3 py-2 ${nameError ? "border-red-500" : "border-black"
+              }`}
           />
-
-          <span className="text-red-600 text-[14px]">
-            {nameError}
-          </span>
+          <span className="text-red-600 text-[14px]">{nameError}</span>
         </div>
 
         <div className="flex flex-col mt-3 w-[70%] mx-auto">
-          <label className="mb-1 font-bold text-black">
-            Doctor
-          </label>
-
+          <label className="mb-1 font-bold">Doctor</label>
           <select
             value={doc}
             onChange={(e) => {
               setDoc(e.target.value);
               setDocError("");
             }}
-    className={`w-full border-2 rounded-lg px-3 py-2 ${
-              docError ? "border-red-500" : "border-black"
-            }`}
+            className={`border-2 rounded-lg px-3 py-2 ${docError ? "border-red-500" : "border-black"
+              }`}
           >
             <option value="">Select a doctor</option>
-
             {doctors.map((d) => (
-              <option
-                key={d.doctor_id}
-                value={d.doctor_id}
-              >
+              <option key={d.doctor_id} value={d.doctor_id}>
                 {d.User?.first_name} {d.User?.last_name}
               </option>
             ))}
           </select>
-
-          <span className="text-red-500 text-[14px]">
-            {docError}
-          </span>
+          <span className="text-red-500 text-[14px]">{docError}</span>
         </div>
       </div>
 
-      <div className="w-full  sm:w-[300px] md:w-[60%] p-2">
+      <div className="w-full sm:w-[300px] md:w-[60%] p-2">
         <div className="flex flex-col w-[70%] mx-auto">
-          <label className="mb-1 font-bold text-black">
-            Email
-          </label>
-
+          <label className="mb-1 font-bold">Email</label>
           <input
             type="text"
             value={email}
@@ -231,21 +226,14 @@ export default function BForm() {
               setEmail(e.target.value);
               setEmailError("");
             }}
-            className={`w-full  border-2 rounded-lg px-3 py-2 ${
-              emailError ? "border-red-500" : "border-black"
-            }`}
+            className={`border-2 rounded-lg px-3 py-2 ${emailError ? "border-red-500" : "border-black"
+              }`}
           />
-
-          <span className="text-red-500 text-[14px]">
-            {emailError}
-          </span>
+          <span className="text-red-500 text-[14px]">{emailError}</span>
         </div>
 
         <div className="flex flex-col mt-3 w-[70%] mx-auto">
-          <label className="mb-1 font-semibold text-black">
-            Phone Number
-          </label>
-
+          <label className="mb-1 font-bold">Phone Number</label>
           <input
             type="text"
             value={phone}
@@ -253,23 +241,16 @@ export default function BForm() {
               setPhone(e.target.value);
               setPhoneError("");
             }}
-            className={`w-full  border-2 rounded-lg px-3 py-2 ${
-              phoneError ? "border-red-500" : "border-black"
-            }`}
+            className={`border-2 rounded-lg px-3 py-2 ${phoneError ? "border-red-500" : "border-black"
+              }`}
           />
-
-          <span className="text-red-500 text-[14px]">
-            {phoneError}
-          </span>
+          <span className="text-red-500 text-[14px]">{phoneError}</span>
         </div>
       </div>
 
-      <div className="w-full  sm:w-[300px] md:w-[60%] p-2 ">
+      <div className="w-full sm:w-[300px] md:w-[60%] p-2">
         <div className="flex flex-col w-[70%] mx-auto">
-          <label className="mb-1 font-bold text-black">
-            Date and Time
-          </label>
-
+          <label className="mb-1 font-bold">Date and Time</label>
           <input
             type="datetime-local"
             value={date}
@@ -277,58 +258,42 @@ export default function BForm() {
               setDate(e.target.value);
               setDateError("");
             }}
-            className={`w-full  border-2 rounded-lg px-3 py-2  ${
-              dateError ? "border-red-500" : "border-black"
-            }`}
+            className={`border-2 rounded-lg px-3 py-2 ${dateError ? "border-red-500" : "border-black"
+              }`}
           />
-
-          <span className="text-red-500 text-[14px]">
-            {dateError}
-          </span>
+          <span className="text-red-500 text-[14px]">{dateError}</span>
         </div>
 
         <div className="flex flex-col mt-3 w-[70%] mx-auto">
-          <label className="mb-1 font-bold text-black">
-            Treatment
-          </label>
-
+          <label className="mb-1 font-bold">Treatment</label>
           <select
             value={reason}
             onChange={(e) => {
               setReason(e.target.value);
               setReasonError("");
             }}
-            className={`w-full  border-2 rounded-lg px-3 py-2 ${
-              reasonError ? "border-red-500" : "border-black"
-            }`}
+            className={`border-2 rounded-lg px-3 py-2 ${reasonError ? "border-red-500" : "border-black"
+              }`}
           >
             <option value="">Select a treatment</option>
-
             {treatments.map((t) => (
-              <option
-                key={t.treatment_id}
-                value={t.treatment_name}
-              >
+              <option key={t.treatment_id} value={t.treatment_name}>
                 {t.treatment_name}
               </option>
             ))}
           </select>
-
-          <span className="text-red-500 text-[14px]">
-            {reasonError}
-          </span>
+          <span className="text-red-500 text-[14px]">{reasonError}</span>
         </div>
 
         {signupErr && (
-          <p className="text-red-600 text-center mt-3">
-            {signupErr}
-          </p>
+          <p className="text-red-600 text-center mt-3">{signupErr}</p>
         )}
 
         <div className="w-full text-center mt-4">
           <input
             type="submit"
-            value="BOOK"
+            value={loading ? "BOOKING..." : "BOOK"}
+            disabled={loading}
             className="px-8 py-2 text-white bg-teal-700 font-bold shadow-md text-sm cursor-pointer rounded-md"
           />
         </div>

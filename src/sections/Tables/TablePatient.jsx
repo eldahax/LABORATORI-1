@@ -1,123 +1,165 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import TableCard from "./TableCard";
-import Navbar from "../../components/Navbar";
-import Sidebar from "../sideBar"
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import CustomAlert from "../../components/CustomAlert";
 
+export default function EditPatient() {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
+  const [form, setForm] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone_number: "",
+    allergy_name: ""
+  });
 
-export default function TablePatient() {
-    const [users, setUsers] = useState([]);
-    const navigate = useNavigate();
+  const [nameErr, setNameErr] = useState("");
+  const [lastNameErr, setLastNameErr] = useState("");
+  const [emailErr, setEmailErr] = useState("");
 
-    useEffect(() => {
-        fetch("http://localhost:5000/api/patients")
-            .then((res) => res.json())
-            .then((data) => setUsers(data))
-            .catch((err) => console.log(err));
-    }, []);
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
+  const nameRegex = /^[A-Za-z]{3,15}$/;
 
-    const handleDelete = async (patient_id) => {
-        try {
-            const res = await fetch(
-                `http://localhost:5000/api/patients/${patient_id}`, {
-                method: "DELETE",
-            }
-            );
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/patients/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setForm({
+          first_name: data?.User?.first_name || "",
+          last_name: data?.User?.last_name || "",
+          email: data?.User?.email || "",
+          phone_number: data?.User?.phone_number || "",
+          allergy_name: data?.PatientAllergies?.[0]?.allergy_name || ""
+        });
+      })
+      .catch(() => {});
+  }, [id]);
 
-            if (res.ok) {
-                setUsers((prev) =>
-                    prev.filter((user) => user.patient_id !== patient_id)
-                );
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    };
+  const handleChange = (e) => {
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
-    return (
-        
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-8 overflow-x-auto">
-                   <Navbar></Navbar>
-            <div className=' min-h-screen'>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-                <div className="flex w-full min-h-screen mt-[50px]">
+    setNameErr("");
+    setLastNameErr("");
+    setEmailErr("");
 
-                    <Sidebar />
+    let hasError = false;
 
-                    <div className="w-3/4  p-10  ml-[25%]">
+    if (!form.first_name.trim()) {
+      setNameErr("First name is required");
+      hasError = true;
+    } else if (!nameRegex.test(form.first_name)) {
+      setNameErr("First name must be 3-15 letters only");
+      hasError = true;
+    }
 
+    if (!form.last_name.trim()) {
+      setLastNameErr("Last name is required");
+      hasError = true;
+    } else if (!nameRegex.test(form.last_name)) {
+      setLastNameErr("Last name must be 3-15 letters only");
+      hasError = true;
+    }
 
-                        <TableCard></TableCard>
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-lg sm:text-xl font-bold text-[#0F766E]">
-                    Patients
-                </h1>
-                <button
-                    onClick={() => navigate("/addP")}
-                    className="bg-[#0F766E] text-white px-4 py-2 rounded-lg hover:bg-[#0D665F] transition-colors"
-                >
-                    + Add Patient
-                </button>
-            </div>
+    if (!form.email.trim()) {
+      setEmailErr("Email is required");
+      hasError = true;
+    } else if (!emailRegex.test(form.email)) {
+      setEmailErr("Invalid email format");
+      hasError = true;
+    }
 
-            <table className="min-w-full text-left text-sm sm:text-base text-black">
-                <thead>
-                    <tr className="border-b">
-                        <th className="py-3 pl-4">ID</th>
-                        <th className="py-2">First Name</th>
-                        <th>Last Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Allergy</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+    if (hasError) return;
 
-                <tbody>
-                    {users.map((user) => (
-                        <tr key={user.patient_id} className="border-b hover:bg-gray-50">
-                            <td className="py-4 pl-4">{user.patient_id}</td>
+    const res = await fetch(`http://localhost:5000/api/patients/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
 
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error || "Update failed");
+      return;
+    }
 
-                            <td>{user.User?.first_name}</td>
-                            <td>{user.User?.last_name}</td>
-                            <td>{user.User?.email}</td>
-                            <td>{user.User?.phone_number}</td>
+    navigate("/Staff");
+  };
 
-                            <td>
-                                {user.PatientAllergies?.length > 0
-                                    ? user.PatientAllergies.map((a) => a.allergy_name).join(", ")
-                                    : "No allergy"}
-                            </td>
+  return (
+    <div className="min-h-screen flex justify-center items-center bg-gray-50">
+      <form
+        onSubmit={handleSubmit}
+        className="w-[450px] bg-white rounded-2xl space-y-2"
+      >
+        <h1 className="text-3xl font-bold text-[#134E4A] text-center">
+          Edit Patient
+        </h1>
 
-                            <td className="flex gap-2 py-2">
-                                <button
-                                    onClick={() => handleDelete(user.patient_id)}
-                                    className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
-                                >
-                                    Delete
-                                </button>
-
-                                <button
-                                    onClick={() =>
-                                        navigate(`/patients/edit/${user.patient_id}`)
-                                    }
-                                    className="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg"
-                                >
-                                    Update
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+        <div>
+          <label className="text-sm font-medium text-gray-700">First Name</label>
+          <input
+            name="first_name"
+            value={form.first_name}
+            onChange={handleChange}
+            className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
+          />
+          <p className="text-red-500 text-sm h-5">{nameErr}</p>
         </div>
 
-            
-                    </div>
-                </div>
+        <div>
+          <label className="text-sm font-medium text-gray-700">Last Name</label>
+          <input
+            name="last_name"
+            value={form.last_name}
+            onChange={handleChange}
+            className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
+          />
+          <p className="text-red-500 text-sm h-5">{lastNameErr}</p>
+        </div>
 
-            </div>
-    );
+        <div>
+          <label className="text-sm font-medium text-gray-700">Email Address</label>
+          <input
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
+          />
+          <p className="text-red-500 text-sm h-5">{emailErr}</p>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-gray-700">Phone Number</label>
+          <input
+            name="phone_number"
+            value={form.phone_number}
+            onChange={handleChange}
+            className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-gray-700">Allergies</label>
+          <input
+            name="allergy_name"
+            value={form.allergy_name}
+            onChange={handleChange}
+            className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
+          />
+        </div>
+
+        <button className="w-full bg-[#0F766E] text-white py-3 rounded-lg font-semibold hover:bg-[#134E4A] transition-colors">
+          Update Patient
+        </button>
+      </form>
+    </div>
+  );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import CustomAlert from "../components/CustomAlert";
 
 export default function EditPatient() {
   const { id } = useParams();
@@ -24,27 +25,22 @@ export default function EditPatient() {
     fetch(`http://localhost:5000/api/patients/${id}`)
       .then((res) => res.json())
       .then((data) => {
-        
         setForm({
-          first_name: data.User?.first_name || "",
-          last_name: data.User?.last_name || "",
-          email: data.User?.email || "",
-          phone_number: data.User?.phone_number || "",
-          allergy_name: data.PatientAllergies[0].allergy_name 
+          first_name: data?.User?.first_name || "",
+          last_name: data?.User?.last_name || "",
+          email: data?.User?.email || "",
+          phone_number: data?.User?.phone_number || "",
+          allergy_name: data?.PatientAllergies?.[0]?.allergy_name || ""
         });
       })
-    .catch(() => {});
+      .catch(() => {});
   }, [id]);
 
   const handleChange = (e) => {
-    setForm({
-      first_name: form.first_name,
-      last_name: form.last_name,
-      email: form.email,
-      phone_number: form.phone_number,
-      allergy_name: form.allergy_name,
+    setForm((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -82,11 +78,17 @@ export default function EditPatient() {
 
     if (hasError) return;
 
-    await fetch(`http://localhost:5000/api/patients/${id}`, {
+    const res = await fetch(`http://localhost:5000/api/patients/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
+
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error || "Update failed");
+      return;
+    }
 
     navigate("/Staff");
   };
@@ -95,7 +97,7 @@ export default function EditPatient() {
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
       <form
         onSubmit={handleSubmit}
-        className="w-[450px] bg-white rounded-2xl  space-y-2"
+        className="w-[450px] bg-white rounded-2xl space-y-2"
       >
         <h1 className="text-3xl font-bold text-[#134E4A] text-center">
           Edit Patient
@@ -107,7 +109,6 @@ export default function EditPatient() {
             name="first_name"
             value={form.first_name}
             onChange={handleChange}
-            placeholder="First Name"
             className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
           />
           <p className="text-red-500 text-sm h-5">{nameErr}</p>
@@ -119,7 +120,6 @@ export default function EditPatient() {
             name="last_name"
             value={form.last_name}
             onChange={handleChange}
-            placeholder="Last Name"
             className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
           />
           <p className="text-red-500 text-sm h-5">{lastNameErr}</p>
@@ -131,7 +131,6 @@ export default function EditPatient() {
             name="email"
             value={form.email}
             onChange={handleChange}
-            placeholder="Email"
             className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
           />
           <p className="text-red-500 text-sm h-5">{emailErr}</p>
@@ -143,10 +142,8 @@ export default function EditPatient() {
             name="phone_number"
             value={form.phone_number}
             onChange={handleChange}
-            placeholder="Phone Number"
             className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
           />
-          <div className="h-5"></div>
         </div>
 
         <div>
@@ -155,10 +152,8 @@ export default function EditPatient() {
             name="allergy_name"
             value={form.allergy_name}
             onChange={handleChange}
-            placeholder="Allergies"
             className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
           />
-          <div className="h-5"></div>
         </div>
 
         <button className="w-full bg-[#0F766E] text-white py-3 rounded-lg font-semibold hover:bg-[#134E4A] transition-colors">

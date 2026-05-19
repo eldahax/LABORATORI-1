@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import CustomAlert from "../components/CustomAlert";
 
 export default function AddPatient() {
     const [name, setName] = useState("");
@@ -12,23 +12,41 @@ export default function AddPatient() {
 
     const [error, setError] = useState("");
 
-    const nameRegex = /^[A-Za-z]{3,15}$/;
+    const nameRegex = /^[A-Za-z\s]{3,30}$/;
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^[0-9]{6,15}$/;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
 
-        let hasError = false;
+        if (!nameRegex.test(name)) {
+            setError("Invalid first name");
+            return;
+        }
 
-        if (!nameRegex.test(name)) hasError = true;
-        if (!nameRegex.test(lastname)) hasError = true;
-        if (!emailRegex.test(email)) hasError = true;
-        if (password.length < 6) hasError = true;
-        if (!dateOfBirth) hasError = true;
+        if (!nameRegex.test(lastname)) {
+            setError("Invalid last name");
+            return;
+        }
 
-        if (hasError) {
-            setError("Please fill all fields correctly");
+        if (!emailRegex.test(email)) {
+            setError("Invalid email");
+            return;
+        }
+
+        if (!phoneRegex.test(phone)) {
+            setError("Invalid phone number");
+            return;
+        }
+
+        if (password.length < 6) {
+            setError("Password must be at least 6 characters");
+            return;
+        }
+
+        if (!dateOfBirth) {
+            setError("Date of birth is required");
             return;
         }
 
@@ -41,11 +59,11 @@ export default function AddPatient() {
                 body: JSON.stringify({
                     first_name: name,
                     last_name: lastname,
-                    email: email,
+                    email,
                     phone_number: phone,
-                    password: password,
+                    password,
                     date_of_birth: dateOfBirth,
-                    allergy_name: allergy
+                    allergy_name: allergy || null
                 }),
             });
 
@@ -56,8 +74,6 @@ export default function AddPatient() {
                 return;
             }
 
-            alert("Patient created successfully!");
-
             setName("");
             setLastName("");
             setEmail("");
@@ -65,6 +81,7 @@ export default function AddPatient() {
             setPhone("");
             setDateOfBirth("");
             setAllergy("");
+
         } catch (err) {
             console.log(err);
             setError("Server error");
@@ -81,54 +98,34 @@ export default function AddPatient() {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
 
-                    <input
-                        placeholder="First name"
-                        value={name}
+                    <input placeholder="First name" value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full border p-2 rounded"
-                    />
+                        className="w-full border p-2 rounded" />
 
-                    <input
-                        placeholder="Last name"
-                        value={lastname}
+                    <input placeholder="Last name" value={lastname}
                         onChange={(e) => setLastName(e.target.value)}
-                        className="w-full border p-2 rounded"
-                    />
+                        className="w-full border p-2 rounded" />
 
-                    <input
-                        placeholder="Email"
-                        value={email}
+                    <input placeholder="Email" value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full border p-2 rounded"
-                    />
+                        className="w-full border p-2 rounded" />
 
-                    <input
-                        placeholder="Phone number"
-                        value={phone}
+                    <input placeholder="Phone number" value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full border p-2 rounded"
-                    />
+                        className="w-full border p-2 rounded" />
 
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
+                    <input type="password" placeholder="Password" value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full border p-2 rounded"
-                    />
+                        className="w-full border p-2 rounded" />
 
-                    <input
-                        type="date"
-                        value={dateOfBirth}
+                    <input type="date" value={dateOfBirth}
                         onChange={(e) => setDateOfBirth(e.target.value)}
-                        className="w-full border p-2 rounded"
-                    />
-                    <input
-                        placeholder=" allergys"
+                        className="w-full border p-2 rounded" />
+
+                    <input placeholder="allergy"
                         value={allergy}
                         onChange={(e) => setAllergy(e.target.value)}
-                        className="w-full border p-2 rounded"
-                    />
+                        className="w-full border p-2 rounded" />
 
                     {error && (
                         <p className="text-red-500 text-center">{error}</p>
