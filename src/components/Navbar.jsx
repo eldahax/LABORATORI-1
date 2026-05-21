@@ -47,11 +47,15 @@ const handleLogout = async () => {
               SERVICES
             </Link>
           </li>
-          <li>
-            <Link className="text-black font-bold px-2" to="/Appointments">
-              APPOINTMENTS
-            </Link>
-          </li>
+           {role && (
+            <li>
+              <Link className="text-black font-bold px-2" to="/Appointments">
+                APPOINTMENT
+              </Link>
+            </li>
+          )}
+
+       
 
           {role && (
             <li>

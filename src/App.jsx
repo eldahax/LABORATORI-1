@@ -46,12 +46,9 @@ function App() {
   return (
     <Routes>
 
-      <Route path="/work-schedules/edit/:id" element={<EditWorkSchedule />} />
+     
       
-      <Route path="dental-history" element={<DentalTable />} />
-      <Route path="/add-work-schedule" element={<AddWorkSchedule />} />
-      <Route path="/work-schedules" element={<TableWorkSchedule />} />
-      <Route path="/addApointment" element={<AddApointment />} />
+   
       <Route path="/" element={<Home />} />
       <Route path="/Home" element={<Home />} />
       <Route path="/About" element={<About />} />
@@ -59,8 +56,7 @@ function App() {
       <Route path="/Login" element={<Login />} />
       <Route path="/Signup" element={<Signup />} />
       <Route path="/Services" element={<Services />} />
-      <Route path="/appointments/edit/:id" element={< EditAppointment />} />
-
+   
       <Route
         element={<RouteProtect allowedRoles={["admin", "doctor", "patient"]} />}
       >
@@ -83,10 +79,12 @@ function App() {
         <Route path="/appointments" element={<AppointmentTable />} />
          <Route path="/contacts" element={<ContactTable />} />
          <Route path="/add-contact" element={<AddContact />} />
+              <Route path="/addApointment" element={<AddApointment />} />
       </Route>
 
       <Route element={<RouteProtect allowedRoles={["admin"]} />}>
         <Route path="/Users" element={<Table />} />
+          <Route path="/appointments/edit/:id" element={< EditAppointment />} />
 
         <Route path="/rooms" element={<TableRoom />} />
         <Route path="/offers" element={<OfferTable />} />
@@ -102,6 +100,12 @@ function App() {
         <Route path="/addRoom" element={<AddRoom />} />
         <Route path="/offers/edit/:id" element={<EditOffers />} />
         <Route path="/rooms/edit/:id" element={<EditRoom />} />
+         <Route path="/work-schedules/edit/:id" element={<EditWorkSchedule />} />
+        <Route path="/work-schedules/edit/:id" element={<EditWorkSchedule />} />
+       <Route path="dental-history" element={<DentalTable />} />
+      <Route path="/add-work-schedule" element={<AddWorkSchedule />} />
+      <Route path="/work-schedules" element={<TableWorkSchedule />} />
+ 
 
         <Route path="/inventory/edit/:id" element={<EditInventory />} />
 

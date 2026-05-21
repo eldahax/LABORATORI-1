@@ -58,15 +58,16 @@ const Forme = () => {
     }
   };
 
+   const user = JSON.parse(localStorage.getItem("user"));
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5 w-full">
-
-      {/* Full Name */}
+   
       <div>
         <input
           type="text"
           placeholder="Full Name"
-          value={fullName}
+          value={user.first_name + " " + user.last_name}
           onChange={(e) => {
             setFullName(e.target.value);
             setErrors({});
@@ -78,12 +79,12 @@ const Forme = () => {
         <span className="text-red-500 text-sm">{errors.fullName}</span>
       </div>
 
-      {/* Email */}
+      
       <div>
         <input
           type="email"
           placeholder="Email"
-          value={email}
+          value={user.email}
           onChange={(e) => {
             setEmail(e.target.value);
             setErrors({});
@@ -95,7 +96,7 @@ const Forme = () => {
         <span className="text-red-500 text-sm">{errors.email}</span>
       </div>
 
-      {/* Address */}
+      
       <input
         type="text"
         placeholder="Address"
@@ -104,13 +105,13 @@ const Forme = () => {
         className="w-full bg-gray-100 p-4 rounded-lg outline-none"
       />
 
-      {/* Phone + DOB */}
+      
       <div className="flex gap-5 max-[700px]:flex-col">
         <div className="w-full">
           <input
             type="text"
             placeholder="Phone Number"
-            value={phone}
+            value={user.phone}
             onChange={(e) => {
               setPhone(e.target.value);
               setErrors({});
@@ -130,7 +131,7 @@ const Forme = () => {
         />
       </div>
 
-      {/* Location + Postal */}
+  
       <div className="flex gap-5 max-[700px]:flex-col">
         <select
           value={location}
@@ -163,9 +164,8 @@ const Forme = () => {
         </div>
       </div>
 
-      {/* Role */}
       <select
-        value={role}
+        value={user.roles}
         onChange={(e) => setRole(e.target.value)}
         className="w-full bg-gray-100 p-4 rounded-lg outline-none"
       >
@@ -178,7 +178,7 @@ const Forme = () => {
         <option>Receptionist</option>
       </select>
 
-      {/* Buttons */}
+    
       <div className="flex justify-between pt-6 max-[500px]:flex-col max-[500px]:gap-3">
         <button
           type="button"

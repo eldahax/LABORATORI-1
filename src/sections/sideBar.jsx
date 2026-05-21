@@ -44,7 +44,10 @@ const Sidebar = () => {
               <Link to="/Users" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Users
               </Link>
-              <Link to="/appointments" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">appointments</Link>
+              <Link to="/Doctors" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                Doctors
+              </Link>
+          
 
               <Link to="/inventory" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Inventory
@@ -55,16 +58,7 @@ const Sidebar = () => {
                 Rooms and Departments
               </Link>
 
-              <Link to="/offers" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-                Offers and Treatments
-              </Link>
-
-              <Link to="/work-schedules" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-                Work Schedule
-              </Link>
-              <Link to="/reminders" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-            Reminders
-          </Link>
+             
           <Link to="/contacts" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
             Contact Messagees
           </Link>
@@ -80,13 +74,24 @@ const Sidebar = () => {
               <Link to="/Patients" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Patients
               </Link>
+<Link to="/appointments" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+              Appointments</Link>
 
-              <Link to="/Doctors" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-                Doctors
-              </Link>
+              
                <Link to="/dental-history" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Dental Records
               </Link>
+
+               <Link to="/offers" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                Offers and Treatments
+              </Link>
+
+              <Link to="/work-schedules" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                Work Schedule
+              </Link>
+              <Link to="/reminders" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Reminders
+          </Link>
 
 
               

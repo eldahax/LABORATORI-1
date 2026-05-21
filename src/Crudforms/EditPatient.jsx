@@ -90,7 +90,7 @@ export default function EditPatient() {
       return;
     }
 
-    navigate("/Staff");
+    navigate("/patients");
   };
 
   return (

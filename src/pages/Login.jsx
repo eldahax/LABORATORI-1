@@ -58,6 +58,9 @@ export default function Login() {
       if (data.user && data.user.roles && data.user.roles.length > 0) {
 localStorage.setItem("userRole", JSON.stringify(data.user.roles));
       }
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+      
       navigate("/Home");
     } catch (err) {
       console.error(err);

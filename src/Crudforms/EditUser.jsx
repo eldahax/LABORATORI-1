@@ -99,7 +99,7 @@ if (!res.ok) {
 alert("User updated successfully");
 
 
-    navigate("/Staff");
+    navigate("/Users");
   };
 
   return (
