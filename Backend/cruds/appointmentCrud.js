@@ -165,7 +165,7 @@ const getAllApp = async () => {
         },
         { model: DentalRecord },
       ],
-      order: [["appointment_date_time", "ASC"]],
+      order: [["appointment_date_time", "DESC"]],
     });
   } catch (err) {
     throw new Error("Could not fetch appointments: " + err.message);
