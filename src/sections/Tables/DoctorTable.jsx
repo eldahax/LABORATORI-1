@@ -6,7 +6,7 @@ import Sidebar from "../sideBar";
 
 export default function DoctorTable() {
   const [doctors, setDoctors] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // 1. Added state for the search input
+  const [searchTerm, setSearchTerm] = useState(""); 
   const navigate = useNavigate();
 
   useEffect(() => {
