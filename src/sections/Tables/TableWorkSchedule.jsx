@@ -1,255 +1,266 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TableCard from "./TableCard";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../sideBar";
 import CustomAlert from "../../components/CustomAlert";
 
 function ConfirmModal({ show, onConfirm, onCancel, loading }) {
-    if (!show) return null;
+  if (!show) return null;
 
-    return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
-                <h2 className="text-lg font-bold mb-2">Confirm Delete</h2>
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
+        <h2 className="text-lg font-bold mb-2">Confirm Delete</h2>
 
-                <p className="text-gray-600 mb-6">
-                    Are you sure you want to delete this work schedule?
-                </p>
+        <p className="text-gray-600 mb-6">
+          Are you sure you want to delete this work schedule?
+        </p>
 
-                <div className="flex justify-end gap-3">
-                    <button
-                        onClick={onCancel}
-                        disabled={loading}
-                        className="px-4 py-2 border rounded-lg"
-                    >
-                        Cancel
-                    </button>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            className="px-4 py-2 border rounded-lg"
+          >
+            Cancel
+          </button>
 
-                    <button
-                        onClick={onConfirm}
-                        disabled={loading}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-60"
-                    >
-                        {loading ? "Deleting..." : "Delete"}
-                    </button>
-                </div>
-            </div>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-60"
+          >
+            {loading ? "Deleting..." : "Delete"}
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 export default function TableWorkSchedule() {
-    const [workSchedules, setWorkSchedules] = useState([]);
+  const [workSchedules, setWorkSchedules] = useState([]);
+  const [search, setSearch] = useState("");
 
-    const [alert, setAlert] = useState({
-        show: false,
-        message: "",
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const [deleteId, setDeleteId] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/work-schedules", {
+  credentials: "include",
+})
+      .then((res) => res.json())
+      .then((data) => setWorkSchedules(data))
+      .catch(() =>
+        setAlert({
+          show: true,
+          message: "Failed to load work schedules",
+          type: "error",
+        })
+      );
+  }, []);
+
+  const grouped = workSchedules.reduce((acc, ws) => {
+    const doctorId = ws.doctor_id;
+
+    if (!acc[doctorId]) {
+      acc[doctorId] = {
+        doctor_id: doctorId,
+        doctor: ws?.Doctor,
+        schedules: [],
+      };
+    }
+
+    acc[doctorId].schedules.push(ws);
+    return acc;
+  }, {});
+
+  const filteredGrouped = Object.values(grouped).map((group) => ({
+    ...group,
+    schedules: group.schedules.filter((ws) =>
+      (ws.schedule_day || "").toLowerCase().includes(search.toLowerCase())
+    ),
+  }));
+
+  const openDeleteModal = (id) => {
+    setDeleteId(id);
+    setConfirmOpen(true);
+  };
+
+  const cancelDelete = () => {
+    setDeleteId(null);
+    setConfirmOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+
+    setLoading(true);
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/work-schedules/${deleteId}`,
+        { method: "DELETE" }
+      );
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setAlert({
+          show: true,
+          message: data.error || "Delete failed",
+          type: "error",
+        });
+        return;
+      }
+
+      setWorkSchedules((prev) =>
+        prev.filter((ws) => ws.work_schedule_id !== deleteId)
+      );
+
+      setAlert({
+        show: true,
+        message: "Work schedule deleted successfully",
         type: "success",
-    });
+      });
 
-    const [deleteId, setDeleteId] = useState(null);
-    const [confirmOpen, setConfirmOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
+      setConfirmOpen(false);
+      setDeleteId(null);
+    } catch {
+      setAlert({
+        show: true,
+        message: "Server error",
+        type: "error",
+      });
+    }
 
-    const [search, setSearch] = useState("");
+    setLoading(false);
+  };
 
-    const navigate = useNavigate();
+  return (
+    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+      <Navbar />
 
-    useEffect(() => {
-        fetch("http://localhost:5000/api/work-schedules")
-            .then((res) => res.json())
-            .then((data) => setWorkSchedules(data))
-            .catch(() =>
-                setAlert({
-                    show: true,
-                    message: "Failed to load work schedules",
-                    type: "error",
-                })
-            );
-    }, []);
+      <div className="min-h-screen flex mt-[50px]">
+        <Sidebar />
 
+        <div className="w-3/4 ml-[25%] p-10">
 
-    const filteredWorkSchedules = workSchedules.filter((ws) => {
-        const day = (ws.schedule_day || "").toLowerCase();
-        const query = search.toLowerCase();
-
-        return day.includes(query);
-    });
-
-    const openDeleteModal = (id) => {
-        setDeleteId(id);
-        setConfirmOpen(true);
-    };
-
-    const cancelDelete = () => {
-        setDeleteId(null);
-        setConfirmOpen(false);
-    };
-
-    const confirmDelete = async () => {
-        if (!deleteId) return;
-
-        setLoading(true);
-
-        try {
-            const res = await fetch(
-                `http://localhost:5000/api/work-schedules/${deleteId}`,
-                { method: "DELETE" }
-            );
-
-            const data = await res.json().catch(() => ({}));
-
-            if (!res.ok) {
-                setAlert({
-                    show: true,
-                    message: data.error || "Delete failed",
-                    type: "error",
-                });
-                return;
+          <CustomAlert
+            show={alert.show}
+            message={alert.message}
+            type={alert.type}
+            onClose={() =>
+              setAlert((p) => ({ ...p, show: false }))
             }
+          />
 
-            setWorkSchedules((prev) =>
-                prev.filter((ws) => ws.work_schedule_id !== deleteId)
-            );
+          <ConfirmModal
+            show={confirmOpen}
+            onConfirm={confirmDelete}
+            onCancel={cancelDelete}
+            loading={loading}
+          />
 
-            setAlert({
-                show: true,
-                message: "Work schedule deleted successfully",
-                type: "success",
-            });
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-xl font-bold text-[#0F766E]">
+              Work Schedules
+            </h1>
 
-            setConfirmOpen(false);
-            setDeleteId(null);
-        } catch {
-            setAlert({
-                show: true,
-                message: "Server error",
-                type: "error",
-            });
-        }
+            <button
+              onClick={() => navigate("/add-work-schedule")}
+              className="bg-[#0F766E] text-white px-4 py-2 rounded-lg"
+            >
+              + Add Work Schedule
+            </button>
+          </div>
 
-        setLoading(false);
-    };
+          <input
+            type="text"
+            placeholder="Search by day..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border px-3 py-2 rounded mb-6 w-full"
+          />
 
-    return (
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-8">
-            <Navbar />
+          <div className="space-y-6">
+            {filteredGrouped.map((group) => (
+              <div
+                key={group.doctor_id}
+                className="bg-gray-50 border rounded-xl p-4"
+              >
+                <h2 className="font-bold text-[#0F766E] mb-3 text-lg">
+                  {group.doctor?.User
+                    ? `Dr. ${group.doctor.User.first_name} ${group.doctor.User.last_name}`
+                    : `Doctor #${group.doctor_id}`}
+                </h2>
 
-            <CustomAlert
-                show={alert.show}
-                message={alert.message}
-                type={alert.type}
-                onClose={() =>
-                    setAlert({ show: false, message: "", type: "success" })
-                }
-            />
+                <div className="flex gap-4 overflow-x-auto pb-2">
+                  {group.schedules.map((ws) => (
+                    <div
+                      key={ws.work_schedule_id}
+                      className="min-w-[220px] bg-white border rounded-lg p-3 shadow-sm flex-shrink-0"
+                    >
+                      <p className="text-sm font-semibold">
+                        {ws.schedule_day}
+                      </p>
 
-            <div className="flex w-full min-h-screen mt-[50px]">
-                <Sidebar />
+                      <p className="text-xs text-gray-600">
+                        {ws.start_time} - {ws.end_time}
+                      </p>
 
-                <div className="w-3/4 p-10 ml-[25%]">
-                    <TableCard />
+                      <p className="text-xs mt-1">
+                        Status:{" "}
+                        <span
+                          className={
+                            ws.status === "active"
+                              ? "text-green-600 font-semibold"
+                              : "text-red-500 font-semibold"
+                          }
+                        >
+                          {ws.status}
+                        </span>
+                      </p>
 
-                    <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-lg font-bold text-[#0F766E]">
-                            Work Schedules
-                        </h1>
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/work-schedules/edit/${ws.work_schedule_id}`
+                            )
+                          }
+                          className="text-xs border px-2 py-1 rounded"
+                        >
+                          Edit
+                        </button>
 
                         <button
-                            onClick={() => navigate("/add-work-schedule")}
-                            className="bg-[#0F766E] text-white px-4 py-2 rounded-lg"
+                          onClick={() =>
+                            openDeleteModal(ws.work_schedule_id)
+                          }
+                          className="text-xs border border-red-500 text-red-500 px-2 py-1 rounded"
                         >
-                            + Add Work Schedule
+                          Delete
                         </button>
+                      </div>
                     </div>
-
-                 
-                    <div className="w-1/2 max-w-sm mb-6">
-                        <input
-                            type="text"
-                            placeholder="Search by day..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full px-4 py-2 border rounded-lg text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#0F766E] border-gray-300 shadow-sm"
-                        />
-                    </div>
-
-                    <table className="min-w-full text-left text-sm sm:text-base text-black">
-                        <thead>
-                            <tr className="border-b">
-                                <th className="py-3 pl-4">ID</th>
-                                <th className="py-3">Doctor ID</th>
-                                <th className="py-3">Day</th>
-                                <th className="py-3">Start</th>
-                                <th className="py-3">End</th>
-                                <th className="py-3">Status</th>
-                                <th className="py-3">Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                           
-                            {filteredWorkSchedules.map((ws) => (
-                                <tr
-                                    key={ws.work_schedule_id}
-                                    className="border-b hover:bg-gray-50"
-                                >
-                                    <td className="py-4 pl-4">
-                                        {ws.work_schedule_id}
-                                    </td>
-
-                                    <td>{ws.doctor_id}</td>
-                                    <td>{ws.schedule_day}</td>
-                                    <td>{ws.start_time}</td>
-                                    <td>{ws.end_time}</td>
-
-                                    <td>
-                                        <span
-                                            className={
-                                                ws.status === "active"
-                                                    ? "text-green-600 font-semibold"
-                                                    : "text-red-500 font-semibold"
-                                            }
-                                        >
-                                            {ws.status}
-                                        </span>
-                                    </td>
-
-                                    <td className="flex gap-2 py-2">
-                                        <button
-                                            onClick={() =>
-                                                openDeleteModal(ws.work_schedule_id)
-                                            }
-                                            className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
-                                        >
-                                            Delete
-                                        </button>
-
-                                        <button
-                                            onClick={() =>
-                                                navigate(
-                                                    `/work-schedules/edit/${ws.work_schedule_id}`
-                                                )
-                                            }
-                                            className="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg"
-                                        >
-                                            Update
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                  ))}
                 </div>
-            </div>
+              </div>
+            ))}
+          </div>
 
-            <ConfirmModal
-                show={confirmOpen}
-                onCancel={cancelDelete}
-                onConfirm={confirmDelete}
-                loading={loading}
-            />
         </div>
-    );
+      </div>
+    </div>
+  );
 }

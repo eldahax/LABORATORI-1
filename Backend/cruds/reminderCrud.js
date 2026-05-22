@@ -130,40 +130,39 @@ const createReminder = async (data) => {
   }
 };
 
-const getAllReminders = async () => {
-  try {
-    return await Reminder.findAll({
+
+const getAllReminders = async (user) => {
+  let includeFilter = [
+    {
+      model: Appointment,
       include: [
-        {
-          model: Appointment,
-          include: [
-            {
-              model: Doctor,
-              include: [
-                {
-                  model: User,
-                  attributes: ["first_name", "last_name", "email"],
-                },
-              ],
-            },
-            {
-              model: Patient,
-              include: [
-                {
-                  model: User,
-                  attributes: ["first_name", "last_name", "email"],
-                },
-              ],
-            },
-          ],
-        },
+        { model: Doctor, include: [User] },
+        { model: Patient, include: [User] },
       ],
-      order: [["reminder_date", "ASC"]],
-    });
-  } catch (err) {
-    throw new Error("Could not fetch reminders: " + err.message);
+    },
+  ];
+
+  const roles = user.roles || [];
+
+  if (roles.includes("patient")) {
+    includeFilter[0].where = {
+      patient_id: user.patient_id,
+    };
   }
+
+  else if (roles.includes("doctor")) {
+    includeFilter[0].where = {
+      doctor_id: user.doctor_id,
+    };
+  }
+
+  return await Reminder.findAll({
+    include: includeFilter,
+    order: [["reminder_date", "DESC"]],
+  });
 };
+
+
 
 const getReminderById = async (id) => {
   try {

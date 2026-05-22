@@ -47,6 +47,9 @@ const Sidebar = () => {
               <Link to="/Doctors" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Doctors
               </Link>
+              <Link to="/Patients" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                Patients
+              </Link>
           
 
               <Link to="/inventory" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
@@ -71,9 +74,7 @@ const Sidebar = () => {
 
           {(roles.includes("doctor") || roles.includes("admin")) && (
             <>
-              <Link to="/Patients" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-                Patients
-              </Link>
+              
 <Link to="/appointments" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
               Appointments</Link>
 

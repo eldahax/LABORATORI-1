@@ -54,16 +54,13 @@ const confirmAppointment = async (req, res) => {
 
 const getAllReminders = async (req, res) => {
   try {
-    const reminders = await reminderService.getAllReminders();
+    const reminders = await reminderService.getAllReminders(req.user);
 
     return successResponse(
       res,
       200,
       "Reminders fetched successfully",
-      reminders,
-      {
-        count: reminders.length,
-      }
+      reminders
     );
   } catch (err) {
     return errorResponse(res, 500, err.message);

@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const appointmentController=require("../controllers/appointmentController");
+const appointmentController =require("../controllers/appointmentController");
 
-router.post("/",appointmentController.createApp);
-router.put("/:id",appointmentController.update);
-router.get("/",appointmentController.getAll);
-router.get("/:id",appointmentController.getById);
-router.delete("/:id",appointmentController.deleteApp);
+const {  protect, authorize} = require("../auth/authMiddleWear");
+router.post( "/", protect, authorize("patient", "admin"),appointmentController.createApp);
+router.get("/",protect,appointmentController.getAll);
+router.get( "/:id", protect, appointmentController.getById);
+router.put( "/:id", protect, appointmentController.update);
+router.delete("/:id",protect,appointmentController.deleteApp);
 
-module.exports=router;
+module.exports = router;
+

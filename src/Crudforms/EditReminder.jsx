@@ -36,7 +36,9 @@ export default function EditReminder() {
     useEffect(() => {
         setServerError("");
 
-        fetch("http://localhost:5000/api/appointments")
+        fetch("http://localhost:5000/api/appointments",{
+            credentials:"include"
+        })
             .then((res) => res.json())
             .then((appointmentsData) => {
                 setAppointments(
@@ -49,7 +51,9 @@ export default function EditReminder() {
                 setServerError("Failed to load appointments");
             });
 
-        fetch(`http://localhost:5000/api/reminders/${id}`)
+        fetch(`http://localhost:5000/api/reminders/${id}`,{
+            credentials:"include"
+        })
             .then((res) => res.json())
             .then((reminderData) => {
                 const reminder = reminderData?.data;
@@ -89,6 +93,7 @@ export default function EditReminder() {
             const res = await fetch(
                 `http://localhost:5000/api/reminders/${id}`,
                 {
+                    credentials:"include",
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",

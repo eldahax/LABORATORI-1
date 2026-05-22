@@ -2,12 +2,16 @@ const express = require("express");
 const router = express.Router();
 const reminderController = require("../controllers/reminderController");
 
-router.post("/", reminderController.createReminder);
-router.get("/", reminderController.getAllReminders);
-router.get("/:id", reminderController.getReminderById);
-router.put("/:id", reminderController.updateReminder);
-router.delete("/:id", reminderController.deleteReminder);
-router.patch("/:id/sent", reminderController.markAsSent);
-router.patch("/appointments/:id/confirm", reminderController.confirmAppointment);
+const { protect, authorize } = require("../auth/authMiddleWear");
+
+
+router.post("/", protect, authorize("patient", "admin"), reminderController.createReminder);
+router.get("/",protect,authorize("doctor", "patient", "admin"),reminderController.getAllReminders);
+router.get( "/:id", protect, authorize("doctor", "patient", "admin"), reminderController.getReminderById);
+router.put("/:id",protect,authorize( "admin","doctor"),reminderController.updateReminder);
+router.delete("/:id",protect,authorize("admin"),reminderController.deleteReminder);
+router.patch("/:id/sent",  protect,authorize("doctor", "admin"),  reminderController.markAsSent);
+router.patch( "/appointments/:id/confirm", protect, authorize("doctor", "admin"), reminderController.confirmAppointment);
+
 
 module.exports = router;

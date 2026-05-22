@@ -23,31 +23,38 @@ export default function EditAppointment() {
     message: "",
     type: "success",
   });
+useEffect(() => {
+  const load = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/appointments/${id}`, {
+        credentials: "include",
+      });
 
-  useEffect(() => {
-    fetch(`http://localhost:5000/api/appointments/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setDoctorId(data.doctor_id || "");
-        setTreatmentName(data.description || "");
-        setStatus(data.appointment_status || "pending");
-
-        setPatientName(
-          `${data.Patient?.User?.first_name} ${data.Patient?.User?.last_name}`
-        );
-
-        if (data.appointment_date_time) {
-          setDateTime(data.appointment_date_time.slice(0, 16));
-        }
-      })
-      .catch((err) =>
-        setAlert({
-          show: true,
-          message: "Error loading appointment",
-          type: "error",
-        })
+      const text = await res.text();
+    
+      const data = JSON.parse(text);
+      setDoctorId(data.doctor_id || "");
+      setTreatmentName(data.description || "");
+      setStatus(data.appointment_status || "pending");
+      setPatientName(
+        data.Patient?.User
+          ? `${data.Patient.User.first_name} ${data.Patient.User.last_name}`
+          : ""
       );
 
+      if (data.appointment_date_time) {
+        setDateTime(data.appointment_date_time.slice(0, 16));
+      }
+    } catch (err) {
+      console.log("ERROR LOADING APPOINTMENT:", err);
+    }
+  };
+
+  load();
+}, [id]);
+
+  useEffect(() => {
+   
     fetch("http://localhost:5000/api/doctors")
       .then((res) => res.json())
       .then(setAllDoctors)
@@ -69,7 +76,9 @@ export default function EditAppointment() {
           type: "error",
         })
       );
-  }, [id]);
+  },[]);
+
+  
 
   const validate = () => {
     const newErrors = {};
@@ -90,6 +99,7 @@ export default function EditAppointment() {
       const res = await fetch(
         `http://localhost:5000/api/appointments/${id}`,
         {
+          credentials:"include",
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

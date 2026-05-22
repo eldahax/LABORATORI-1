@@ -49,7 +49,9 @@ export default function AppointmentTable() {
   const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/appointments")
+   fetch("http://localhost:5000/api/appointments", {
+  credentials: "include"
+})
       .then((res) => res.json())
       .then((data) => setAppointments(data))
       .catch(() =>
@@ -63,11 +65,9 @@ export default function AppointmentTable() {
 
   const deleteAppointment = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/appointments/${selectedId}`,
-        { method: "DELETE" }
-      );
-
+     const res = await fetch( `http://localhost:5000/api/appointments/${selectedId}`, 
+      { method: "DELETE", 
+        credentials: "include" } );
       if (!res.ok) {
         setAlert({
           show: true,
@@ -131,65 +131,71 @@ export default function AppointmentTable() {
             onConfirm={deleteAppointment}
           />
 
-          <table className="min-w-full text-left text-sm sm:text-base text-black">
-            <thead>
-              <tr className="border-b">
-                <th className="py-3 pl-4">ID</th>
-                <th>Patient</th>
-                <th>Doctor</th>
-                <th>Date & Time</th>
-                <th>Treatment</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  {appointments.map((app) => (
+    <div
+      key={app.appointment_id}
+      className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 hover:shadow-md transition"
+    >
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h2 className="text-lg font-bold text-[#0F766E]">
+            Appointment with   Dr. {app.Doctor?.User?.first_name}{" "}
+          {app.Doctor?.User?.last_name}
+          </h2>
 
-            <tbody>
-              {appointments.map((app) => (
-                <tr key={app.appointment_id} className="border-b hover:bg-gray-50">
-                  <td className="py-4 pl-4">{app.appointment_id}</td>
+          <p className="text-sm text-gray-500">
+            {new Date(app.appointment_date_time).toLocaleString()}
+          </p>
+        </div>
 
-                  <td>
-                    {app.Patient?.User?.first_name}{" "}
-                    {app.Patient?.User?.last_name}
-                  </td>
+        <span className="bg-[#0F766E]/10 text-[#0F766E] text-xs px-3 py-1 rounded-full">
+          {app.appointment_status}
+        </span>
+      </div>
 
-                  <td>
-                    Dr. {app.Doctor?.User?.first_name}{" "}
-                    {app.Doctor?.User?.last_name}
-                  </td>
+      <div className="space-y-2 text-sm">
+        <p>
+          <span className="font-semibold">Patient:</span>{" "}
+          {app.Patient?.User?.first_name}{" "}
+          {app.Patient?.User?.last_name}
+        </p>
 
-                  <td>
-                    {new Date(app.appointment_date_time).toLocaleString()}
-                  </td>
+        <p>
+          <span className="font-semibold">Doctor:</span>{" "}
+          Dr. {app.Doctor?.User?.first_name}{" "}
+          {app.Doctor?.User?.last_name}
+        </p>
 
-                  <td>{app.description}</td>
-                  <td>{app.appointment_status}</td>
+        <p>
+          <span className="font-semibold">Treatment:</span>{" "}
+          {app.description}
+        </p>
+      </div>
 
-                  <td className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setSelectedId(app.appointment_id);
-                        setConfirmOpen(true);
-                      }}
-                      className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
-                    >
-                      Delete
-                    </button>
+      <div className="flex gap-3 mt-5">
+        <button
+          onClick={() => {
+            setSelectedId(app.appointment_id);
+            setConfirmOpen(true);
+          }}
+          className="flex-1 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition py-2 rounded-xl"
+        >
+          Delete
+        </button>
 
-                    <button
-                      onClick={() =>
-                        navigate(`/appointments/edit/${app.appointment_id}`)
-                      }
-                      className="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg"
-                    >
-                      Update
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <button
+          onClick={() =>
+            navigate(`/appointments/edit/${app.appointment_id}`)
+          }
+          className="flex-1 bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition py-2 rounded-xl"
+        >
+          Update
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
         </div>
       </div>
     </div>

@@ -86,6 +86,7 @@ const create = async (
       throw new Error("this doctor doesnt work on " + dayName + " ' s");
     }
 
+    
     const allAppointments = await Appointment.findAll({ transaction: t });
 
     for (const app of allAppointments) {
@@ -148,14 +149,41 @@ const create = async (
   }
 };
 
-const getAllApp = async () => {
+
+const getAllApp = async (user) => {
   try {
+    let whereCondition = {};
+    const roles = user.roles || [];
+
+  
+    if (!roles.includes("admin")) {
+
+   
+      if (roles.includes("patient")) {
+        whereCondition.patient_id = user.patient_id;
+      }
+
+     
+      if (roles.includes("doctor")) {
+        whereCondition.doctor_id = user.doctor_id;
+      }
+    }
+
     return await Appointment.findAll({
+      where: whereCondition,
       include: [
-        { model: Patient, include: [User] },
+        {
+          model: Patient,
+          include: [User],
+        },
         {
           model: Doctor,
-          include: [{ model: User, attributes: ["first_name", "last_name"] }],
+          include: [
+            {
+              model: User,
+              attributes: ["first_name", "last_name"],
+            },
+          ],
         },
         { model: Room },
         {
@@ -168,9 +196,12 @@ const getAllApp = async () => {
       order: [["appointment_date_time", "DESC"]],
     });
   } catch (err) {
-    throw new Error("Could not fetch appointments: " + err.message);
+    throw new Error(
+      "Could not fetch appointments: " + err.message
+    );
   }
 };
+
 
 const deleteAppoint = async (appointment_id) => {
   const t = await sequelize.transaction();
@@ -298,26 +329,26 @@ const updateAppointment = async (appointment_id, updateData) => {
       status &&
       status.toLowerCase() === "confirmed"
     ) {
-       
-  const existingReminderr = await Reminder.findOne({
-    where: { appointment_id: appointment.appointment_id },
-    transaction: t,
-  });
 
-  if (!existingReminderr) {
-    await Reminder.create(
-      {
-        appointment_id: appointment.appointment_id,
-        patient_id: appointment.patient_id,
-        reminder_date: new Date(
-          new Date(newStart).getTime() - 24 * 60 * 60 * 1000
-        ),
-         message: `Reminder: Appointment in 24 hours  ${finalDescription} at ${newStart.toLocaleString()}`,
-        sent: false,
-      },
-      { transaction: t }
-    );
-  }
+      const existingReminderr = await Reminder.findOne({
+        where: { appointment_id: appointment.appointment_id },
+        transaction: t,
+      });
+
+      if (!existingReminderr) {
+        await Reminder.create(
+          {
+            appointment_id: appointment.appointment_id,
+            patient_id: appointment.patient_id,
+            reminder_date: new Date(
+              new Date(newStart).getTime() - 24 * 60 * 60 * 1000
+            ),
+            message: `Reminder: Appointment in 24 hours  ${finalDescription} at ${newStart.toLocaleString()}`,
+            sent: false,
+          },
+          { transaction: t }
+        );
+      }
       const existingReminder = await Reminder.findOne({
         where: {
           appointment_id: appointment.appointment_id,

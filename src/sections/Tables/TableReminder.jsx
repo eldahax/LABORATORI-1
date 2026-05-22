@@ -54,7 +54,9 @@ export default function TableReminder() {
   const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/reminders")
+    fetch("http://localhost:5000/api/reminders",{
+      credentials:"include"
+    })
       .then((res) => res.json())
       .then((data) => {
         setReminders(data.data || []);
@@ -74,18 +76,21 @@ export default function TableReminder() {
     }, 2500);
   };
 
-  // OPEN MODAL
+
   const handleDeleteClick = (id) => {
     setDeleteId(id);
   };
 
-  // CONFIRM DELETE
+
   const confirmDelete = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/reminders/${deleteId}`,
-        { method: "DELETE" }
-      );
+     const res = await fetch(
+  `http://localhost:5000/api/reminders/${deleteId}`,
+  {
+    method: "DELETE",
+    credentials: "include",
+  }
+);
 
       const data = await res.json().catch(() => ({}));
 

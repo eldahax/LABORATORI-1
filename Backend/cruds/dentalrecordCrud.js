@@ -1,39 +1,69 @@
 const { DentalRecord, User, Patient, Doctor, Appointment } = require("../models");
 
-const readAllDentalRecords = async () => {
-  return await DentalRecord.findAll({
-    include: [
-      {
-        model: Appointment,
-      },
-      {
-        model: Patient,
-        include: [
-          {
-            model: User,
-            attributes: ["first_name", "last_name", "email"],
-          },
-        ],
-      },
-      {
-        model: Doctor,
-        include: [
-          {
-            model: User,
-            attributes: ["first_name", "last_name", "email"],
-          },
-        ],
-      },
-    ],
-    
-  });
-};
 
+
+const readAllDentalRecords = async (user) => {
+  try {
+    let whereCondition = {};
+    const roles = user.roles || [];
+
+
+    if (!roles.includes("admin")) {
+
+      if (roles.includes("patient")) {
+        whereCondition.patient_id = user.patient_id;
+      }
+
+      
+      if (roles.includes("doctor")) {
+        whereCondition.doctor_id = user.doctor_id;
+      }
+    }
+
+    return await DentalRecord.findAll({
+      where: whereCondition,
+
+      include: [
+        {
+          model: Appointment,
+        },
+
+        {
+          model: Patient,
+          include: [
+            {
+              model: User,
+              attributes: ["first_name", "last_name", "email"],
+            },
+          ],
+        },
+
+        {
+          model: Doctor,
+          include: [
+            {
+              model: User,
+              attributes: ["first_name", "last_name", "email"],
+            },
+          ],
+        },
+      ],
+
+      order: [["record_date", "DESC"]],
+    });
+
+  } catch (err) {
+    throw new Error(
+      "Could not fetch dental records: " + err.message
+    );
+  }
+};
 
 const getDentalRecordById = async (id) => {
   const record = await DentalRecord.findByPk(id, {
     include: [
       { model: Appointment },
+
       {
         model: Patient,
         include: [
@@ -43,6 +73,7 @@ const getDentalRecordById = async (id) => {
           },
         ],
       },
+
       {
         model: Doctor,
         include: [
@@ -55,25 +86,34 @@ const getDentalRecordById = async (id) => {
     ],
   });
 
-  if (!record) throw new Error("Dental record not found");
+  if (!record) {
+    throw new Error("Dental record not found");
+  }
 
   return record;
 };
 
-
 const updateDentalRecord = async (id, data) => {
   const record = await DentalRecord.findByPk(id);
 
-  if (!record) throw new Error("Dental record not found");
+  if (!record) {
+    throw new Error("Dental record not found");
+  }
 
- 
-  if (data.tooth !== undefined && data.tooth.trim() === "") {
+  if (
+    data.tooth !== undefined &&
+    data.tooth.trim() === ""
+  ) {
     throw new Error("Tooth cannot be empty");
   }
 
   await record.update({
     tooth: data.tooth ?? record.tooth,
-    dental_condition: data.dental_condition ?? record.dental_condition,
+
+    dental_condition:
+      data.dental_condition ??
+      record.dental_condition,
+
     notes: data.notes ?? record.notes,
   });
 
@@ -83,11 +123,12 @@ const updateDentalRecord = async (id, data) => {
   };
 };
 
-
 const deleteDentalRecord = async (id) => {
   const record = await DentalRecord.findByPk(id);
 
-  if (!record) throw new Error("Dental record not found");
+  if (!record) {
+    throw new Error("Dental record not found");
+  }
 
   await record.destroy();
 

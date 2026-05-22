@@ -1,4 +1,4 @@
-const { WorkSchedule, Doctor } = require("../models");
+const { WorkSchedule, Doctor,User } = require("../models");
 
 const createWorkSchedule = async (
     doctor_id,
@@ -30,17 +30,20 @@ const createWorkSchedule = async (
         throw err;
     }
 };
-
 const getAllWorkSchedules = async () => {
-
-    return await WorkSchedule.findAll({
+  return await WorkSchedule.findAll({
+    include: [
+      {
+        model: Doctor,
         include: [
-            {
-                model: Doctor,
-                attributes: ["doctor_id"],
-            },
+          {
+            model: User,
+            attributes: ["first_name", "last_name"],
+          },
         ],
-    });
+      },
+    ],
+  });
 };
 
 const getWorkScheduleById = async (id) => {
