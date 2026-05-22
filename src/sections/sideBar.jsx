@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  
+
 
   useEffect(() => {
     fetch("http://localhost:5000/api/users/me", {
@@ -20,7 +20,7 @@ const Sidebar = () => {
 
   return (
     <>
-    
+
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="md:hidden fixed top-[70px] left-4 text-3xl text-[#134E4A] z-[60]"
@@ -28,16 +28,19 @@ const Sidebar = () => {
         ☰
       </button>
 
-    
+
       <div className="mt-[50px] hidden md:flex fixed top-0 left-0 h-screen w-1/4 bg-gradient-to-b from-[#134E4A] via-[#0F766E] to-[#5EEAD4] text-white flex-col items-center p-6 z-[40]">
         <div className="w-full space-y-3">
 
-          
+
           <Link to="/Profile" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
             Personal Information
           </Link>
+          <Link to="/reminders" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+            Reminders
+          </Link>
 
-          
+
           {roles.includes("admin") && (
             <>
               <Link to="/Users" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
@@ -49,7 +52,7 @@ const Sidebar = () => {
                 Inventory
               </Link>
 
-              
+
               <Link to="/rooms" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Rooms and Departments
               </Link>
@@ -61,10 +64,10 @@ const Sidebar = () => {
               <Link to="/work-schedules" className="block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Work Schedule
               </Link>
-            
-             
-              
-              
+
+
+
+
             </>
           )}
 
@@ -84,8 +87,8 @@ const Sidebar = () => {
             </>
           )}
 
-        
-         
+
+
 
         </div>
       </div>

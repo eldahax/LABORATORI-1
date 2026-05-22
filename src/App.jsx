@@ -33,25 +33,30 @@ import EditDepartment from "./Crudforms/EditDepartment";
 import AddApointment from "./Crudforms/AddApointment"
 import AppointmentTable from "./sections/Tables/AppointmentTable";
 import EditAppointment from "./Crudforms/EditAppointment";
-import TableWorkSchedule from"./sections/Tables/TableWorkSchedule";
+import TableWorkSchedule from "./sections/Tables/TableWorkSchedule";
 import AddWorkSchedule from "./Crudforms/AddWorkSchedule";
 import EditWorkSchedule from "./Crudforms/EditWorkSchedule";
 import RouteProtect from "./components/RouteProtect";
+import TableReminder from "./sections/Tables/TableReminder";
+import EditReminder from "./Crudforms/EditReminder";
+
+
 function App() {
   return (
     <Routes>
-        <Route path="/work-schedules/edit/:id" element={<EditWorkSchedule />} />
-        <Route path="/add-work-schedule" element={<AddWorkSchedule />} />
-       <Route path="/work-schedules" element={<TableWorkSchedule />} />
-       <Route path="/addApointment" element={<AddApointment />} />
+
+      <Route path="/work-schedules/edit/:id" element={<EditWorkSchedule />} />
+      <Route path="/add-work-schedule" element={<AddWorkSchedule />} />
+      <Route path="/work-schedules" element={<TableWorkSchedule />} />
+      <Route path="/addApointment" element={<AddApointment />} />
       <Route path="/" element={<Home />} />
-       <Route path="/Home" element={<Home />} />
+      <Route path="/Home" element={<Home />} />
       <Route path="/About" element={<About />} />
       <Route path="/Contact" element={<Contact />} />
       <Route path="/Login" element={<Login />} />
       <Route path="/Signup" element={<Signup />} />
       <Route path="/Services" element={<Services />} />
-      <Route path="/appointments/edit/:id" element={< EditAppointment/>} />
+      <Route path="/appointments/edit/:id" element={< EditAppointment />} />
 
       <Route
         element={<RouteProtect allowedRoles={["admin", "doctor", "patient"]} />}
@@ -61,6 +66,8 @@ function App() {
       </Route>
 
       <Route element={<RouteProtect allowedRoles={["admin", "doctor"]} />}>
+        <Route path="/reminders" element={<TableReminder />} />
+        <Route path="/reminders/edit/:id" element={<EditReminder />} />
         <Route path="/Patients" element={<TablePatient />} />
         <Route path="/addP" element={<AddPartient />} />
         <Route path="/patients/edit/:id" element={<EditPatient />} />
@@ -70,7 +77,7 @@ function App() {
         <Route path="/Treatments" element={<TableTreatment />} />
         <Route path="/addT" element={<AddTreatment />} />
         <Route path="/treatments/edit/:id" element={<EditTreatment />} />
-        <Route path="/appointments" element={<AppointmentTable/>} />
+        <Route path="/appointments" element={<AppointmentTable />} />
       </Route>
 
       <Route element={<RouteProtect allowedRoles={["admin"]} />}>
