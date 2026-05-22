@@ -3,121 +3,167 @@ import { useNavigate } from "react-router-dom";
 import TableCard from "./TableCard";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../sideBar";
+import CustomAlert from "../../components/CustomAlert";
+
+
+function ConfirmModal({ show, onConfirm, onCancel }) {
+    if (!show) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
+
+                <h2 className="text-lg font-bold mb-2">
+                    Confirm Delete
+                </h2>
+
+                <p className="text-gray-600 mb-6">
+                    Are you sure you want to delete this item?
+                </p>
+
+                <div className="flex justify-end gap-3">
+                    <button
+                        onClick={onCancel}
+                        className="px-4 py-2 border rounded-lg"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        onClick={onConfirm}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg"
+                    >
+                        Delete
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    );
+}
 
 export default function OfferTable() {
+
     const [treatments, setTreatments] = useState([]);
     const [offers, setOffers] = useState([]);
 
     const [offerSearch, setOfferSearch] = useState("");
     const [treatmentSearch, setTreatmentSearch] = useState("");
 
+    const [selectedId, setSelectedId] = useState(null);
+    const [deleteType, setDeleteType] = useState("");
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
+    const [alert, setAlert] = useState({
+        show: false,
+        message: "",
+        type: "success",
+    });
+
     const navigate = useNavigate();
+
+
+    const showAlert = (message, type = "success") => {
+        setAlert({
+            show: true,
+            message,
+            type,
+        });
+    };
+
 
     useEffect(() => {
         fetch("http://localhost:5000/api/treatments")
             .then((res) => res.json())
             .then((data) => setTreatments(data))
-            .catch((err) => console.log(err));
+            .catch(() =>
+                showAlert("Failed to load treatments", "error")
+            );
     }, []);
 
     useEffect(() => {
         fetch("http://localhost:5000/api/offers")
             .then((res) => res.json())
             .then((data) => setOffers(data))
-            .catch((err) => console.log(err));
+            .catch(() =>
+                showAlert("Failed to load offers", "error")
+            );
     }, []);
 
-    const handleDeleteD = async (treatment_id) => {
-        if (!window.confirm("Are you sure?")) return;
 
-        try {
-            const res = await fetch(
-                `http://localhost:5000/api/treatments/${treatment_id}`,
-                { method: "DELETE" }
-            );
-
-            if (res.ok) {
-                setTreatments((prev) =>
-                    prev.filter(
-                        (t) =>
-                            t.treatment_id !== treatment_id
-                    )
-                );
-            }
-        } catch (err) {
-            console.log(err);
-        }
+    const openDelete = (id, type) => {
+        setSelectedId(id);
+        setDeleteType(type);
+        setConfirmOpen(true);
     };
 
-    const handleDelete = async (offers_id) => {
-        if (
-            !window.confirm(
-                "Are you sure you want to delete this offer?"
-            )
-        )
-            return;
+    const closeDelete = () => {
+        setSelectedId(null);
+        setDeleteType("");
+        setConfirmOpen(false);
+    };
+
+    const handleDelete = async () => {
+        if (!selectedId) return;
 
         try {
-            const res = await fetch(
-                `http://localhost:5000/api/offers/${offers_id}`,
-                { method: "DELETE" }
-            );
+            let url = "";
 
-            if (res.ok) {
+            if (deleteType === "offer") {
+                url = `http://localhost:5000/api/offers/${selectedId}`;
+            }
+
+            if (deleteType === "treatment") {
+                url = `http://localhost:5000/api/treatments/${selectedId}`;
+            }
+
+            const res = await fetch(url, { method: "DELETE" });
+
+            if (!res.ok) {
+                showAlert("Delete failed", "error");
+                return;
+            }
+
+            if (deleteType === "offer") {
                 setOffers((prev) =>
-                    prev.filter(
-                        (off) =>
-                            off.offers_id !== offers_id
-                    )
+                    prev.filter((o) => o.offers_id !== selectedId)
                 );
             }
+
+            if (deleteType === "treatment") {
+                setTreatments((prev) =>
+                    prev.filter((t) => t.treatment_id !== selectedId)
+                );
+            }
+
+            showAlert("Deleted successfully", "success");
+            closeDelete();
+
         } catch (err) {
-            console.log(err);
+            showAlert("Server error", "error");
         }
     };
 
-    // ✅ OFFERS SEARCH (ONLY NAME + TREATMENTS)
-    const filteredOffers = offers.filter(
-        (off) => {
-            const name = (
-                off.offers_name || ""
-            ).toLowerCase();
+    const filteredOffers = offers.filter((off) => {
+        const name = (off.offers_name || "").toLowerCase();
+        const treatmentsText =
+            (off.Treatments?.map((t) => t.treatment_name).join(" ") || "").toLowerCase();
 
-            const treatmentsText = (
-                off.Treatments?.map(
-                    (t) => t.treatment_name
-                ).join(" ") || ""
-            ).toLowerCase();
+        return (
+            name.includes(offerSearch.toLowerCase()) ||
+            treatmentsText.includes(offerSearch.toLowerCase())
+        );
+    });
 
-            const search =
-                offerSearch.toLowerCase();
+    const filteredTreatments = treatments.filter((t) => {
+        const name = (t.treatment_name || "").toLowerCase();
+        const department = (t.Department?.department_name || "").toLowerCase();
 
-            return (
-                name.includes(search) ||
-                treatmentsText.includes(search)
-            );
-        }
-    );
-
-    // ✅ TREATMENTS SEARCH (NAME + DEPARTMENT ONLY)
-    const filteredTreatments =
-        treatments.filter((t) => {
-            const name = (
-                t.treatment_name || ""
-            ).toLowerCase();
-
-            const department = (
-                t.Department?.department_name || ""
-            ).toLowerCase();
-
-            const search =
-                treatmentSearch.toLowerCase();
-
-            return (
-                name.includes(search) ||
-                department.includes(search)
-            );
-        });
+        return (
+            name.includes(treatmentSearch.toLowerCase()) ||
+            department.includes(treatmentSearch.toLowerCase())
+        );
+    });
 
     return (
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-8 overflow-x-auto">
@@ -130,7 +176,7 @@ export default function OfferTable() {
                     <div className="w-3/4 ml-[25%]">
                         <TableCard />
 
-                        {/* OFFERS */}
+                       
                         <div className="flex justify-between items-center mb-6">
                             <h1 className="text-xl font-bold text-[#0F766E]">
                                 Offers
@@ -145,7 +191,23 @@ export default function OfferTable() {
                                 + Add Offer
                             </button>
                         </div>
+                        <CustomAlert
+                            show={alert.show}
+                            message={alert.message}
+                            type={alert.type}
+                            onClose={() =>
+                                setAlert((p) => ({
+                                    ...p,
+                                    show: false,
+                                }))
+                            }
+                        />
 
+                        <ConfirmModal
+                            show={confirmOpen}
+                            onCancel={() => setConfirmOpen(false)}
+                            onConfirm={handleDelete}
+                        />
                         <div className="w-1/2 max-w-sm mb-6">
                             <input
                                 type="text"
@@ -208,11 +270,7 @@ export default function OfferTable() {
 
                                         <td className="flex gap-2">
                                             <button
-                                                onClick={() =>
-                                                    handleDelete(
-                                                        off.offers_id
-                                                    )
-                                                }
+                                                onClick={() => openDelete(off.offers_id)}
                                                 className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
                                             >
                                                 Delete
@@ -297,12 +355,8 @@ export default function OfferTable() {
 
                                         <td className="flex gap-2 py-2">
                                             <button
-                                                onClick={() =>
-                                                    handleDeleteD(
-                                                        t.treatment_id
-                                                    )
-                                                }
-                                                className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
+                                                onClick={() => openDelete(t.treatment_id, "treatment")}
+                                                className="text-red-500 px-3 py-1"
                                             >
                                                 Delete
                                             </button>

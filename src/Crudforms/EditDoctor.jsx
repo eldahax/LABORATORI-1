@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import CustomAlert from "../components/CustomAlert";
 
 export default function EditDoctor() {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const [name, setName] = useState("");
   const [lastname, setLastName] = useState("");
@@ -14,418 +18,238 @@ export default function EditDoctor() {
   const [experience, setExperience] = useState("");
   const [description, setDescription] = useState("");
   const [departmentId, setDepartmentId] = useState("");
-  const[certifications,setCertifications]=useState([]);
+  const [certifications, setCertifications] = useState([]);
 
   const [allDepartments, setAllDepartments] = useState([]);
-
   const [errors, setErrors] = useState({});
-  const addCertification = () => {
-    const updated = certifications.slice();
-    updated.push({
-      certification_name: "",
-      certification_type: "",
-      certification_date: "",
-      organization: "",
-    });
-    setCertifications(updated);
-  };
 
-  const updateCertification = (index, field, value) => {
-    const updated = certifications.slice();
-    updated[index][field] = value;
-    setCertifications(updated);
-  };
-
-  const removeCertification = (index) => {
-    setCertifications(certifications.filter((_, i) => i !== index));
-  };
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   useEffect(() => {
-    
-    fetch(`http://localhost:5000/api/doctors/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setName(data.User?.first_name || "");
-        setLastName(data.User?.last_name || "");
-        setEmail(data.User?.email || "");
-        setPhone(data.User?.phone_number || "");
-        setSpeciality(data.specialization || "");
-        setLicense(data.license_number || "");
-        setExperience(data.years_experience || "");
-        setDescription(data.description || "");
-        setDepartmentId(data.Departments?.[0]?.department_id || "");
-setCertifications(Array.isArray(data.Certifications) ? data.Certifications : []);
-      })
-      .catch((err) => console.log(err));
+    const fetchData = async () => {
+      setLoading(true);
 
-    
-    fetch("http://localhost:5000/api/departments")
-      .then((res) => res.json())
-      .then((data) => {
-        setAllDepartments(data);
-      })
-      .catch((err) => console.log(err));
+      try {
+        const [docRes, depRes] = await Promise.all([
+          fetch(`http://localhost:5000/api/doctors/${id}`),
+          fetch("http://localhost:5000/api/departments"),
+        ]);
 
+        const doc = await docRes.json();
+        const deps = await depRes.json();
+
+        setName(doc.User?.first_name || "");
+        setLastName(doc.User?.last_name || "");
+        setEmail(doc.User?.email || "");
+        setPhone(doc.User?.phone_number || "");
+        setSpeciality(doc.specialization || "");
+        setLicense(doc.license_number || "");
+        setExperience(doc.years_experience || "");
+        setDescription(doc.description || "");
+        setDepartmentId(doc.Departments?.[0]?.department_id || "");
+        setCertifications(Array.isArray(doc.Certifications) ? doc.Certifications : []);
+
+        setAllDepartments(deps);
+      } catch {
+        setAlert({
+          show: true,
+          message: "Failed to load doctor data",
+          type: "error",
+        });
+      }
+
+      setLoading(false);
+    };
+
+    fetchData();
   }, [id]);
 
   const validate = () => {
-    const newErrors = {};
+    const e = {};
 
-    if (!name || name.length < 3)
-      newErrors.name = "Invalid first name";
+    if (!name || name.length < 2) e.name = "Invalid name";
+    if (!lastname || lastname.length < 2) e.lastname = "Invalid last name";
+    if (!email.includes("@")) e.email = "Invalid email";
+    if (!speciality) e.speciality = "Required";
+    if (!license) e.license = "Required";
+    if (!experience) e.experience = "Required";
+    if (!departmentId) e.department = "Required";
 
-    if (!lastname || lastname.length < 3)
-      newErrors.lastname = "Invalid last name";
-
-    const emailRegex =
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
-
-    if (!emailRegex.test(email))
-      newErrors.email = "Invalid email";
-
-    if (!speciality)
-      newErrors.speciality = "Required";
-
-    if (!license)
-      newErrors.license = "Required";
-
-    if (!experience)
-      newErrors.experience = "Required";
-
-    if (!departmentId)
-      newErrors.department = "Required";
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
+    setSaving(true);
+
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/doctors/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-         body: JSON.stringify({
-  first_name: name,
-  last_name: lastname,
-  email,
-  phone_number: phone,
-  specialization: speciality,
-  license_number: license,
-  years_experience: experience,
-  description,
-  department_id: departmentId,
-  certifications: certifications,
-}),
-        }
-      );
+      const res = await fetch(`http://localhost:5000/api/doctors/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: name,
+          last_name: lastname,
+          email,
+          phone_number: phone,
+          specialization: speciality,
+          license_number: license,
+          years_experience: experience,
+          description,
+          department_id: Number(departmentId),
+          certifications,
+        }),
+      });
 
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Update failed");
+        setAlert({
+          show: true,
+          message: data.error || "Update failed",
+          type: "error",
+        });
+        setSaving(false);
         return;
       }
 
-      alert("Doctor updated successfully");
+      setAlert({
+        show: true,
+        message: "Doctor updated successfully",
+        type: "success",
+      });
 
-      navigate("/Doctors");
-
-    } catch (err) {
-      console.error(err);
-      alert("Server error");
+      setTimeout(() => navigate("/doctors"), 1000);
+    } catch {
+      setAlert({
+        show: true,
+        message: "Server error",
+        type: "error",
+      });
     }
+
+    setSaving(false);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
+      <CustomAlert
+        {...alert}
+        onClose={() => setAlert((p) => ({ ...p, show: false }))}
+      />
+
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-3xl bg-white p-6 rounded-xl shadow-lg flex flex-col gap-4"
       >
         <h1 className="text-2xl font-bold text-[#0F766E] text-center uppercase">
-          Edit Doctor 
+          Edit Doctor
         </h1>
 
-        <div className="flex flex-col md:flex-row gap-4">
-          
-          <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">
-              First Name
-            </label>
+        {loading && (
+          <p className="text-center text-gray-500">Loading...</p>
+        )}
 
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            />
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="border p-2 rounded"
+          placeholder="First Name"
+        />
+        <p className="text-red-500 text-sm">{errors.name}</p>
 
-            <p className="text-red-500 text-sm">
-              {errors.name}
-            </p>
-          </div>
+        <input
+          value={lastname}
+          onChange={(e) => setLastName(e.target.value)}
+          className="border p-2 rounded"
+          placeholder="Last Name"
+        />
+        <p className="text-red-500 text-sm">{errors.lastname}</p>
 
-          
-          <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">
-              Last Name
-            </label>
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="border p-2 rounded"
+          placeholder="Email"
+        />
+        <p className="text-red-500 text-sm">{errors.email}</p>
 
-            <input
-              value={lastname}
-              onChange={(e) => setLastName(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            />
+        <input
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          className="border p-2 rounded"
+          placeholder="Phone"
+        />
 
-            <p className="text-red-500 text-sm">
-              {errors.lastname}
-            </p>
-          </div>
-        </div>
+        <input
+          value={license}
+          onChange={(e) => setLicense(e.target.value)}
+          className="border p-2 rounded"
+          placeholder="License"
+        />
+        <p className="text-red-500 text-sm">{errors.license}</p>
 
-        <div className="flex flex-col md:flex-row gap-4">
-          
-          <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">
-              Email
-            </label>
+        <input
+          value={experience}
+          onChange={(e) => setExperience(e.target.value)}
+          className="border p-2 rounded"
+          placeholder="Experience"
+        />
+        <p className="text-red-500 text-sm">{errors.experience}</p>
 
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            />
+        <select
+          value={speciality}
+          onChange={(e) => setSpeciality(e.target.value)}
+          className="border p-2 rounded"
+        >
+          <option value="">Speciality</option>
+          <option value="General Dentistry">General Dentistry</option>
+          <option value="Orthodontics">Orthodontics</option>
+          <option value="Oral Surgery">Oral Surgery</option>
+          <option value="Cosmetic">Cosmetic</option>
+        </select>
 
-            <p className="text-red-500 text-sm">
-              {errors.email}
-            </p>
-          </div>
-
-          
-          <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">
-              Phone
-            </label>
-
-            <input
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-4">
-          
-          <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">
-              License Number
-            </label>
-
-            <input
-              value={license}
-              onChange={(e) => setLicense(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            />
-
-            <p className="text-red-500 text-sm">
-              {errors.license}
-            </p>
-          </div>
-
-          
-          <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">
-              Years of Experience
-            </label>
-
-            <input
-              type="number"
-              value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            />
-
-            <p className="text-red-500 text-sm">
-              {errors.experience}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-4">
-          
-          <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">
-              Speciality
-            </label>
-
-            <select
-              value={speciality}
-              onChange={(e) => setSpeciality(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            >
-              <option value="">Select</option>
-              <option value="General Dentistry">
-                General Dentistry
-              </option>
-              <option value="Orthodontics">
-                Orthodontics
-              </option>
-              <option value="Oral Surgery">
-                Oral Surgery
-              </option>
-              <option value="Cosmetic">
-                Cosmetic
-              </option>
-            </select>
-
-            <p className="text-red-500 text-sm">
-              {errors.speciality}
-            </p>
-          </div>
-
-          
-          <div className="flex flex-col w-full">
-            <label className="text-xs font-semibold text-gray-500 ml-1">
-              Department
-            </label>
-
-            <select
-              value={departmentId}
-              onChange={(e) =>
-                setDepartmentId(Number(e.target.value))
-              }
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-            >
-              <option value="">
-                Select Department
-              </option>
-
-              {allDepartments.map((dept) => (
-                <option
-                  key={dept.department_id}
-                  value={dept.department_id}
-                >
-                  {dept.department_name}
-                </option>
-              ))}
-            </select>
-
-            <p className="text-red-500 text-sm">
-              {errors.department}
-            </p>
-          </div>
-        </div>
-
-        
-        <div className="flex flex-col">
-          <label className="text-xs font-semibold text-gray-500 ml-1">
-            Description
-          </label>
-
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2 h-24"
-          />
-        </div>
-  
-        <div className="flex flex-col gap-3">
-          <div className="flex justify-between">
-            <h2 className="font-bold text-[#0F766E]">Certifications</h2>
-
-            <button
-              type="button"
-              onClick={addCertification}
-              className="bg-[#0F766E] text-white px-3 py-1 rounded"
-            >
-              Add
-            </button>
-          </div>
-
-          {certifications.map((c, index) => (
-            <div key={index} className="grid grid-cols-2 gap-2">
-              <input
-                placeholder="Name"
-                value={c.certification_name}
-                onChange={(e) =>
-                  updateCertification(
-                    index,
-                    "certification_name",
-                    e.target.value,
-                  )
-                }
-                className="border p-2 rounded"
-              />
-
-              <input
-                placeholder="Type"
-                value={c.certification_type}
-                onChange={(e) =>
-                  updateCertification(
-                    index,
-                    "certification_type",
-                    e.target.value,
-                  )
-                }
-                className="border p-2 rounded"
-              />
-
-              <input
-                type="date"
-                value={c.certification_date}
-                onChange={(e) =>
-                  updateCertification(
-                    index,
-                    "certification_date",
-                    e.target.value,
-                  )
-                }
-                className="border p-2 rounded"
-              />
-
-              <input
-                placeholder="Organization"
-                value={c.organization}
-                onChange={(e) =>
-                  updateCertification(index, "organization", e.target.value)
-                }
-                className="border p-2 rounded"
-              />
-
-              <button
-                type="button"
-                onClick={() => removeCertification(index)}
-                className="bg-red-500 text-white rounded px-2"
-              >
-                Remove
-              </button>
-            </div>
+        <select
+          value={departmentId}
+          onChange={(e) => setDepartmentId(e.target.value)}
+          className="border p-2 rounded"
+        >
+          <option value="">Department</option>
+          {allDepartments.map((d) => (
+            <option key={d.department_id} value={d.department_id}>
+              {d.department_name}
+            </option>
           ))}
-        </div>
-        
+        </select>
+
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="border p-2 rounded"
+          placeholder="Description"
+        />
+
         <div className="flex gap-4">
           <button
             type="button"
             onClick={() => navigate("/doctors")}
-            className="w-1/2 border-2 border-gray-300 text-gray-600 py-2 rounded-lg font-bold hover:bg-gray-100"
+            className="w-1/2 border p-2 rounded"
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            className="w-1/2 bg-[#0F766E] text-white py-2 rounded-lg font-bold hover:bg-[#134E4A]"
+            disabled={saving}
+            className="w-1/2 bg-[#0F766E] text-white p-2 rounded disabled:opacity-60"
           >
-            Save Changes
+            {saving ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </form>

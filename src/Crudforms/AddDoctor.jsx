@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import CustomAlert from "../components/CustomAlert";
 
 export default function AddDoc() {
   const [name, setName] = useState("");
@@ -14,27 +15,47 @@ export default function AddDoc() {
   const [deps, setDeps] = useState([]);
 
   const [certifications, setCertifications] = useState([]);
-
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
   const nameRegex = /^[A-Za-z]{3,15}$/;
   const passRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!.@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
 
+  useEffect(() => {
+    fetch("http://localhost:5000/api/departments")
+      .then((res) => res.json())
+      .then((data) => setDeps(data))
+      .catch(() =>
+        setAlert({
+          show: true,
+          message: "Failed to load departments",
+          type: "error",
+        })
+      );
+  }, []);
+
   const addCertification = () => {
-    const updated = certifications.slice();
-    updated.push({
-      certification_name: "",
-      certification_type: "",
-      certification_date: "",
-      organization: "",
-    });
-    setCertifications(updated);
+    setCertifications([
+      ...certifications,
+      {
+        certification_name: "",
+        certification_type: "",
+        certification_date: "",
+        organization: "",
+      },
+    ]);
   };
 
   const updateCertification = (index, field, value) => {
-    const updated = certifications.slice();
+    const updated = [...certifications];
     updated[index][field] = value;
     setCertifications(updated);
   };
@@ -43,17 +64,11 @@ export default function AddDoc() {
     setCertifications(certifications.filter((_, i) => i !== index));
   };
 
-  useEffect(() => {
-    const fetchD = async () => {
-      const res = await fetch("http://localhost:5000/api/departments");
-      const data = await res.json();
-      setDeps(data);
-    };
-    fetchD();
-  }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (loading) return;
+    setLoading(true);
 
     const newErrors = {};
 
@@ -61,14 +76,18 @@ export default function AddDoc() {
     if (!nameRegex.test(lastname)) newErrors.lastname = "Invalid last name";
     if (!emailRegex.test(email)) newErrors.email = "Invalid email";
     if (!passRegex.test(password)) newErrors.password = "Weak password";
-    if (!speciality) newErrors.speciality = "speciality is required";
-    if (!license) newErrors.license = "license number is required";
-    if (!experience) newErrors.experience = "experience required";
-    if (!description) newErrors.description = "description required";
-    if (!department) newErrors.department = "department required";
+    if (!speciality) newErrors.speciality = "Speciality required";
+    if (!license) newErrors.license = "License required";
+    if (!experience) newErrors.experience = "Experience required";
+    if (!description) newErrors.description = "Description required";
+    if (!department) newErrors.department = "Department required";
 
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+
+    if (Object.keys(newErrors).length > 0) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch("http://localhost:5000/api/doctors", {
@@ -77,26 +96,35 @@ export default function AddDoc() {
         body: JSON.stringify({
           first_name: name,
           last_name: lastname,
-          email: email,
+          email,
           phone_number: phone,
-          password: password,
+          password,
           specialization: speciality,
           license_number: license,
           years_experience: experience,
-          description: description,
+          description,
           department_name: department,
-          certifications: certifications,
+          certifications,
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error);
+        setAlert({
+          show: true,
+          message: data.error || "Create failed",
+          type: "error",
+        });
+        setLoading(false);
         return;
       }
 
-      alert("Doctor created successfully");
+      setAlert({
+        show: true,
+        message: "Doctor created successfully",
+        type: "success",
+      });
 
       setName("");
       setLastName("");
@@ -110,14 +138,27 @@ export default function AddDoc() {
       setDepartment("");
       setCertifications([]);
       setErrors({});
+
+      setLoading(false);
     } catch (err) {
-      console.log(err);
-      alert("Server error");
+      setAlert({
+        show: true,
+        message: "Server error",
+        type: "error",
+      });
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <CustomAlert
+        show={alert.show}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({ ...alert, show: false })}
+      />
+
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-3xl bg-white p-6 rounded-xl flex flex-col gap-4"
@@ -148,62 +189,56 @@ export default function AddDoc() {
           </div>
         </div>
 
-        <div className="flex gap-4">
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="border p-2 rounded w-full"
-          />
+        <input
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="border p-2 rounded"
+        />
+        <p className="text-red-500 text-sm">{errors.email}</p>
 
-          <input
-            placeholder="Phone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="border p-2 rounded w-full"
-          />
-        </div>
+        <input
+          placeholder="Phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          className="border p-2 rounded"
+        />
 
-        <div className="flex gap-4">
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="border p-2 rounded w-full"
-          />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="border p-2 rounded"
+        />
+        <p className="text-red-500 text-sm">{errors.password}</p>
 
-          <input
-            placeholder="License"
-            value={license}
-            onChange={(e) => setLicense(e.target.value)}
-            className="border p-2 rounded w-full"
-          />
-        </div>
+        <input
+          placeholder="License"
+          value={license}
+          onChange={(e) => setLicense(e.target.value)}
+          className="border p-2 rounded"
+        />
 
-        <div className="flex gap-4">
-          <select
-            value={department}
-            onChange={(e) => setSpeciality(e.target.value)}
-            className="border p-2 rounded w-full"
-          >
-            <option value="">Select a Speciality</option>
+        <input
+          type="number"
+          placeholder="Experience"
+          value={experience}
+          onChange={(e) => setExperience(e.target.value)}
+          className="border p-2 rounded"
+        />
 
-            {deps.map((d) => (
-              <option value={d.department_name} key={d.department_id}>
-                {d.department_name}
-              </option>
-            ))}
-          </select>
-
-          <input
-            type="number"
-            placeholder="Experience"
-            value={experience}
-            onChange={(e) => setExperience(e.target.value)}
-            className="border p-2 rounded w-full"
-          />
-        </div>
+        <select
+          value={speciality}
+          onChange={(e) => setSpeciality(e.target.value)}
+          className="border p-2 rounded"
+        >
+          <option value="">Select Speciality</option>
+          <option value="General Dentistry">General Dentistry</option>
+          <option value="Orthodontics">Orthodontics</option>
+          <option value="Oral Surgery">Oral Surgery</option>
+          <option value="Cosmetic">Cosmetic</option>
+        </select>
 
         <select
           value={department}
@@ -211,9 +246,8 @@ export default function AddDoc() {
           className="border p-2 rounded"
         >
           <option value="">Select Department</option>
-
           {deps.map((d) => (
-            <option value={d.department_name} key={d.department_id}>
+            <option key={d.department_id} value={d.department_name}>
               {d.department_name}
             </option>
           ))}
@@ -226,82 +260,11 @@ export default function AddDoc() {
           className="border p-2 rounded"
         />
 
-        <div className="flex flex-col gap-3">
-          <div className="flex justify-between">
-            <h2 className="font-bold text-[#0F766E]">Certifications</h2>
-
-            <button
-              type="button"
-              onClick={addCertification}
-              className="bg-[#0F766E] text-white px-3 py-1 rounded"
-            >
-              Add
-            </button>
-          </div>
-
-          {certifications.map((c, index) => (
-            <div key={index} className="grid grid-cols-2 gap-2">
-              <input
-                placeholder="Name"
-                value={c.certification_name}
-                onChange={(e) =>
-                  updateCertification(
-                    index,
-                    "certification_name",
-                    e.target.value,
-                  )
-                }
-                className="border p-2 rounded"
-              />
-
-              <input
-                placeholder="Type"
-                value={c.certification_type}
-                onChange={(e) =>
-                  updateCertification(
-                    index,
-                    "certification_type",
-                    e.target.value,
-                  )
-                }
-                className="border p-2 rounded"
-              />
-
-              <input
-                type="date"
-                value={c.certification_date}
-                onChange={(e) =>
-                  updateCertification(
-                    index,
-                    "certification_date",
-                    e.target.value,
-                  )
-                }
-                className="border p-2 rounded"
-              />
-
-              <input
-                placeholder="Organization"
-                value={c.organization}
-                onChange={(e) =>
-                  updateCertification(index, "organization", e.target.value)
-                }
-                className="border p-2 rounded"
-              />
-
-              <button
-                type="button"
-                onClick={() => removeCertification(index)}
-                className="bg-red-500 text-white rounded px-2"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <button className="bg-[#0F766E] text-white p-2 rounded">
-          Create Doctor
+        <button
+          disabled={loading}
+          className="bg-[#0F766E] text-white p-2 rounded"
+        >
+          {loading ? "Creating..." : "Create Doctor"}
         </button>
       </form>
     </div>

@@ -3,10 +3,51 @@ import { useNavigate } from "react-router-dom";
 import TableCard from "./TableCard";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../sideBar"
+import CustomAlert from "../../components/CustomAlert";
 
+function ConfirmModal({ show, onConfirm, onCancel }) {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
+        <h2 className="text-lg font-bold mb-2">Confirm Delete</h2>
+
+        <p className="text-gray-600 mb-6">
+          Are you sure you want to delete this patient?
+        </p>
+
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 border rounded-lg"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 export default function Table() {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState(""); 
+   const [selectedId, setSelectedId] = useState(null);
+    const [deleteType, setDeleteType] = useState("");
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
+    const [alert, setAlert] = useState({
+        show: false,
+        message: "",
+        type: "success",
+    });
   const navigate = useNavigate();
 
   useEffect(() => {

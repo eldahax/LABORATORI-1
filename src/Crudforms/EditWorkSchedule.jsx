@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import CustomAlert from "../components/CustomAlert";
 
 export default function EditWorkSchedule() {
-
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -19,6 +19,12 @@ export default function EditWorkSchedule() {
     const [startErr, setStartErr] = useState("");
     const [endErr, setEndErr] = useState("");
 
+    const [alert, setAlert] = useState({
+        show: false,
+        message: "",
+        type: "success",
+    });
+
     const days = [
         "Monday",
         "Tuesday",
@@ -26,22 +32,23 @@ export default function EditWorkSchedule() {
         "Thursday",
         "Friday",
         "Saturday",
-        "Sunday"
+        "Sunday",
     ];
-     const [allDoctors, setAllDoctors] = useState([]);
-    
-        useEffect(() => {
-            const fetchDoctors = async () => {
-                try {
-                    const res = await fetch("http://localhost:5000/api/doctors");
-                    const data = await res.json();
-                    setAllDoctors(data);
-                } catch (err) {
-                    console.error("Failed to fetch doctors:", err);
-                }
-            };
-            fetchDoctors();
-        }, []);
+
+    const [allDoctors, setAllDoctors] = useState([]);
+
+    useEffect(() => {
+        const fetchDoctors = async () => {
+            try {
+                const res = await fetch("http://localhost:5000/api/doctors");
+                const data = await res.json();
+                setAllDoctors(data);
+            } catch (err) {
+                console.error("Failed to fetch doctors:", err);
+            }
+        };
+        fetchDoctors();
+    }, []);
 
     useEffect(() => {
         fetch(`http://localhost:5000/api/work-schedules/${id}`)
@@ -67,31 +74,27 @@ export default function EditWorkSchedule() {
 
         let hasError = false;
 
-        if (doctorId === "" || Number(doctorId) <= 0) {
-            setDoctorErr("Doctor ID must be greater than 0");
+        if (!doctorId || Number(doctorId) <= 0) {
+            setDoctorErr("Doctor is required");
             hasError = true;
         }
 
-        if (scheduleDay === "") {
+        if (!scheduleDay) {
             setDayErr("Schedule day is required");
             hasError = true;
         }
 
-        if (startTime === "") {
+        if (!startTime) {
             setStartErr("Start time is required");
             hasError = true;
         }
 
-        if (endTime === "") {
+        if (!endTime) {
             setEndErr("End time is required");
             hasError = true;
         }
 
-        if (
-            startTime !== "" &&
-            endTime !== "" &&
-            startTime >= endTime
-        ) {
+        if (startTime && endTime && startTime >= endTime) {
             setEndErr("End time must be after start time");
             hasError = true;
         }
@@ -99,19 +102,22 @@ export default function EditWorkSchedule() {
         if (hasError) return;
 
         try {
-            const res = await fetch(`http://localhost:5000/api/work-schedules/${id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    doctor_id: doctorId,
-                    schedule_day: scheduleDay,
-                    start_time: startTime,
-                    end_time: endTime,
-                    status: status
-                }),
-            });
+            const res = await fetch(
+                `http://localhost:5000/api/work-schedules/${id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        doctor_id: doctorId,
+                        schedule_day: scheduleDay,
+                        start_time: startTime,
+                        end_time: endTime,
+                        status,
+                    }),
+                }
+            );
 
             const data = await res.json();
 
@@ -120,9 +126,14 @@ export default function EditWorkSchedule() {
                 return;
             }
 
-            alert("Work schedule updated successfully!");
-            navigate("/work-schedules");
+            // ✅ CUSTOM ALERT (FIXED)
+            setAlert({
+                show: true,
+                message: "Work schedule updated successfully!",
+                type: "success",
+            });
 
+            setTimeout(() => navigate("/work-schedules"), 1200);
         } catch (err) {
             console.log(err);
             setSignupErr("Server error");
@@ -133,28 +144,42 @@ export default function EditWorkSchedule() {
         <div className="flex justify-center items-center w-full h-screen">
             <div className="w-full max-w-md p-8 rounded-xl">
 
+                {/* ✅ ALERT FIXED */}
+                <CustomAlert
+                    show={alert.show}
+                    message={alert.message}
+                    type={alert.type}
+                    onClose={() =>
+                        setAlert((p) => ({ ...p, show: false }))
+                    }
+                />
+
                 <h1 className="text-[36px] font-bold text-[#0F766E] text-center tracking-widest mb-5">
                     EDIT WORK SCHEDULE
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
 
-                  <div className="flex flex-col">
-            <label className="text-xs font-semibold text-gray-500 mb-1">Assigned Doctor</label>
-            <select
-              value={doctorId}
-              onChange={(e) => setDoctorId(e.target.value)}
-              className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2 outline-none"
-            >
-              <option value="">Select Doctor</option>
-              {allDoctors.map((doc) => (
-                <option key={doc.doctor_id} value={doc.doctor_id}>
-                  Dr. {doc.User?.first_name} {doc.User?.last_name} ({doc.specialization})
-                </option>
-              ))}
-            </select>
-          
-          </div>
+                    <div className="flex flex-col">
+                        <label className="text-xs font-semibold text-gray-500 mb-1">
+                            Assigned Doctor
+                        </label>
+
+                        <select
+                            value={doctorId}
+                            onChange={(e) => setDoctorId(e.target.value)}
+                            className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2 outline-none"
+                        >
+                            <option value="">Select Doctor</option>
+                            {allDoctors.map((doc) => (
+                                <option key={doc.doctor_id} value={doc.doctor_id}>
+                                    Dr. {doc.User?.first_name} {doc.User?.last_name} ({doc.specialization})
+                                </option>
+                            ))}
+                        </select>
+
+                        <p className="text-red-500">{doctorErr}</p>
+                    </div>
 
                     <div className="flex flex-col">
                         <select
@@ -163,7 +188,6 @@ export default function EditWorkSchedule() {
                             className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
                         >
                             <option value="">select day</option>
-
                             {days.map((d, i) => (
                                 <option key={i} value={d}>
                                     {d}
@@ -171,9 +195,7 @@ export default function EditWorkSchedule() {
                             ))}
                         </select>
 
-                        <p className="text-red-500 pl-[4px]">
-                            {dayErr}
-                        </p>
+                        <p className="text-red-500 pl-[4px]">{dayErr}</p>
                     </div>
 
                     <div className="flex flex-col">
@@ -184,9 +206,7 @@ export default function EditWorkSchedule() {
                             className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
                         />
 
-                        <p className="text-red-500 pl-[4px]">
-                            {startErr}
-                        </p>
+                        <p className="text-red-500 pl-[4px]">{startErr}</p>
                     </div>
 
                     <div className="flex flex-col">
@@ -197,9 +217,7 @@ export default function EditWorkSchedule() {
                             className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
                         />
 
-                        <p className="text-red-500 pl-[4px]">
-                            {endErr}
-                        </p>
+                        <p className="text-red-500 pl-[4px]">{endErr}</p>
                     </div>
 
                     <div className="flex flex-col">
@@ -209,14 +227,8 @@ export default function EditWorkSchedule() {
                             className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
                         >
                             <option value="">select status</option>
-
-                            <option value="active">
-                                active
-                            </option>
-
-                            <option value="inactive">
-                                inactive
-                            </option>
+                            <option value="active">active</option>
+                            <option value="inactive">inactive</option>
                         </select>
                     </div>
 
@@ -227,7 +239,6 @@ export default function EditWorkSchedule() {
                     )}
 
                     <div className="flex gap-3 pt-2">
-
                         <button
                             type="button"
                             onClick={() => navigate("/work-schedules")}
@@ -242,7 +253,6 @@ export default function EditWorkSchedule() {
                         >
                             Save
                         </button>
-
                     </div>
 
                 </form>

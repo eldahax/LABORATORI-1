@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import CustomAlert from "../components/CustomAlert";
 
 export default function EditReminder() {
     const { id } = useParams();
@@ -14,10 +15,15 @@ export default function EditReminder() {
     const [errors, setErrors] = useState({});
     const [serverError, setServerError] = useState("");
 
+    const [alert, setAlert] = useState({
+        show: false,
+        message: "",
+        type: "success",
+    });
+
     const formatDateForInput = (date) => {
         if (!date) return "";
         const parsed = new Date(date);
-
         if (isNaN(parsed.getTime())) return "";
 
         const local = new Date(
@@ -39,28 +45,26 @@ export default function EditReminder() {
                         : appointmentsData.data || []
                 );
             })
-            .catch((err) => {
-                console.error(err);
+            .catch(() => {
                 setServerError("Failed to load appointments");
             });
 
         fetch(`http://localhost:5000/api/reminders/${id}`)
             .then((res) => res.json())
             .then((reminderData) => {
-                if (!reminderData) {
+                const reminder = reminderData?.data;
+
+                if (!reminder) {
                     setServerError("Reminder not found");
                     return;
                 }
 
-                const reminder = reminderData.data;
-
                 setAppointmentId(reminder?.appointment_id || "");
                 setMessage(reminder?.message || "");
                 setReminderDate(formatDateForInput(reminder?.reminder_date));
-                setSent(reminder?.sent ? true : false);
+                setSent(!!reminder?.sent);
             })
-            .catch((err) => {
-                console.error(err);
+            .catch(() => {
                 setServerError("Failed to load reminder");
             });
     }, [id]);
@@ -76,40 +80,69 @@ export default function EditReminder() {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!validate()) return;
 
-        fetch(`http://localhost:5000/api/reminders/${id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                appointment_id: Number(appointmentId),
-                message: message,
-                reminder_date: reminderDate,
-                sent: sent,
-            }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (!data || data.error) {
-                    alert(data.message || "Update failed");
-                    return;
+        try {
+            const res = await fetch(
+                `http://localhost:5000/api/reminders/${id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        appointment_id: Number(appointmentId),
+                        message,
+                        reminder_date: reminderDate,
+                        sent,
+                    }),
                 }
+            );
 
-                navigate("/reminders");
-            })
-            .catch((err) => {
-                console.error(err);
-                alert("Server error");
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                setAlert({
+                    show: true,
+                    message: data.message || "Update failed",
+                    type: "error",
+                });
+                return;
+            }
+
+            setAlert({
+                show: true,
+                message: "Reminder updated successfully",
+                type: "success",
             });
+
+            setTimeout(() => {
+                navigate("/reminders");
+            }, 1000);
+        } catch (err) {
+            setAlert({
+                show: true,
+                message: "Server error",
+                type: "error",
+            });
+        }
     };
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-5">
+
+            <CustomAlert
+                show={alert.show}
+                message={alert.message}
+                type={alert.type}
+                onClose={() =>
+                    setAlert({ show: false, message: "", type: "success" })
+                }
+            />
+
             <div className="w-full max-w-2xl bg-white rounded-3xl shadow-lg p-8">
                 <h1 className="text-3xl font-bold text-[#0F766E] mb-2">
                     Edit Reminder
@@ -125,72 +158,48 @@ export default function EditReminder() {
 
                 <form onSubmit={handleSubmit} className="space-y-5">
 
-                    <div>
-                        <label className="text-xs font-semibold text-gray-500">
-                            Appointment
-                        </label>
+                    <select
+                        value={appointmentId}
+                        onChange={(e) => setAppointmentId(e.target.value)}
+                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+                    >
+                        <option value="">Select Appointment</option>
+                        {appointments.map((a) => (
+                            <option
+                                key={a.appointment_id}
+                                value={a.appointment_id}
+                            >
+                                {a.Patient?.User?.first_name}{" "}
+                                {a.Patient?.User?.last_name} → Dr.{" "}
+                                {a.Doctor?.User?.first_name}{" "}
+                                {a.Doctor?.User?.last_name}
+                            </option>
+                        ))}
+                    </select>
 
-                        <select
-                            value={appointmentId}
-                            onChange={(e) => setAppointmentId(e.target.value)}
-                            className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-                        >
-                            <option value="">Select Appointment</option>
+                    <p className="text-red-500 text-xs">
+                        {errors.appointmentId}
+                    </p>
 
-                            {appointments.map((a) => (
-                                <option key={a.appointment_id} value={a.appointment_id}>
-                                    {a.Patient?.User?.first_name}{" "}
-                                    {a.Patient?.User?.last_name} → Dr.{" "}
-                                    {a.Doctor?.User?.first_name}{" "}
-                                    {a.Doctor?.User?.last_name}
-                                </option>
-                            ))}
-                        </select>
+                    <textarea
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+                        rows="4"
+                    />
 
-                        {errors.appointmentId && (
-                            <p className="text-red-500 text-xs mt-1">
-                                {errors.appointmentId}
-                            </p>
-                        )}
-                    </div>
+                    <p className="text-red-500 text-xs">{errors.message}</p>
 
-                    <div>
-                        <label className="text-xs font-semibold text-gray-500">
-                            Message
-                        </label>
+                    <input
+                        type="datetime-local"
+                        value={reminderDate}
+                        onChange={(e) => setReminderDate(e.target.value)}
+                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+                    />
 
-                        <textarea
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-                            rows="4"
-                        />
-
-                        {errors.message && (
-                            <p className="text-red-500 text-xs mt-1">
-                                {errors.message}
-                            </p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label className="text-xs font-semibold text-gray-500">
-                            Reminder Date
-                        </label>
-
-                        <input
-                            type="datetime-local"
-                            value={reminderDate}
-                            onChange={(e) => setReminderDate(e.target.value)}
-                            className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
-                        />
-
-                        {errors.reminderDate && (
-                            <p className="text-red-500 text-xs mt-1">
-                                {errors.reminderDate}
-                            </p>
-                        )}
-                    </div>
+                    <p className="text-red-500 text-xs">
+                        {errors.reminderDate}
+                    </p>
 
                     <div className="flex items-center gap-2">
                         <input

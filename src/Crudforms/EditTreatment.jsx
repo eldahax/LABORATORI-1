@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import CustomAlert from "../components/CustomAlert";
 
 export default function EditTreatment() {
     const { id } = useParams();
@@ -11,13 +12,17 @@ export default function EditTreatment() {
     const [averageDuration, setAverageDuration] = useState("");
     const [departmentName, setDepartmentName] = useState("");
 
-    const [signupErr, setSignupErr] = useState("");
-
     const [nameErr, setNameErr] = useState("");
     const [priceErr, setPriceErr] = useState("");
     const [descriptionErr, setDescriptionErr] = useState("");
     const [durationErr, setDurationErr] = useState("");
     const [departmentErr, setDepartmentErr] = useState("");
+
+    const [alert, setAlert] = useState({
+        show: false,
+        message: "",
+        type: "success",
+    });
 
     const nameRegex = /^[A-Za-z0-9\s]{3,50}$/;
 
@@ -40,7 +45,13 @@ export default function EditTreatment() {
                 setAverageDuration(data.average_duration || "");
                 setDepartmentName(data.Department?.department_name || "");
             })
-            .catch((err) => console.log(err));
+            .catch(() => {
+                setAlert({
+                    show: true,
+                    message: "Failed to load treatment",
+                    type: "error",
+                });
+            });
     }, [id]);
 
     const handleSubmit = async (e) => {
@@ -51,7 +62,6 @@ export default function EditTreatment() {
         setDescriptionErr("");
         setDurationErr("");
         setDepartmentErr("");
-        setSignupErr("");
 
         let hasError = false;
 
@@ -91,8 +101,8 @@ export default function EditTreatment() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     treatment_name: treatmentName,
-                    price: price,
-                    description: description,
+                    price,
+                    description,
                     average_duration: averageDuration,
                     department_name: departmentName
                 }),
@@ -101,108 +111,118 @@ export default function EditTreatment() {
             const data = await res.json();
 
             if (!res.ok) {
-                setSignupErr(data.error || "Update failed");
+                setAlert({
+                    show: true,
+                    message: data.error || "Update failed",
+                    type: "error",
+                });
                 return;
             }
 
-            alert("Treatment updated successfully!");
-            navigate("/Treatments");
+            setAlert({
+                show: true,
+                message: "Treatment updated successfully!",
+                type: "success",
+            });
 
-        } catch (err) {
-            console.log(err);
+            setTimeout(() => {
+                navigate("/Treatments");
+            }, 1000);
+
+        } catch {
+            setAlert({
+                show: true,
+                message: "Server error",
+                type: "error",
+            });
         }
     };
 
     return (
         <div className="flex justify-center items-center w-full h-screen">
+
             <div className="w-full max-w-md p-8 rounded-xl">
 
-                <h1 className="text-[36px] font-bold text-[#0F766E] text-center tracking-widest mb-5">
+                {/* ALERT */}
+                <CustomAlert
+                    show={alert.show}
+                    message={alert.message}
+                    type={alert.type}
+                    onClose={() =>
+                        setAlert((p) => ({ ...p, show: false }))
+                    }
+                />
+
+                <h1 className="text-[36px] font-bold text-[#0F766E] text-center mb-5">
                     EDIT TREATMENT
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
 
-                    <div className="flex flex-col pt-4">
-                        <input
-                            type="text"
-                            placeholder="treatment name"
-                            value={treatmentName}
-                            onChange={(e) => setTreatmentName(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
-                        />
-                        <p className="text-red-500 pl-[4px]">{nameErr}</p>
-                    </div>
+                    <input
+                        type="text"
+                        value={treatmentName}
+                        onChange={(e) => setTreatmentName(e.target.value)}
+                        placeholder="Treatment name"
+                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+                    />
+                    <p className="text-red-500 text-sm">{nameErr}</p>
 
-                    <div className="flex flex-col">
-                        <input
-                            type="number"
-                            placeholder="price"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
-                        />
-                        <p className="text-red-500 pl-[4px]">{priceErr}</p>
-                    </div>
+                    <input
+                        type="number"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        placeholder="Price"
+                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+                    />
+                    <p className="text-red-500 text-sm">{priceErr}</p>
 
-                    <div className="flex flex-col">
-                        <input
-                            type="text"
-                            placeholder="description"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
-                        />
-                        <p className="text-red-500 pl-[4px]">{descriptionErr}</p>
-                    </div>
+                    <input
+                        type="text"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Description"
+                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+                    />
+                    <p className="text-red-500 text-sm">{descriptionErr}</p>
 
-                    <div className="flex flex-col">
-                        <input
-                            type="number"
-                            placeholder="average duration"
-                            value={averageDuration}
-                            onChange={(e) => setAverageDuration(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
-                        />
-                        <p className="text-red-500 pl-[4px]">{durationErr}</p>
-                    </div>
+                    <input
+                        type="number"
+                        value={averageDuration}
+                        onChange={(e) => setAverageDuration(e.target.value)}
+                        placeholder="Average duration"
+                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+                    />
+                    <p className="text-red-500 text-sm">{durationErr}</p>
 
-                    <div className="flex flex-col">
-                        <select
-                            value={departmentName}
-                            onChange={(e) => setDepartmentName(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
-                        >
-                            <option value="">select department</option>
-                            {departments.map((d, i) => (
-                                <option key={i} value={d}>{d}</option>
-                            ))}
-                        </select>
-                        <p className="text-red-500 pl-[4px]">{departmentErr}</p>
-                    </div>
+                    <select
+                        value={departmentName}
+                        onChange={(e) => setDepartmentName(e.target.value)}
+                        className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+                    >
+                        <option value="">Select department</option>
+                        {departments.map((d, i) => (
+                            <option key={i} value={d}>
+                                {d}
+                            </option>
+                        ))}
+                    </select>
+                    <p className="text-red-500 text-sm">{departmentErr}</p>
 
-                    {signupErr && (
-                        <p className="text-red-500 text-center font-semibold">
-                            {signupErr}
-                        </p>
-                    )}
+                    <button
+                        type="submit"
+                        className="w-full bg-[#0F766E] text-white py-2 rounded-lg font-bold"
+                    >
+                        Save
+                    </button>
 
-                    <div className="flex gap-3">
-                        <button
-                            type="button"
-                            onClick={() => navigate("/Staff")}
-                            className="w-1/2 border-[2px] border-gray-300 text-gray-600 py-2 rounded-lg font-bold hover:bg-gray-100"
-                        >
-                            Cancel
-                        </button>
-
-                        <button
-                            type="submit"
-                            className="w-1/2 bg-[#0F766E] text-white font-bold py-2 rounded-lg hover:bg-[#134E4A]"
-                        >
-                            Save
-                        </button>
-                    </div>
+                    <button
+                        type="button"
+                        onClick={() => navigate("/Treatments")}
+                        className="w-full border border-gray-300 text-gray-600 py-2 rounded-lg mt-2"
+                    >
+                        Cancel
+                    </button>
 
                 </form>
             </div>

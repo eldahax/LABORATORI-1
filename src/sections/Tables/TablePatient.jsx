@@ -3,39 +3,112 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../sideBar";
 import TableCard from "./TableCard";
+import CustomAlert from "../../components/CustomAlert";
+
+function ConfirmModal({ show, onConfirm, onCancel }) {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
+        <h2 className="text-lg font-bold mb-2">Confirm Delete</h2>
+
+        <p className="text-gray-600 mb-6">
+          Are you sure you want to delete this patient?
+        </p>
+
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 border rounded-lg"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function PatientTable() {
   const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
+  const [selectedId, setSelectedId] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
   useEffect(() => {
     fetch("http://localhost:5000/api/patients")
       .then((res) => res.json())
       .then((data) => setPatients(data))
-      .catch((err) => console.log(err));
+      .catch(() =>
+        setAlert({
+          show: true,
+          message: "Failed to load patients",
+          type: "error",
+        })
+      );
   }, []);
 
-  const handleDelete = async (patient_id) => {
-    if (!window.confirm("Are you sure?")) return;
+  const openConfirm = (id) => {
+    setSelectedId(id);
+    setConfirmOpen(true);
+  };
+
+  const closeConfirm = () => {
+    setSelectedId(null);
+    setConfirmOpen(false);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedId) return;
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/patients/${patient_id}`,
-        {
-          method: "DELETE",
-        }
+        `http://localhost:5000/api/patients/${selectedId}`,
+        { method: "DELETE" }
       );
 
-      if (res.ok) {
-        setPatients(
-          patients.filter(
-            (patient) => patient.patient_id !== patient_id
-          )
-        );
+      if (!res.ok) {
+        setAlert({
+          show: true,
+          message: "Delete failed",
+          type: "error",
+        });
+        return;
       }
+
+      setPatients((prev) =>
+        prev.filter((p) => p.patient_id !== selectedId)
+      );
+
+      setAlert({
+        show: true,
+        message: "Patient deleted successfully",
+        type: "success",
+      });
+
+      closeConfirm();
     } catch (err) {
-      console.log(err);
+      setAlert({
+        show: true,
+        message: "Server error",
+        type: "error",
+      });
     }
   };
 
@@ -117,34 +190,22 @@ export default function PatientTable() {
                       {patient.patient_id}
                     </td>
 
-                    <td className="py-2">
-                      {patient.User?.first_name}
-                    </td>
-
+                    <td>{patient.User?.first_name}</td>
+                    <td>{patient.User?.last_name}</td>
+                    <td>{patient.date_of_birth}</td>
                     <td>
-                      {patient.User?.last_name}
+                      {
+                        patient.PatientAllergies?.[0]
+                          ?.allergy_name
+                      }
                     </td>
-
-                    <td>
-                      {patient.date_of_birth}
-                    </td>
-
-                    <td>
-                      {patient.PatientAllergies?.[0]?.allergy_name}
-                    </td>
-
-                    <td>
-                      {patient.User?.email}
-                    </td>
-
-                    <td>
-                      {patient.User?.phone_number}
-                    </td>
+                    <td>{patient.User?.email}</td>
+                    <td>{patient.User?.phone_number}</td>
 
                     <td className="flex gap-2">
                       <button
                         onClick={() =>
-                          handleDelete(patient.patient_id)
+                          openConfirm(patient.patient_id)
                         }
                         className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
                       >
@@ -180,6 +241,23 @@ export default function PatientTable() {
           </div>
         </div>
       </div>
+
+   
+      <CustomAlert
+        show={alert.show}
+        message={alert.message}
+        type={alert.type}
+        onClose={() =>
+          setAlert({ show: false, message: "", type: "success" })
+        }
+      />
+
+     
+      <ConfirmModal
+        show={confirmOpen}
+        onCancel={closeConfirm}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

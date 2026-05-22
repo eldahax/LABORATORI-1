@@ -1,135 +1,213 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CustomAlert from "../components/CustomAlert";
 
 export default function AddPatient() {
-    const [name, setName] = useState("");
-    const [lastname, setLastName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [phone, setPhone] = useState("");
-    const [dateOfBirth, setDateOfBirth] = useState("");
-    const [allergy, setAllergy] = useState("");
+    const navigate = useNavigate();
 
-    const [error, setError] = useState("");
+    const [form, setForm] = useState({
+        first_name: "",
+        last_name: "",
+        email: "",
+        password: "",
+        phone_number: "",
+        date_of_birth: "",
+        allergy_name: "",
+    });
+
+    const [alert, setAlert] = useState({
+        show: false,
+        message: "",
+        type: "success",
+    });
 
     const nameRegex = /^[A-Za-z\s]{3,30}$/;
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
     const phoneRegex = /^[0-9]{6,15}$/;
 
+    const handleChange = (e) => {
+        setForm((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value,
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError("");
 
-        if (!nameRegex.test(name)) {
-            setError("Invalid first name");
-            return;
+        if (!nameRegex.test(form.first_name)) {
+            return setAlert({
+                show: true,
+                message: "Invalid first name",
+                type: "error",
+            });
         }
 
-        if (!nameRegex.test(lastname)) {
-            setError("Invalid last name");
-            return;
+        if (!nameRegex.test(form.last_name)) {
+            return setAlert({
+                show: true,
+                message: "Invalid last name",
+                type: "error",
+            });
         }
 
-        if (!emailRegex.test(email)) {
-            setError("Invalid email");
-            return;
+        if (!emailRegex.test(form.email)) {
+            return setAlert({
+                show: true,
+                message: "Invalid email",
+                type: "error",
+            });
         }
 
-        if (!phoneRegex.test(phone)) {
-            setError("Invalid phone number");
-            return;
+        if (!phoneRegex.test(form.phone_number)) {
+            return setAlert({
+                show: true,
+                message: "Invalid phone number",
+                type: "error",
+            });
         }
 
-        if (password.length < 6) {
-            setError("Password must be at least 6 characters");
-            return;
+        if (form.password.length < 6) {
+            return setAlert({
+                show: true,
+                message: "Password must be at least 6 characters",
+                type: "error",
+            });
         }
 
-        if (!dateOfBirth) {
-            setError("Date of birth is required");
-            return;
+        if (!form.date_of_birth) {
+            return setAlert({
+                show: true,
+                message: "Date of birth is required",
+                type: "error",
+            });
         }
 
         try {
-            const res = await fetch("http://localhost:5000/api/patients/add", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    first_name: name,
-                    last_name: lastname,
-                    email,
-                    phone_number: phone,
-                    password,
-                    date_of_birth: dateOfBirth,
-                    allergy_name: allergy || null
-                }),
-            });
+            const res = await fetch(
+                "http://localhost:5000/api/patients/add",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(form),
+                }
+            );
 
-            const data = await res.json();
+            const data = await res.json().catch(() => ({}));
 
             if (!res.ok) {
-                setError(data.error || "Something went wrong");
-                return;
+                return setAlert({
+                    show: true,
+                    message: data.error || "Something went wrong",
+                    type: "error",
+                });
             }
 
-            setName("");
-            setLastName("");
-            setEmail("");
-            setPassword("");
-            setPhone("");
-            setDateOfBirth("");
-            setAllergy("");
+            setAlert({
+                show: true,
+                message: "Patient created successfully",
+                type: "success",
+            });
 
+            setForm({
+                first_name: "",
+                last_name: "",
+                email: "",
+                password: "",
+                phone_number: "",
+                date_of_birth: "",
+                allergy_name: "",
+            });
+
+            setTimeout(() => {
+                navigate("/patients");
+            }, 1200);
         } catch (err) {
-            console.log(err);
-            setError("Server error");
+            setAlert({
+                show: true,
+                message: "Server error",
+                type: "error",
+            });
         }
     };
 
     return (
         <div className="flex justify-center items-center w-full min-h-screen">
-            <div className="w-full max-w-md p-8 rounded-xl">
 
+            <CustomAlert
+                show={alert.show}
+                message={alert.message}
+                type={alert.type}
+                onClose={() =>
+                    setAlert({ show: false, message: "", type: "success" })
+                }
+            />
+
+            <div className="w-full max-w-md p-8 rounded-xl">
                 <h1 className="text-[30px] font-bold text-[#0F766E] text-center mb-5">
                     ADD PATIENT
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
 
-                    <input placeholder="First name" value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full border p-2 rounded" />
+                    <input
+                        name="first_name"
+                        placeholder="First name"
+                        value={form.first_name}
+                        onChange={handleChange}
+                        className="w-full border p-2 rounded"
+                    />
 
-                    <input placeholder="Last name" value={lastname}
-                        onChange={(e) => setLastName(e.target.value)}
-                        className="w-full border p-2 rounded" />
+                    <input
+                        name="last_name"
+                        placeholder="Last name"
+                        value={form.last_name}
+                        onChange={handleChange}
+                        className="w-full border p-2 rounded"
+                    />
 
-                    <input placeholder="Email" value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full border p-2 rounded" />
+                    <input
+                        name="email"
+                        placeholder="Email"
+                        value={form.email}
+                        onChange={handleChange}
+                        className="w-full border p-2 rounded"
+                    />
 
-                    <input placeholder="Phone number" value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="w-full border p-2 rounded" />
+                    <input
+                        name="phone_number"
+                        placeholder="Phone number"
+                        value={form.phone_number}
+                        onChange={handleChange}
+                        className="w-full border p-2 rounded"
+                    />
 
-                    <input type="password" placeholder="Password" value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full border p-2 rounded" />
+                    <input
+                        name="password"
+                        type="password"
+                        placeholder="Password"
+                        value={form.password}
+                        onChange={handleChange}
+                        className="w-full border p-2 rounded"
+                    />
 
-                    <input type="date" value={dateOfBirth}
-                        onChange={(e) => setDateOfBirth(e.target.value)}
-                        className="w-full border p-2 rounded" />
+                    <input
+                        type="date"
+                        name="date_of_birth"
+                        value={form.date_of_birth}
+                        onChange={handleChange}
+                        className="w-full border p-2 rounded"
+                    />
 
-                    <input placeholder="allergy"
-                        value={allergy}
-                        onChange={(e) => setAllergy(e.target.value)}
-                        className="w-full border p-2 rounded" />
-
-                    {error && (
-                        <p className="text-red-500 text-center">{error}</p>
-                    )}
+                    <input
+                        name="allergy_name"
+                        placeholder="Allergy"
+                        value={form.allergy_name}
+                        onChange={handleChange}
+                        className="w-full border p-2 rounded"
+                    />
 
                     <button
                         type="submit"
@@ -137,7 +215,6 @@ export default function AddPatient() {
                     >
                         Create Patient
                     </button>
-
                 </form>
             </div>
         </div>
