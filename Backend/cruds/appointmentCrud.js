@@ -29,7 +29,7 @@ const create = async (
       transaction: t,
     });
 
-    
+
 
     if (!userExist || !userExist.Patient)
       throw new Error("Patient profile not found");
@@ -294,7 +294,40 @@ const updateAppointment = async (appointment_id, updateData) => {
       { transaction: t },
     );
 
-   
+    if (
+      status &&
+      status.toLowerCase() === "confirmed"
+    ) {
+
+      const existingReminder = await Reminder.findOne({
+        where: {
+          appointment_id: appointment.appointment_id,
+        },
+        transaction: t,
+      });
+
+      if (!existingReminder) {
+
+        const reminderDate = new Date(
+          newStart.getTime() - 60 * 60 * 1000
+        );
+
+        await Reminder.create(
+          {
+            appointment_id: appointment.appointment_id,
+
+            reminder_date: reminderDate,
+
+            message: `Reminder: Appointment for ${finalDescription} at ${newStart.toLocaleString()}`,
+
+            sent: false,
+          },
+          { transaction: t }
+        );
+      }
+    }
+
+
 
     await t.commit();
     return appointment;
