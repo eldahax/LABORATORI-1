@@ -1,31 +1,38 @@
-import { useState , useEffect} from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import CustomAlert from "../components/CustomAlert";
 
 export default function AddRoom() {
-
     const navigate = useNavigate();
 
     const [roomName, setRoomName] = useState("");
     const [chairNumber, setChairNumber] = useState("");
-    const [departmentName, setDepartmentName] = useState("");
+    const [departmentId, setDepartmentId] = useState("");
 
-    const [signupErr, setSignupErr] = useState("");
+    const [departments, setDep] = useState([]);
 
     const [roomErr, setRoomErr] = useState("");
     const [chairErr, setChairErr] = useState("");
     const [departmentErr, setDepartmentErr] = useState("");
 
-    const nameRegex = /^[A-Za-z0-9\s]{3,50}$/;
+    const [alert, setAlert] = useState({
+        show:false,
+        message:"",
+        type:"success"
+    });
 
-   const [departments,setDep]=useState([]);
-    useEffect(()=>{
-        const fetchD=async()=>{
-        const res=await fetch("http://localhost:5000/api/departments");
-        const data= await res.json();
-        setDep(data)
-        }
-        fetchD();
-    },[])
+    useEffect(() => {
+        fetch("http://localhost:5000/api/departments")
+            .then(res => res.json())
+            .then(data => setDep(data))
+            .catch(() =>
+                setAlert({
+                    show:true,
+                    message:"Failed loading departments",
+                    type:"error"
+                })
+            );
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -33,126 +40,144 @@ export default function AddRoom() {
         setRoomErr("");
         setChairErr("");
         setDepartmentErr("");
-        setSignupErr("");
 
-        let hasError = false;
+        let hasError=false;
 
-        if (roomName.trim() === "") {
-            setRoomErr("Room name is required");
-            hasError = true;
-        } else if (!nameRegex.test(roomName)) {
-            setRoomErr("Invalid room name");
-            hasError = true;
+        if(!roomName.trim()){
+            setRoomErr("Room name required");
+            hasError=true;
         }
 
-        if (chairNumber === "" || Number(chairNumber) <= 0) {
-            setChairErr("Chair number must be greater than 0");
-            hasError = true;
+        if(!chairNumber || Number(chairNumber)<=0){
+            setChairErr("Chair number >0");
+            hasError=true;
         }
 
-        if (departmentName === "") {
-            setDepartmentErr("Department is required");
-            hasError = true;
+        if(!departmentId){
+            setDepartmentErr("Department required");
+            hasError=true;
         }
 
-        if (hasError) return;
+        if(hasError) return;
 
-        try {
-            const res = await fetch("http://localhost:5000/api/rooms", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    room_name: roomName,
-                    chair_number: chairNumber,
-                    department_name: departmentName
-                })
-            });
+        try{
 
-            const data = await res.json();
+            const res=await fetch(
+                "http://localhost:5000/api/rooms",
+                {
+                    method:"POST",
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+                    body:JSON.stringify({
+                        room_name:roomName,
+                        chair_number:Number(chairNumber),
+                        department_id:Number(departmentId)
+                    })
+                }
+            );
 
-            if (!res.ok) {
-                setSignupErr(data.error);
+            const data=await res.json();
+
+            if(!res.ok){
+
+                setAlert({
+                    show:true,
+                    message:data.error || "Failed adding room",
+                    type:"error"
+                });
+
                 return;
             }
 
-            alert("Room created successfully!");
-            navigate("/Rooms");
+            setAlert({
+                show:true,
+                message:"Room added successfully",
+                type:"success"
+            });
 
-            setRoomName("");
-            setChairNumber("");
-            setDepartmentName("");
-        } catch (err) {
-            console.log(err);
-            setSignupErr("Server error");
+            setTimeout(()=>{
+                navigate("/rooms")
+            },1000)
+
+        }catch{
+
+            setAlert({
+                show:true,
+                message:"Server error",
+                type:"error"
+            });
         }
     };
 
     return (
         <div className="flex justify-center items-center w-full h-screen">
-            <div className="w-full max-w-md p-8 rounded-xl">
 
-                <h1 className="text-[36px] font-bold text-[#0F766E] text-center tracking-widest mb-5">
-                    ADD ROOM
-                </h1>
+            <form
+                onSubmit={handleSubmit}
+                className="w-full max-w-md space-y-4"
+            >
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <CustomAlert
+                    show={alert.show}
+                    message={alert.message}
+                    type={alert.type}
+                    onClose={()=>
+                        setAlert(p=>({
+                            ...p,
+                            show:false
+                        }))
+                    }
+                />
 
-                    <div className="flex flex-col pt-4">
-                        <input
-                            type="text"
-                            placeholder="room name"
-                            value={roomName}
-                            onChange={(e) => setRoomName(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A]"
-                        />
-                        <p className="text-red-500 pl-[4px] text-sm">{roomErr}</p>
-                    </div>
+                <input
+                    placeholder="Room name"
+                    value={roomName}
+                    onChange={(e)=>setRoomName(e.target.value)}
+                    className="w-full border p-2 rounded"
+                />
 
-                    <div className="flex flex-col">
-                        <input
-                            type="number"
-                            placeholder="chair number"
-                            value={chairNumber}
-                            onChange={(e) => setChairNumber(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A]"
-                        />
-                        <p className="text-red-500 pl-[4px] text-sm">{chairErr}</p>
-                    </div>
+                <p className="text-red-500">{roomErr}</p>
 
-                    <div className="flex flex-col">
-                        <select
-                            value={departmentName}
-                            onChange={(e) => setDepartmentName(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A]"
+                <input
+                    type="number"
+                    placeholder="Chair number"
+                    value={chairNumber}
+                    onChange={(e)=>setChairNumber(e.target.value)}
+                    className="w-full border p-2 rounded"
+                />
+
+                <p className="text-red-500">{chairErr}</p>
+
+                <select
+                    value={departmentId}
+                    onChange={(e)=>setDepartmentId(e.target.value)}
+                    className="w-full border p-2 rounded"
+                >
+                    <option value="">
+                        Select department
+                    </option>
+
+                    {departments.map(d=>(
+                        <option
+                            key={d.department_id}
+                            value={d.department_id}
                         >
-                            <option value="">select department</option>
+                            {d.department_name}
+                        </option>
+                    ))}
 
-                            {departments.map((d) => (
-                                <option key={d.department_id} value={d.department_name}>
-                                    {d.department_name}
-                                </option>
-                            ))}
-                        </select>
-                        <p className="text-red-500 pl-[4px] text-sm">{departmentErr}</p>
-                    </div>
+                </select>
 
-                    {signupErr && (
-                        <p className="text-red-500 text-center font-semibold">
-                            {signupErr}
-                        </p>
-                    )}
+                <p className="text-red-500">
+                    {departmentErr}
+                </p>
 
-                    <button
-                        type="submit"
-                        className="w-full bg-[#0F766E] text-white font-bold py-2 rounded-lg cursor-pointer hover:bg-[#134E4A] transition-colors"
-                    >
-                        Add Room
-                    </button>
+                <button className="w-full bg-teal-600 text-white p-2 rounded">
+                    Add Room
+                </button>
 
-                </form>
-            </div>
+            </form>
         </div>
     );
 }

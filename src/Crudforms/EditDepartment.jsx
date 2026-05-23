@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import CustomAlert from "../components/CustomAlert";
 
 export default function EditDepartment() {
   const { id } = useParams();
@@ -8,8 +9,13 @@ export default function EditDepartment() {
   const [department_name, setDepartmentName] = useState("");
   const [nameErr, setNameErr] = useState("");
 
-  const nameRegex = /^[A-Za-z\s]{3,50}$/;
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
+  const nameRegex = /^[A-Za-z\s]{3,50}$/;
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/departments/${id}`)
@@ -17,7 +23,13 @@ export default function EditDepartment() {
       .then((data) => {
         setDepartmentName(data.department_name);
       })
-      .catch(() => {});
+      .catch(() => {
+        setAlert({
+          show: true,
+          message: "Failed to load department",
+          type: "error",
+        });
+      });
   }, [id]);
 
   const handleSubmit = async (e) => {
@@ -37,19 +49,66 @@ export default function EditDepartment() {
 
     if (hasError) return;
 
-    await fetch(`http://localhost:5000/api/departments/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        department_name,
-      }),
-    });
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/departments/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            department_name,
+          }),
+        }
+      );
 
-    navigate("/departments");
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setAlert({
+          show: true,
+          message: data.error || "Update failed",
+          type: "error",
+        });
+
+        return;
+      }
+
+      setAlert({
+        show: true,
+        message: "Department updated successfully",
+        type: "success",
+      });
+
+      setTimeout(() => {
+        navigate("/departments");
+      }, 1000);
+
+    } catch {
+      setAlert({
+        show: true,
+        message: "Server error",
+        type: "error",
+      });
+    }
   };
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
+
+      <CustomAlert
+        show={alert.show}
+        message={alert.message}
+        type={alert.type}
+        onClose={() =>
+          setAlert((prev) => ({
+            ...prev,
+            show: false,
+          }))
+        }
+      />
+
       <form
         onSubmit={handleSubmit}
         className="w-[450px] bg-white p-8 rounded-2xl shadow-lg space-y-4"
@@ -61,11 +120,16 @@ export default function EditDepartment() {
         <div>
           <input
             value={department_name}
-            onChange={(e) => setDepartmentName(e.target.value)}
+            onChange={(e) =>
+              setDepartmentName(e.target.value)
+            }
             placeholder="Department Name"
             className="p-3 border w-full rounded-lg"
           />
-          <p className="text-red-500 text-sm">{nameErr}</p>
+
+          <p className="text-red-500 text-sm">
+            {nameErr}
+          </p>
         </div>
 
         <button className="w-full bg-[#0F766E] text-white py-3 rounded-lg font-semibold">

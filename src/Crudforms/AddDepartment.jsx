@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import CustomAlert from "../components/CustomAlert";
 
 export default function CreateDepartment() {
   const navigate = useNavigate();
@@ -9,15 +10,27 @@ export default function CreateDepartment() {
 
   const [nameErr, setNameErr] = useState("");
   const [descErr, setDescErr] = useState("");
-    const [signupErr, setSignupErr] = useState("");
+  const [signupErr, setSignupErr] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   const nameRegex = /^[A-Za-z\s]{3,50}$/;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (loading) return;
+    setLoading(true);
+
     setNameErr("");
     setDescErr("");
+    setSignupErr("");
 
     let hasError = false;
 
@@ -37,38 +50,75 @@ export default function CreateDepartment() {
       hasError = true;
     }
 
-    if (hasError) return;
+    if (hasError) {
+      setLoading(false);
+      return;
+    }
+
     try {
-   const res= await fetch("http://localhost:5000/api/departments", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        department_name
-      }),
-    });
-    
+      const res = await fetch(
+        "http://localhost:5000/api/departments",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            department_name,
+            description,
+          }),
+        }
+      );
+
       const data = await res.json();
 
       if (!res.ok) {
-        setSignupErr(data.error || "Something went wrong");
+        setAlert({
+          show: true,
+          message: data.error || "Failed to create department",
+          type: "error",
+        });
+
+        setLoading(false);
         return;
       }
 
-      alert("department created successfully!");
+      setAlert({
+        show: true,
+        message: "Department created successfully!",
+        type: "success",
+      });
 
       setDepartmentName("");
       setDescription("");
-    } catch (err) {
-      console.error("Submission Error:", err);
-      setSignupErr("Failed to connect to the server.");
-    }
-    setSignupErr("");
 
-    navigate("/departments");
+      setLoading(false);
+
+      setTimeout(() => {
+        navigate("/departments");
+      }, 1000);
+
+    } catch {
+      setAlert({
+        show: true,
+        message: "Server error",
+        type: "error",
+      });
+
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
+
+      <CustomAlert
+        show={alert.show}
+        message={alert.message}
+        type={alert.type}
+        onClose={() =>
+          setAlert((p) => ({ ...p, show: false }))
+        }
+      />
+
       <form
         onSubmit={handleSubmit}
         className="w-[450px] bg-white rounded-2xl p-6 space-y-4"
@@ -77,39 +127,35 @@ export default function CreateDepartment() {
           Create Department
         </h1>
 
-      
         <div>
-          <label className="text-sm font-medium text-gray-700">
-            Department Name
-          </label>
+          <label>Department Name</label>
+
           <input
             value={department_name}
             onChange={(e) => setDepartmentName(e.target.value)}
-            placeholder="Department Name"
-            className="p-3 border w-full rounded-lg focus:ring-2 focus:ring-[#0F766E] outline-none"
+            className="p-3 border w-full rounded-lg"
           />
-          <p className="text-red-500 text-sm h-5">{nameErr}</p>
+
+          <p className="text-red-500">{nameErr}</p>
         </div>
 
-       
         <div>
-          <label className="text-sm font-medium text-gray-700">
-            Description
-          </label>
+          <label>Description</label>
+
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Description"
-            className="p-3 border w-full rounded-lg h-24 focus:ring-2 focus:ring-[#0F766E] outline-none"
+            className="p-3 border w-full rounded-lg h-24"
           />
-          <p className="text-red-500 text-sm h-5">{descErr}</p>
+
+          <p className="text-red-500">{descErr}</p>
         </div>
 
         <button
-          type="submit"
-          className="w-full bg-[#0F766E] text-white py-3 rounded-lg font-semibold hover:bg-[#134E4A]"
+          disabled={loading}
+          className="w-full bg-[#0F766E] text-white py-3 rounded-lg"
         >
-          Create Department
+          {loading ? "CREATING..." : "Create Department"}
         </button>
       </form>
     </div>

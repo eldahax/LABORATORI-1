@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import CustomAlert from "../components/CustomAlert";
 
 export default function EditRoom() {
     const { id } = useParams();
@@ -7,163 +8,167 @@ export default function EditRoom() {
 
     const [roomName, setRoomName] = useState("");
     const [chairNumber, setChairNumber] = useState("");
-    const [department, setDepartment] = useState("");
+    const [departmentId, setDepartmentId] = useState("");
 
-    const [signupErr, setSignupErr] = useState("");
+    const [departments, setDepartments] = useState([]);
 
-    const [roomErr, setRoomErr] = useState("");
-    const [chairErr, setChairErr] = useState("");
-    const [departmentErr, setDepartmentErr] = useState("");
+    const [error, setError] = useState("");
 
-    const nameRegex = /^[A-Za-z0-9\s]{3,50}$/;
-
-    const departments = [
-        "General Dentistry",
-        "Orthodontics",
-        "Endodontics",
-        "Prosthodontics",
-        "Cosmetic Dentistry",
-        "Pediatric Dentistry"
-    ];
+    const [alert, setAlert] = useState({
+        show: false,
+        message: "",
+        type: "success"
+    });
 
     useEffect(() => {
         fetch(`http://localhost:5000/api/rooms/${id}`)
-            .then((res) => res.json())
-            .then((data) => {
-                setRoomName(data.room_name || "");
-                setChairNumber(data.chair_number || "");
-                setDepartment(data.Department?.department_name || "");
+            .then(res => res.json())
+            .then(data => {
+                setRoomName(data.room_name);
+                setChairNumber(data.chair_number);
+                setDepartmentId(data.department_id);
             })
-            .catch((err) => console.log(err));
+            .catch(() => {
+                setAlert({
+                    show: true,
+                    message: "Failed to load room",
+                    type: "error"
+                });
+            });
     }, [id]);
+
+    useEffect(() => {
+        fetch("http://localhost:5000/api/departments")
+            .then(res => res.json())
+            .then(data => setDepartments(data))
+            .catch(() => {
+                setAlert({
+                    show: true,
+                    message: "Failed to load departments",
+                    type: "error"
+                });
+            });
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        setRoomErr("");
-        setChairErr("");
-        setDepartmentErr("");
-        setSignupErr("");
-
-        let hasError = false;
-
-        if (roomName.trim() === "") {
-            setRoomErr("Room name is required");
-            hasError = true;
-        } else if (!nameRegex.test(roomName)) {
-            setRoomErr("Invalid room name");
-            hasError = true;
-        }
-
-        if (chairNumber === "" || Number(chairNumber) <= 0) {
-            setChairErr("Chair number must be greater than 0");
-            hasError = true;
-        }
-
-        if (department === "") {
-            setDepartmentErr("Department is required");
-            hasError = true;
-        }
-
-        if (hasError) return;
-
         try {
-            const res = await fetch(`http://localhost:5000/api/rooms/${id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    room_name: roomName,
-                    chair_number: chairNumber,
-                    department_name: department
-                }),
-            });
-
-            const data = await res.json();
+            const res = await fetch(
+                `http://localhost:5000/api/rooms/${id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        room_name: roomName,
+                        chair_number: Number(chairNumber),
+                        department_id: Number(departmentId)
+                    }),
+                }
+            );
 
             if (!res.ok) {
-                setSignupErr(data.error || "Update failed");
+                const data = await res.json();
+
+                setError(data.error);
+
+                setAlert({
+                    show: true,
+                    message: data.error || "Update failed",
+                    type: "error"
+                });
+
                 return;
             }
 
-            alert("Room updated successfully!");
-            navigate("/rooms");
+            setAlert({
+                show: true,
+                message: "Room updated successfully",
+                type: "success"
+            });
 
-        } catch (err) {
-            console.log(err);
+            setTimeout(() => {
+                navigate("/rooms");
+            }, 1000);
+
+        } catch {
+            setError("Server error");
+
+            setAlert({
+                show: true,
+                message: "Server error",
+                type: "error"
+            });
         }
     };
 
     return (
-        <div className="flex justify-center items-center w-full h-screen">
-            <div className="w-full max-w-md p-8 rounded-xl">
+        <div className="flex justify-center items-center h-screen">
 
-                <h1 className="text-[36px] font-bold text-[#0F766E] text-center tracking-widest mb-5">
-                    EDIT ROOM
-                </h1>
+            <CustomAlert
+                show={alert.show}
+                message={alert.message}
+                type={alert.type}
+                onClose={() =>
+                    setAlert(prev => ({
+                        ...prev,
+                        show: false
+                    }))
+                }
+            />
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+            <form
+                onSubmit={handleSubmit}
+                className="space-y-4 w-96"
+            >
 
-                    <div className="flex flex-col pt-4">
-                        <input
-                            type="text"
-                            placeholder="room name"
-                            value={roomName}
-                            onChange={(e) => setRoomName(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
-                        />
-                        <p className="text-red-500 pl-[4px]">{roomErr}</p>
-                    </div>
+                <input
+                    value={roomName}
+                    onChange={(e) =>
+                        setRoomName(e.target.value)
+                    }
+                    className="w-full border p-2"
+                />
 
-                    <div className="flex flex-col">
-                        <input
-                            type="number"
-                            placeholder="chair number"
-                            value={chairNumber}
-                            onChange={(e) => setChairNumber(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
-                        />
-                        <p className="text-red-500 pl-[4px]">{chairErr}</p>
-                    </div>
+                <input
+                    type="number"
+                    value={chairNumber}
+                    onChange={(e) =>
+                        setChairNumber(e.target.value)
+                    }
+                    className="w-full border p-2"
+                />
 
-                    <div className="flex flex-col">
-                        <select
-                            value={department}
-                            onChange={(e) => setDepartment(e.target.value)}
-                            className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
+                <select
+                    value={departmentId}
+                    onChange={(e) =>
+                        setDepartmentId(e.target.value)
+                    }
+                    className="w-full border p-2"
+                >
+                    {departments.map(d => (
+                        <option
+                            key={d.department_id}
+                            value={d.department_id}
                         >
-                            <option value="">select department</option>
-                            {departments.map((d, i) => (
-                                <option key={i} value={d}>{d}</option>
-                            ))}
-                        </select>
-                        <p className="text-red-500 pl-[4px]">{departmentErr}</p>
-                    </div>
+                            {d.department_name}
+                        </option>
+                    ))}
+                </select>
 
-                    {signupErr && (
-                        <p className="text-red-500 text-center font-semibold">
-                            {signupErr}
-                        </p>
-                    )}
+                <button className="bg-teal-600 text-white w-full p-2">
+                    Save
+                </button>
 
-                    <div className="flex gap-3 pt-2">
-                        <button
-                            type="button"
-                            onClick={() => navigate("/rooms")}
-                            className="w-1/2 border-[2px] border-gray-300 text-gray-600 py-2 rounded-lg font-bold hover:bg-gray-100"
-                        >
-                            Cancel
-                        </button>
+                {error && (
+                    <p className="text-red-500">
+                        {error}
+                    </p>
+                )}
 
-                        <button
-                            type="submit"
-                            className="w-1/2 bg-[#0F766E] text-white font-bold py-2 rounded-lg hover:bg-[#134E4A]"
-                        >
-                            Save
-                        </button>
-                    </div>
-
-                </form>
-            </div>
+            </form>
         </div>
     );
 }
