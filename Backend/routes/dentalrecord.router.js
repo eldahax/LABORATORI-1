@@ -3,9 +3,10 @@ const router = express.Router();
 
 const dentalController = require("../controllers/dentalrecordController");
 
-router.get("/", dentalController.getAll);
-router.get("/:id", dentalController.getById);
-router.put("/:id", dentalController.update);
-router.delete("/:id", dentalController.remove);
+const {protect,authorize,} = require("../auth/authMiddleWear");
+router.get( "/",protect,authorize("admin", "doctor", "patient"),dentalController.getAll);
+router.get("/:id",protect,  authorize("admin", "doctor", "patient"),dentalController.getById);
+router.put("/:id",protect,authorize("admin", "doctor"),dentalController.update);
+router.delete("/:id",protect,authorize("admin", "doctor"),dentalController.remove);
 
 module.exports = router;

@@ -28,29 +28,36 @@ export default function EditDentalRecord() {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/dental-history/${id}`
+          `http://localhost:5000/api/dental-history/${id}`,
+          {
+            credentials: "include",
+          }
         );
 
-        const data = await res.json();
+        const text = await res.text();
+        const data = JSON.parse(text);
 
-        const record = data?.data || data;
+        const record = data?.data ?? data;
 
         if (!record) return;
 
         setPatientName(
-          `${record.Patient?.User?.first_name || ""} ${record.Patient?.User?.last_name || ""
+          `${record.Patient?.User?.first_name || ""} ${
+            record.Patient?.User?.last_name || ""
           }`
         );
 
         setDoctorName(
-          `${record.Doctor?.User?.first_name || ""} ${record.Doctor?.User?.last_name || ""
+          `${record.Doctor?.User?.first_name || ""} ${
+            record.Doctor?.User?.last_name || ""
           }`
         );
 
         setTooth(record.tooth || "");
         setCondition(record.dental_condition || "");
         setNotes(record.notes || "");
-      } catch {
+      } catch (err) {
+        console.log(err);
         setAlert({
           show: true,
           message: "Failed to load record",
@@ -86,7 +93,6 @@ export default function EditDentalRecord() {
     e.preventDefault();
 
     if (loading) return;
-
     if (!validate()) return;
 
     setLoading(true);
@@ -96,6 +102,7 @@ export default function EditDentalRecord() {
         `http://localhost:5000/api/dental-history/${id}`,
         {
           method: "PUT",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -131,7 +138,8 @@ export default function EditDentalRecord() {
       setTimeout(() => {
         navigate("/dental-history");
       }, 1200);
-    } catch {
+    } catch (err) {
+      console.log(err);
       setAlert({
         show: true,
         message: "Server error",
@@ -144,7 +152,6 @@ export default function EditDentalRecord() {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
-
       <CustomAlert
         show={alert.show}
         message={alert.message}
@@ -158,15 +165,11 @@ export default function EditDentalRecord() {
       />
 
       <div className="w-full max-w-md p-8">
-
         <h1 className="text-[36px] font-bold text-[#0F766E] text-center mb-5">
           EDIT DENTAL RECORD
         </h1>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4"
-        >
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             value={patientName}
             readOnly
@@ -189,10 +192,7 @@ export default function EditDentalRecord() {
               placeholder="Tooth"
               className="w-full border px-3 py-2 rounded-lg"
             />
-
-            <p className="text-red-500 text-sm">
-              {toothErr}
-            </p>
+            <p className="text-red-500 text-sm">{toothErr}</p>
           </div>
 
           <div>
@@ -205,10 +205,7 @@ export default function EditDentalRecord() {
               placeholder="Condition"
               className="w-full border px-3 py-2 rounded-lg"
             />
-
-            <p className="text-red-500 text-sm">
-              {conditionErr}
-            </p>
+            <p className="text-red-500 text-sm">{conditionErr}</p>
           </div>
 
           <textarea
@@ -219,17 +216,13 @@ export default function EditDentalRecord() {
           />
 
           {submitErr && (
-            <p className="text-red-500 text-sm">
-              {submitErr}
-            </p>
+            <p className="text-red-500 text-sm">{submitErr}</p>
           )}
 
           <div className="flex gap-4">
             <button
               type="button"
-              onClick={() =>
-                navigate("/dental-history")
-              }
+              onClick={() => navigate("/dental-history")}
               className="w-1/2 border py-2 rounded-lg"
             >
               Cancel
@@ -248,3 +241,4 @@ export default function EditDentalRecord() {
     </div>
   );
 }
+

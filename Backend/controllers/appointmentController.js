@@ -37,7 +37,7 @@ const deleteApp=async(req,res)=>{
 
 const getAll=async(req,res)=>{
     try{
-   const all=await crud.getAllApp();
+   const all = await crud.getAllApp(req.user);
    res.json(all)
     }
     catch(err){

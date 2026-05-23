@@ -62,27 +62,27 @@ export default function DentalTable() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch(
-      "http://localhost:5000/api/dental-history"
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        setRecords(
-          Array.isArray(data)
-            ? data
-            : data?.data || []
-        );
-      })
-      .catch(() =>
-        setAlert({
-          show: true,
-          message:
-            "Failed to load dental records",
-          type: "error",
-        })
-      );
-  }, []);
+ useEffect(() => {
+  fetch("http://localhost:5000/api/dental-history", {
+    credentials: "include",
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      const records = Array.isArray(data)
+        ? data
+        : data?.data || [];
+
+      setRecords(records);
+    })
+    .catch((err) => {
+      console.log(err);
+      setAlert({
+        show: true,
+        message: "Failed to load dental records",
+        type: "error",
+      });
+    });
+}, []);
 
   const handleDelete = async () => {
     try {
