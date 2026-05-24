@@ -8,12 +8,12 @@ class Review extends Model {
 
 module.exports = (sequelize) => {
   Review.init({
-    Id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'reviews_id' },
-    PatientId: { type: DataTypes.INTEGER, allowNull: false, field: 'patient_id' },
-    TreatmentId: { type: DataTypes.INTEGER, allowNull: false, field: 'treatment_id' },
-    Rating: { type: DataTypes.INTEGER, allowNull: false, field: 'rating' },
-    Description: { type: DataTypes.STRING(255), allowNull: false, field: 'description' },
-    CreatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, field: 'created_at' },
+    reviews_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'reviews_id' },
+    patient_id: { type: DataTypes.INTEGER, allowNull: false, field: 'patient_id' },
+    treatment_id: { type: DataTypes.INTEGER, allowNull: false, field: 'treatment_id' },
+    rating: { type: DataTypes.INTEGER, allowNull: false, field: 'rating' },
+    description: { type: DataTypes.STRING(255), allowNull: false, field: 'description' },
+    created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, field: 'created_at' },
   }, { sequelize, tableName: 'reviews', timestamps: false });
   return Review;
 };

@@ -26,6 +26,9 @@ app.use("/api/doctors", docRouter);
 const tretRouter = require("./routes/treatment.router");
 app.use("/api/treatments", tretRouter);
 
+const reviewRouter = require("./routes/review.router");
+app.use("/api/reviews", reviewRouter);
+
 const offerRouter = require("./routes/offer.router");
 app.use("/api/offers", offerRouter);
 
@@ -53,6 +56,7 @@ app.use("/api/dental-history", DentalRecordRouter);
 
 const reminderRouter = require("./routes/reminder.router");
 app.use("/api/reminders", reminderRouter);
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
