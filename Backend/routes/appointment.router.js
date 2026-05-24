@@ -7,7 +7,7 @@ router.post( "/", protect, authorize("patient", "admin"),appointmentController.c
 router.get("/",protect,appointmentController.getAll);
 router.get( "/:id", protect, appointmentController.getById);
 router.put( "/:id", protect, appointmentController.update);
-router.delete("/:id",protect,appointmentController.deleteApp);
+router.delete("/:id", authorize("patient", "admin"),protect,appointmentController.deleteApp);
 
 module.exports = router;
 

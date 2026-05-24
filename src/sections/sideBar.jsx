@@ -36,7 +36,7 @@ const Sidebar = () => {
           <Link to="/Profile" className="block text-center font-bold p-3 rounded-lg hover:bg-white hover:text-black">
             Personal Information
           </Link>
-          
+
 
 
           {roles.includes("admin") && (
@@ -50,7 +50,7 @@ const Sidebar = () => {
               <Link to="/Patients" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Patients
               </Link>
-          
+
 
               <Link to="/inventory" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Inventory
@@ -61,10 +61,10 @@ const Sidebar = () => {
                 Rooms and Departments
               </Link>
 
-             
-          <Link to="/contacts" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-            Contact Messagees
-          </Link>
+
+              <Link to="/contacts" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                Contact Messagees
+              </Link>
 
 
 
@@ -74,28 +74,42 @@ const Sidebar = () => {
 
           {(roles.includes("doctor") || roles.includes("admin")) && (
             <>
-              
-<Link to="/appointments" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-              Appointments</Link>
+              <>
+                <Link to="/reminders" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                  Reminders
+                </Link>
 
-              
-               <Link to="/dental-history" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                <Link to="/appointments" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                  Appointments</Link>
+              </>
+
+
+              <Link to="/dental-history" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Dental Records
               </Link>
 
-               <Link to="/offers" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+              <Link to="/offers" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Offers and Treatments
               </Link>
 
               <Link to="/work-schedules" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Work Schedule
               </Link>
+
+
+
+
+            </>
+          )}
+
+          {(roles.includes("doctor") || roles.includes("admin")) || roles.includes("patient") && (
+            <>
               <Link to="/reminders" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
-            Reminders
-          </Link>
+                Reminders
+              </Link>
 
-
-              
+              <Link to="/appointments" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                Appointments</Link>
             </>
           )}
 

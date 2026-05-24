@@ -80,7 +80,7 @@ function App() {
 
       <Route element={<RouteProtect allowedRoles={["admin"]} />}>
         <Route path="/Patients" element={<TablePatient />} />
-        <Route path="/addP" element={<AddPartient />} />
+        <Route path="/patients/add" element={<AddPartient />} />
         <Route path="/addT" element={<AddTreatment />} />
         <Route path="/treatments/edit/:id" element={<EditTreatment />} />
         <Route path="/add-work-schedule" element={<AddWorkSchedule />} />

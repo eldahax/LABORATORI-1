@@ -45,6 +45,20 @@ export default function AppointmentTable() {
     type: "success",
   });
 
+  
+ useEffect(() => {
+    fetch("http://localhost:5000/api/users/me", {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => setUser(data))
+      .catch((err) => console.log(err));
+  }, []);
+  const [user, setUser] = useState(null);
+
+  const roles = user?.roles || [];
+
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
@@ -168,12 +182,31 @@ export default function AppointmentTable() {
         </p>
 
         <p>
-          <span className="font-semibold">Treatment:</span>{" "}
-          {app.description}
-        </p>
+  <span className="font-semibold">Room:</span>{" "}
+  {app.Room?.room_name}
+</p>
+
+<p>
+  <span className="font-semibold">Duration:</span>{" "}
+  {app.duration} mins
+</p>
+<p>
+  <span className="font-semibold">Procedure:</span>{" "}
+  {app.PatientTreatments?.[0]?.Treatment?.treatment_name}
+</p>
+
+<p>
+  <span className="font-semibold">Condition:</span>{" "}
+  {app.DentalRecords?.[0]?.dental_condition}
+</p>
+<p>
+  <span className="font-semibold">Tooth:</span>{" "}
+  {app.DentalRecords?.[0]?.tooth}
+</p>
       </div>
 
       <div className="flex gap-3 mt-5">
+          {(roles.includes("doctor") || roles.includes("admin")) && (
         <button
           onClick={() => {
             setSelectedId(app.appointment_id);
@@ -183,7 +216,8 @@ export default function AppointmentTable() {
         >
           Delete
         </button>
-
+          )}
+           {(roles.includes("doctor") || roles.includes("admin")) && (
         <button
           onClick={() =>
             navigate(`/appointments/edit/${app.appointment_id}`)
@@ -192,6 +226,8 @@ export default function AppointmentTable() {
         >
           Update
         </button>
+           )}
+  
       </div>
     </div>
   ))}

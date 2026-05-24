@@ -1,8 +1,9 @@
 import { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 export default function Signup() {
+  const navigate=useNavigate();
   const [name, setName] = useState("");
   const [lastname, setLastName] = useState("");
   const [username, setUsername] = useState("");
@@ -94,18 +95,20 @@ export default function Signup() {
       });
 
       const data = await res.json();
+      navigate("/Login");
 
       if (!res.ok) {
        setSignupErr(data.error)
         return;
       }
 
-      alert("User created successfully!");
+      
       setName("");
       setLastName("");
       setEmail("");
       setPassword("");
       setConfirm("");
+      
     } catch (err) {
       console.log(err);
     }

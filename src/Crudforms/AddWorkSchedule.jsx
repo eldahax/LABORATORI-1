@@ -104,6 +104,7 @@ export default function AddWorkSchedule() {
                 "http://localhost:5000/api/work-schedules",
                 {
                     method: "POST",
+                    credentials:"include",
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -147,12 +148,12 @@ export default function AddWorkSchedule() {
 
     return (
         <div className="flex justify-center items-center w-full min-h-screen bg-gray-50 px-4">
-            <CustomAlert
-                show={showAlert}
-                message={alertMessage}
-                type={alertType}
-                onClose={() => setShowAlert(false)}
-            />
+           <CustomAlert
+  show={alert.show}
+  message={alert.message}
+  type={alert.type}
+  onClose={() => setAlert((prev) => ({ ...prev, show: false }))}
+/>
             <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
                 <h1 className="text-3xl font-bold text-[#0F766E] text-center mb-6">
                     ADD WORK SCHEDULE

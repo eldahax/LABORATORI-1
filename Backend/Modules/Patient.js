@@ -15,7 +15,7 @@ class Patient extends Model {
 module.exports = (sequelize) => {
   Patient.init({
     patient_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'patient_id' },
-    date_of_birth: { type: DataTypes.DATEONLY, allowNull: false, field: 'date_of_birth' },
+    date_of_birth: { type: DataTypes.DATEONLY, allowNull: true, field: 'date_of_birth' },
     user_id: { type: DataTypes.INTEGER, allowNull: false, unique: true, field: 'user_id' },
   }, { sequelize, tableName: 'patients', timestamps: false });
   return Patient;

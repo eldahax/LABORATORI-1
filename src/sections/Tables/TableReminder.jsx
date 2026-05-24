@@ -51,6 +51,19 @@ export default function TableReminder() {
     type: "success",
   });
 
+    
+ useEffect(() => {
+    fetch("http://localhost:5000/api/users/me", {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => setUser(data))
+      .catch((err) => console.log(err));
+  }, []);
+  const [user, setUser] = useState(null);
+
+  const roles = user?.roles || [];
+
   const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
@@ -115,7 +128,9 @@ export default function TableReminder() {
     try {
       const res = await fetch(
         `http://localhost:5000/api/reminders/${id}/sent`,
-        { method: "PATCH" }
+        { method: "PATCH",
+            credentials: "include",
+         }
       );
 
       const data = await res.json().catch(() => ({}));
@@ -241,8 +256,9 @@ export default function TableReminder() {
                   <p><b>Message:</b> {r.message}</p>
                   <p><b>Date:</b> {formatDate(r.reminder_date)}</p>
                 </div>
-
+        {(roles.includes("doctor") || roles.includes("admin")) && (
                 <div className="flex gap-2 mt-4">
+                 
                   <button
                     onClick={() =>
                       navigate(`/reminders/edit/${r.reminder_id}`)
@@ -260,14 +276,16 @@ export default function TableReminder() {
                       Sent
                     </button>
                   )}
-
+            
                   <button
                     onClick={() => handleDeleteClick(r.reminder_id)}
                     className="border px-3 py-1 rounded text-red-600"
                   >
                     Delete
                   </button>
+                  
                 </div>
+        )}
 
               </div>
             ))}

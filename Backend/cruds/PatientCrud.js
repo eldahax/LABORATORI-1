@@ -21,18 +21,7 @@ const addPatient = async (
         phone_number,
         password_hash
     });
-
-    const patient = await Patient.create({
-        user_id: user.user_id,
-        date_of_birth,
-        allergy_name
-    });
-
-    await PatientAllergy.create({
-        patient_id: patient.patient_id,
-        allergy_name
-    });
-    const role = await Role.findOne({
+     const role = await Role.findOne({
           where: { role_name: "patient" }
         
         });
@@ -43,6 +32,17 @@ const addPatient = async (
           user_id: user.user_id,
           role_id: role.role_id
         });
+
+    const patient = await Patient.create({
+        user_id: user.user_id,
+        date_of_birth
+    });
+
+    await PatientAllergy.create({
+        patient_id: patient.patient_id,
+        allergy_name
+    });
+   
     return {
         user_id: user.user_id,
         patient_id: patient.patient_id,
@@ -103,7 +103,7 @@ const updatePatient = async (patient_id, data) => {
 
     await patient.update({
         date_of_birth: data.date_of_birth ?? patient.date_of_birth,
-        allergy_name: data.allergy_name ?? patient.allergy_name
+       
     });
    await PatientAllergy.destroy({
   where: { patient_id: patient.patient_id }

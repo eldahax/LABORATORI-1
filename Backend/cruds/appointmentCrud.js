@@ -191,7 +191,10 @@ const getAllApp = async (user) => {
           as: "PatientTreatments",
           include: [Treatment],
         },
-        { model: DentalRecord },
+        { model: DentalRecord,
+            as: "DentalRecords"
+
+         },
       ],
       order: [["appointment_date_time", "DESC"]],
     });
@@ -236,7 +239,8 @@ const getAppById = async (appointment_id) => {
           as: "PatientTreatments",
           include: [Treatment],
         },
-        { model: DentalRecord },
+        { model: DentalRecord,  as: "DentalRecords"
+ },
       ],
     });
     if (!appointment) throw new Error("Not found");
@@ -343,7 +347,7 @@ const updateAppointment = async (appointment_id, updateData) => {
             reminder_date: new Date(
               new Date(newStart).getTime() - 24 * 60 * 60 * 1000
             ),
-            message: `Reminder: Appointment in 24 hours  ${finalDescription} at ${newStart.toLocaleString()}`,
+            message: `Appointment in 24 hours  ${finalDescription} at ${newStart.toLocaleString()}`,
             sent: false,
           },
           { transaction: t }
