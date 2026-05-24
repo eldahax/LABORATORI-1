@@ -28,7 +28,6 @@ import InventoryTable from "./sections/Tables/InventoryTable";
 import AddInventory from "./Crudforms/AddInventory";
 import EditInventory from "./Crudforms/EditInventory";
 import CreateDepartment from "./Crudforms/AddDepartment";
-import DepartmentsTable from "./sections/Tables/DepartmentTable";
 import EditDepartment from "./Crudforms/EditDepartment";
 import AddApointment from "./Crudforms/AddApointment"
 import AppointmentTable from "./sections/Tables/AppointmentTable";
@@ -43,6 +42,7 @@ import ContactTable from "./sections/Tables/ContactTable";
 import AddContact from "./Crudforms/AddContact";
 import DentalTable from "./sections/Tables/DentalTable";
 import EditDentalRecord from "./Crudforms/EditDentalRecord"
+import TableReview from "./sections/Tables/TableReview";
 function App() {
   return (
     <Routes>
@@ -60,12 +60,15 @@ function App() {
 
       <Route
         element={<RouteProtect allowedRoles={["admin", "doctor", "patient"]} />}
-      > 
-       <Route path="/offers" element={<OfferTable />} />
+      >
+        
+
+        <Route path="/offers" element={<OfferTable />} />
         <Route path="/Profile" element={<PersonalProfile />} />
         <Route path="dental-history" element={<DentalTable />} />
         <Route path="/appointments" element={<AppointmentTable />} />
         <Route path="/reminders" element={<TableReminder />} />
+        <Route path="/reviews" element={<TableReview />} />
       </Route>
 
       <Route element={<RouteProtect allowedRoles={["admin", "doctor"]} />}>
@@ -101,7 +104,6 @@ function App() {
         <Route path="/inventory" element={<InventoryTable />} />
         <Route path="/addI" element={<AddInventory />} />
         <Route path="/inventory/edit/:id" element={<EditInventory />} />
-        <Route path="/departments" element={<DepartmentsTable />} />
         <Route path="/dep" element={<CreateDepartment />} />
         <Route path="/departments/edit/:id" element={<EditDepartment />} />
         <Route path="/addO" element={<AddOffers />} />

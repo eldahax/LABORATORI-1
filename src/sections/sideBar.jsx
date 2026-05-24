@@ -78,6 +78,9 @@ const Sidebar = () => {
                 <Link to="/reminders" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                   Reminders
                 </Link>
+                <Link to="/reviews" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                  Reviews
+                </Link>
 
                 <Link to="/appointments" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                   Appointments</Link>
@@ -106,6 +109,9 @@ const Sidebar = () => {
             <>
               <Link to="/reminders" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Reminders
+              </Link>
+              <Link to="/reviews" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
+                Reviews
               </Link>
 
               <Link to="/appointments" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
