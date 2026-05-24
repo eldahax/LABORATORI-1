@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 export default function Signup() {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [lastname, setLastName] = useState("");
   const [username, setUsername] = useState("");
@@ -12,7 +12,7 @@ export default function Signup() {
   const [confirm, setConfirm] = useState("");
   const [phone, setPhone] = useState("");
 
-  const [signupErr, setSignupErr]=useState("");
+  const [signupErr, setSignupErr] = useState("");
   const [nameErr, setNameErr] = useState("");
   const [phoneErr, setPhoneErr] = useState("");
   const [lastNameErr, setLastNameerr] = useState("");
@@ -82,6 +82,7 @@ export default function Signup() {
     try {
       const res = await fetch("http://localhost:5000/api/users/signup", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -98,17 +99,17 @@ export default function Signup() {
       navigate("/Login");
 
       if (!res.ok) {
-       setSignupErr(data.error)
+        setSignupErr(data.error)
         return;
       }
 
-      
+
       setName("");
       setLastName("");
       setEmail("");
       setPassword("");
       setConfirm("");
-      
+
     } catch (err) {
       console.log(err);
     }

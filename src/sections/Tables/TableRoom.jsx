@@ -62,9 +62,10 @@ export default function TableRoom() {
 
   const navigate = useNavigate();
 
-  // ================= ROOMS =================
   useEffect(() => {
-    fetch("http://localhost:5000/api/rooms")
+    fetch("http://localhost:5000/api/rooms", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setRooms(data))
       .catch(() =>
@@ -76,9 +77,10 @@ export default function TableRoom() {
       );
   }, []);
 
-  // ================= DEPARTMENTS =================
   useEffect(() => {
-    fetch("http://localhost:5000/api/departments")
+    fetch("http://localhost:5000/api/departments", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setDepartments(data))
       .catch(() =>
@@ -90,12 +92,14 @@ export default function TableRoom() {
       );
   }, []);
 
-  // ================= DELETE ROOM =================
   const handleDelete = async (room_id) => {
     try {
       const res = await fetch(
         `http://localhost:5000/api/rooms/${room_id}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
       );
 
       const data = await res.json().catch(() => ({}));
@@ -127,12 +131,14 @@ export default function TableRoom() {
     }
   };
 
-  // ================= DELETE DEPARTMENT =================
   const handleDeleteD = async (department_id) => {
     try {
       const res = await fetch(
         `http://localhost:5000/api/departments/${department_id}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
       );
 
       const data = await res.json().catch(() => ({}));
@@ -178,7 +184,6 @@ export default function TableRoom() {
         }
       />
 
-      {/* CONFIRM MODAL */}
       <ConfirmModal
         show={confirmOpen}
         onCancel={() => setConfirmOpen(false)}
@@ -201,7 +206,6 @@ export default function TableRoom() {
 
             <TableCard />
 
-            {/* ================= ROOMS ================= */}
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-lg font-bold text-[#0F766E]">
                 Rooms
@@ -285,7 +289,6 @@ export default function TableRoom() {
 
             </table>
 
-            {/* ================= DEPARTMENTS ================= */}
             <div className="mt-[80px] flex justify-between items-center mb-6">
               <h1 className="text-lg font-bold text-[#0F766E]">
                 Departments

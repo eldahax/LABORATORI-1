@@ -61,6 +61,7 @@ export default function ContactForm() {
             const res = await fetch("http://localhost:5000/api/contacts", {
 
                 method: "POST",
+                credentials: "include",
 
                 headers: {
                     "Content-Type": "application/json",

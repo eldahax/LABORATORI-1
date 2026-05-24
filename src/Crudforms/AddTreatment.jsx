@@ -25,7 +25,9 @@ export default function AddTreatment() {
 
   useEffect(() => {
     const fetchD = async () => {
-      const d = await fetch("http://localhost:5000/api/departments");
+      const d = await fetch("http://localhost:5000/api/departments", {
+        credentials: "include",
+      });
       const res = await d.json();
       setDeps(res);
     };
@@ -43,6 +45,7 @@ export default function AddTreatment() {
     try {
       const res = await fetch("http://localhost:5000/api/treatments", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -80,7 +83,6 @@ export default function AddTreatment() {
     <div className="flex justify-center items-center w-full h-screen">
       <div className="w-full max-w-md p-8 rounded-xl">
 
-        {/* ALERT */}
         <CustomAlert
           show={alert.show}
           message={alert.message}

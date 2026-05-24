@@ -11,7 +11,9 @@ export default function TableTreatment() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/treatments")
+        fetch("http://localhost:5000/api/treatments", {
+            credentials: "include",
+        })
             .then((res) => res.json())
             .then((data) => setTreatments(data))
             .catch((err) => console.log(err));
@@ -25,6 +27,7 @@ export default function TableTreatment() {
                 `http://localhost:5000/api/treatments/${treatment_id}`,
                 {
                     method: "DELETE",
+                    credentials: "include",
                 }
             );
 
@@ -83,7 +86,6 @@ export default function TableTreatment() {
                                 </button>
                             </div>
 
-                            {/* SEARCH INPUT */}
                             <div className="w-1/2 max-w-sm mb-6">
                                 <input
                                     type="text"

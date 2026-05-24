@@ -49,7 +49,12 @@ export default function ContactTable() {
 
   const fetchContacts = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/contacts");
+      const res = await fetch(
+        "http://localhost:5000/api/contacts",
+        {
+          credentials: "include",
+        }
+      );
       const data = await res.json();
 
       setContacts(data.data || data);
@@ -71,7 +76,11 @@ export default function ContactTable() {
     try {
       const res = await fetch(
         `http://localhost:5000/api/contacts/${selectedId}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+
       );
 
       if (!res.ok) {
@@ -136,7 +145,6 @@ export default function ContactTable() {
             </button>
           </div>
 
-          {/* SEARCH */}
           <div className="w-1/2 mb-6">
             <input
               type="text"
@@ -171,14 +179,6 @@ export default function ContactTable() {
                   </td>
 
                   <td className="flex gap-2">
-                    <button
-                      onClick={() =>
-                        navigate(`/contacts/edit/${c.contact_id}`)
-                      }
-                      className="text-green-600"
-                    >
-                      Update
-                    </button>
 
                     <button
                       onClick={() => openDelete(c.contact_id)}
@@ -194,7 +194,7 @@ export default function ContactTable() {
         </div>
       </div>
 
-      
+
       <ConfirmModal
         show={confirm}
         onCancel={() => setConfirm(false)}

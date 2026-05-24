@@ -52,7 +52,9 @@ export default function PatientTable() {
   });
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/patients")
+    fetch("http://localhost:5000/api/patients", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setPatients(data))
       .catch(() =>
@@ -80,7 +82,10 @@ export default function PatientTable() {
     try {
       const res = await fetch(
         `http://localhost:5000/api/patients/${selectedId}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
       );
 
       if (!res.ok) {
@@ -242,7 +247,7 @@ export default function PatientTable() {
         </div>
       </div>
 
-   
+
       <CustomAlert
         show={alert.show}
         message={alert.message}
@@ -252,7 +257,7 @@ export default function PatientTable() {
         }
       />
 
-     
+
       <ConfirmModal
         show={confirmOpen}
         onCancel={closeConfirm}

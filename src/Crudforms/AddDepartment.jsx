@@ -60,6 +60,7 @@ export default function CreateDepartment() {
         "http://localhost:5000/api/departments",
         {
           method: "POST",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             department_name,

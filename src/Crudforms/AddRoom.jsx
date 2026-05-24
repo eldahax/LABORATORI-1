@@ -16,20 +16,22 @@ export default function AddRoom() {
     const [departmentErr, setDepartmentErr] = useState("");
 
     const [alert, setAlert] = useState({
-        show:false,
-        message:"",
-        type:"success"
+        show: false,
+        message: "",
+        type: "success"
     });
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/departments")
+        fetch("http://localhost:5000/api/departments", {
+            credentials: "include",
+        })
             .then(res => res.json())
             .then(data => setDep(data))
             .catch(() =>
                 setAlert({
-                    show:true,
-                    message:"Failed loading departments",
-                    type:"error"
+                    show: true,
+                    message: "Failed loading departments",
+                    type: "error"
                 })
             );
     }, []);
@@ -41,71 +43,72 @@ export default function AddRoom() {
         setChairErr("");
         setDepartmentErr("");
 
-        let hasError=false;
+        let hasError = false;
 
-        if(!roomName.trim()){
+        if (!roomName.trim()) {
             setRoomErr("Room name required");
-            hasError=true;
+            hasError = true;
         }
 
-        if(!chairNumber || Number(chairNumber)<=0){
+        if (!chairNumber || Number(chairNumber) <= 0) {
             setChairErr("Chair number >0");
-            hasError=true;
+            hasError = true;
         }
 
-        if(!departmentId){
+        if (!departmentId) {
             setDepartmentErr("Department required");
-            hasError=true;
+            hasError = true;
         }
 
-        if(hasError) return;
+        if (hasError) return;
 
-        try{
+        try {
 
-            const res=await fetch(
+            const res = await fetch(
                 "http://localhost:5000/api/rooms",
                 {
-                    method:"POST",
-                    headers:{
-                        "Content-Type":"application/json"
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json"
                     },
-                    body:JSON.stringify({
-                        room_name:roomName,
-                        chair_number:Number(chairNumber),
-                        department_id:Number(departmentId)
+                    body: JSON.stringify({
+                        room_name: roomName,
+                        chair_number: Number(chairNumber),
+                        department_id: Number(departmentId)
                     })
                 }
             );
 
-            const data=await res.json();
+            const data = await res.json();
 
-            if(!res.ok){
+            if (!res.ok) {
 
                 setAlert({
-                    show:true,
-                    message:data.error || "Failed adding room",
-                    type:"error"
+                    show: true,
+                    message: data.error || "Failed adding room",
+                    type: "error"
                 });
 
                 return;
             }
 
             setAlert({
-                show:true,
-                message:"Room added successfully",
-                type:"success"
+                show: true,
+                message: "Room added successfully",
+                type: "success"
             });
 
-            setTimeout(()=>{
+            setTimeout(() => {
                 navigate("/rooms")
-            },1000)
+            }, 1000)
 
-        }catch{
+        } catch {
 
             setAlert({
-                show:true,
-                message:"Server error",
-                type:"error"
+                show: true,
+                message: "Server error",
+                type: "error"
             });
         }
     };
@@ -122,10 +125,10 @@ export default function AddRoom() {
                     show={alert.show}
                     message={alert.message}
                     type={alert.type}
-                    onClose={()=>
-                        setAlert(p=>({
+                    onClose={() =>
+                        setAlert(p => ({
                             ...p,
-                            show:false
+                            show: false
                         }))
                     }
                 />
@@ -133,7 +136,7 @@ export default function AddRoom() {
                 <input
                     placeholder="Room name"
                     value={roomName}
-                    onChange={(e)=>setRoomName(e.target.value)}
+                    onChange={(e) => setRoomName(e.target.value)}
                     className="w-full border p-2 rounded"
                 />
 
@@ -143,7 +146,7 @@ export default function AddRoom() {
                     type="number"
                     placeholder="Chair number"
                     value={chairNumber}
-                    onChange={(e)=>setChairNumber(e.target.value)}
+                    onChange={(e) => setChairNumber(e.target.value)}
                     className="w-full border p-2 rounded"
                 />
 
@@ -151,14 +154,14 @@ export default function AddRoom() {
 
                 <select
                     value={departmentId}
-                    onChange={(e)=>setDepartmentId(e.target.value)}
+                    onChange={(e) => setDepartmentId(e.target.value)}
                     className="w-full border p-2 rounded"
                 >
                     <option value="">
                         Select department
                     </option>
 
-                    {departments.map(d=>(
+                    {departments.map(d => (
                         <option
                             key={d.department_id}
                             value={d.department_id}

@@ -40,7 +40,9 @@ export default function EditWorkSchedule() {
     useEffect(() => {
         const fetchDoctors = async () => {
             try {
-                const res = await fetch("http://localhost:5000/api/doctors");
+                const res = await fetch("http://localhost:5000/api/doctors", {
+                    credentials: "include",
+                });
                 const data = await res.json();
                 setAllDoctors(data);
             } catch (err) {
@@ -51,7 +53,9 @@ export default function EditWorkSchedule() {
     }, []);
 
     useEffect(() => {
-        fetch(`http://localhost:5000/api/work-schedules/${id}`)
+        fetch(`http://localhost:5000/api/work-schedules/${id}`, {
+            credentials: "include",
+        })
             .then((res) => res.json())
             .then((data) => {
                 setDoctorId(data.doctor_id || "");
@@ -106,6 +110,7 @@ export default function EditWorkSchedule() {
                 `http://localhost:5000/api/work-schedules/${id}`,
                 {
                     method: "PUT",
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -126,7 +131,6 @@ export default function EditWorkSchedule() {
                 return;
             }
 
-            // ✅ CUSTOM ALERT (FIXED)
             setAlert({
                 show: true,
                 message: "Work schedule updated successfully!",
@@ -144,7 +148,6 @@ export default function EditWorkSchedule() {
         <div className="flex justify-center items-center w-full h-screen">
             <div className="w-full max-w-md p-8 rounded-xl">
 
-                {/* ✅ ALERT FIXED */}
                 <CustomAlert
                     show={alert.show}
                     message={alert.message}

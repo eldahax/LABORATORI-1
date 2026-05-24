@@ -28,7 +28,9 @@ export default function EditPatient() {
   const nameRegex = /^[A-Za-z]{3,15}$/;
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/patients/${id}`)
+    fetch(`http://localhost:5000/api/patients/${id}`, {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => {
         setForm({
@@ -95,6 +97,7 @@ export default function EditPatient() {
         `http://localhost:5000/api/patients/${id}`,
         {
           method: "PUT",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -133,7 +136,7 @@ export default function EditPatient() {
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
-      
+
       <CustomAlert
         show={alert.show}
         message={alert.message}

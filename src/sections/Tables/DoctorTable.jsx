@@ -56,7 +56,9 @@ export default function DoctorTable() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/doctors")
+    fetch("http://localhost:5000/api/doctors", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setDoctors(data))
       .catch(() =>
@@ -78,6 +80,7 @@ export default function DoctorTable() {
         `http://localhost:5000/api/doctors/${selectedId}`,
         {
           method: "DELETE",
+          credentials: "include",
         }
       );
 

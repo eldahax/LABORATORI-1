@@ -36,7 +36,9 @@ export default function EditTreatment() {
     ];
 
     useEffect(() => {
-        fetch(`http://localhost:5000/api/treatments/${id}`)
+        fetch(`http://localhost:5000/api/treatments/${id}`, {
+            credentials: "include"
+        })
             .then((res) => res.json())
             .then((data) => {
                 setTreatmentName(data.treatment_name || "");
@@ -98,6 +100,7 @@ export default function EditTreatment() {
         try {
             const res = await fetch(`http://localhost:5000/api/treatments/${id}`, {
                 method: "PUT",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     treatment_name: treatmentName,

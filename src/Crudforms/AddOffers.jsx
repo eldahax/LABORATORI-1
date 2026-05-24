@@ -17,7 +17,9 @@ export default function AddOffer() {
   });
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/treatments")
+    fetch("http://localhost:5000/api/treatments", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setTreatments(data))
       .catch(() =>
@@ -52,6 +54,7 @@ export default function AddOffer() {
     try {
       const res = await fetch("http://localhost:5000/api/offers", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           offers_name,
@@ -97,7 +100,6 @@ export default function AddOffer() {
     <div className="flex justify-center items-center w-full h-screen">
       <div className="w-full max-w-md p-8 rounded-xl">
 
-        {/* ALERT */}
         <CustomAlert
           show={alert.show}
           message={alert.message}

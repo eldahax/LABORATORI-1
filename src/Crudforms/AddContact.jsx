@@ -50,6 +50,7 @@ export default function AddContact() {
         "http://localhost:5000/api/contacts",
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

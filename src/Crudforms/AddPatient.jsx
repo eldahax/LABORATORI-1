@@ -88,6 +88,7 @@ export default function AddPatient() {
                 "http://localhost:5000/api/patients/add",
                 {
                     method: "POST",
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
                     },

@@ -43,22 +43,7 @@ const getId = async (id) => {
     return contact;
 };
 
-const updateContact = async (id, data) => {
-    const contact = await Contact.findByPk(id);
 
-    if (!contact) {
-        throw new Error("Contact not found");
-    }
-
-    await contact.update({
-        fullname: data.fullname,
-        email: data.email,
-        phone_number: data.phone_number,
-        message: data.message
-    });
-
-    return { message: "Contact updated" };
-};
 
 const deleteContact = async (id) => {
     const contact = await Contact.findByPk(id);
@@ -78,6 +63,5 @@ module.exports = {
     createContact,
     readallContacts,
     getId,
-    updateContact,
     deleteContact
 };

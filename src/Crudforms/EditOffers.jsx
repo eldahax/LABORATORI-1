@@ -21,7 +21,9 @@ export default function EditOffer() {
   });
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/offers/${id}`)
+    fetch(`http://localhost:5000/api/offers/${id}`, {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => {
         setOfferName(data.offers_name || "");
@@ -43,7 +45,9 @@ export default function EditOffer() {
   }, [id]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/treatments")
+    fetch("http://localhost:5000/api/treatments", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setTreatments(data))
       .catch(() =>
@@ -80,6 +84,7 @@ export default function EditOffer() {
         `http://localhost:5000/api/offers/${id}`,
         {
           method: "PUT",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             offers_name,

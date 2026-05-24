@@ -21,7 +21,9 @@ export default function EditRoom() {
     });
 
     useEffect(() => {
-        fetch(`http://localhost:5000/api/rooms/${id}`)
+        fetch(`http://localhost:5000/api/rooms/${id}`, {
+            credentials: "include"
+        })
             .then(res => res.json())
             .then(data => {
                 setRoomName(data.room_name);
@@ -38,7 +40,9 @@ export default function EditRoom() {
     }, [id]);
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/departments")
+        fetch("http://localhost:5000/api/departments", {
+            credentials: "include"
+        })
             .then(res => res.json())
             .then(data => setDepartments(data))
             .catch(() => {
@@ -58,6 +62,7 @@ export default function EditRoom() {
                 `http://localhost:5000/api/rooms/${id}`,
                 {
                     method: "PUT",
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json"
                     },

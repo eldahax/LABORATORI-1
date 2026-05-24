@@ -23,39 +23,41 @@ export default function EditAppointment() {
     message: "",
     type: "success",
   });
-useEffect(() => {
-  const load = async () => {
-    try {
-      const res = await fetch(`http://localhost:5000/api/appointments/${id}`, {
-        credentials: "include",
-      });
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/appointments/${id}`, {
+          credentials: "include",
+        });
 
-      const text = await res.text();
-    
-      const data = JSON.parse(text);
-      setDoctorId(data.doctor_id || "");
-      setTreatmentName(data.description || "");
-      setStatus(data.appointment_status || "pending");
-      setPatientName(
-        data.Patient?.User
-          ? `${data.Patient.User.first_name} ${data.Patient.User.last_name}`
-          : ""
-      );
+        const text = await res.text();
 
-      if (data.appointment_date_time) {
-        setDateTime(data.appointment_date_time.slice(0, 16));
+        const data = JSON.parse(text);
+        setDoctorId(data.doctor_id || "");
+        setTreatmentName(data.description || "");
+        setStatus(data.appointment_status || "pending");
+        setPatientName(
+          data.Patient?.User
+            ? `${data.Patient.User.first_name} ${data.Patient.User.last_name}`
+            : ""
+        );
+
+        if (data.appointment_date_time) {
+          setDateTime(data.appointment_date_time.slice(0, 16));
+        }
+      } catch (err) {
+        console.log("ERROR LOADING APPOINTMENT:", err);
       }
-    } catch (err) {
-      console.log("ERROR LOADING APPOINTMENT:", err);
-    }
-  };
+    };
 
-  load();
-}, [id]);
+    load();
+  }, [id]);
 
   useEffect(() => {
-   
-    fetch("http://localhost:5000/api/doctors")
+
+    fetch("http://localhost:5000/api/doctors", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then(setAllDoctors)
       .catch(() =>
@@ -66,7 +68,9 @@ useEffect(() => {
         })
       );
 
-    fetch("http://localhost:5000/api/treatments")
+    fetch("http://localhost:5000/api/treatments", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then(setAllTreatments)
       .catch(() =>
@@ -76,9 +80,9 @@ useEffect(() => {
           type: "error",
         })
       );
-  },[]);
+  }, []);
 
-  
+
 
   const validate = () => {
     const newErrors = {};
@@ -99,7 +103,7 @@ useEffect(() => {
       const res = await fetch(
         `http://localhost:5000/api/appointments/${id}`,
         {
-          credentials:"include",
+          credentials: "include",
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -140,7 +144,7 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
-      
+
 
       <CustomAlert
         show={alert.show}

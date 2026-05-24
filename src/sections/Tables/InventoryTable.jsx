@@ -53,7 +53,9 @@ export default function InventoryTable() {
   });
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/inventory")
+    fetch("http://localhost:5000/api/inventory", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setInventorys(data))
       .catch(() =>
@@ -71,6 +73,7 @@ export default function InventoryTable() {
         `http://localhost:5000/api/inventory/${selectedId}`,
         {
           method: "DELETE",
+          credentials: "include",
         }
       );
 

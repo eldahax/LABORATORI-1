@@ -10,12 +10,12 @@ const add = async (req, res) => {
             message
         } = req.body;
 
-        const result = await contactService.createContact(
-            fullname,
-            email,
-            phone_number,
-            message
-        );
+        const result = await crud.create(
+    req,
+    treatment_id,
+    rating,
+    description
+);
 
         res.json(result);
 
@@ -25,21 +25,7 @@ const add = async (req, res) => {
     }
 };
 
-const update = async (req, res) => {
-    try {
 
-        const result = await contactService.updateContact(
-            req.params.id,
-            req.body
-        );
-
-        res.json(result);
-
-    } catch (err) {
-
-        res.status(400).json({ error: err.message });
-    }
-};
 
 const getAllContacts = async (req, res) => {
     try {
@@ -82,7 +68,6 @@ const deleteContact = async (req, res) => {
 
 module.exports = {
     add,
-    update,
     getAllContacts,
     getContactById,
     deleteContact,

@@ -30,7 +30,9 @@ export default function AddDoc() {
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!.@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/departments")
+    fetch("http://localhost:5000/api/departments", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setDeps(data))
       .catch(() =>
@@ -92,6 +94,7 @@ export default function AddDoc() {
     try {
       const res = await fetch("http://localhost:5000/api/doctors", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           first_name: name,

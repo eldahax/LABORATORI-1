@@ -56,8 +56,8 @@ export default function TableWorkSchedule() {
 
   useEffect(() => {
     fetch("http://localhost:5000/api/work-schedules", {
-  credentials: "include",
-})
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setWorkSchedules(data))
       .catch(() =>
@@ -109,7 +109,10 @@ export default function TableWorkSchedule() {
     try {
       const res = await fetch(
         `http://localhost:5000/api/work-schedules/${deleteId}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
       );
 
       const data = await res.json().catch(() => ({}));

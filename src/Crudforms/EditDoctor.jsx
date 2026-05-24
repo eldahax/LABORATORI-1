@@ -35,8 +35,12 @@ export default function EditDoctor() {
 
       try {
         const [docRes, depRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/doctors/${id}`),
-          fetch("http://localhost:5000/api/departments"),
+          fetch(`http://localhost:5000/api/doctors/${id}`, {
+            credentials: "include",
+          }),
+          fetch("http://localhost:5000/api/departments", {
+            credentials: "include",
+          })
         ]);
 
         const doc = await docRes.json();
@@ -92,6 +96,7 @@ export default function EditDoctor() {
     try {
       const res = await fetch(`http://localhost:5000/api/doctors/${id}`, {
         method: "PUT",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           first_name: name,

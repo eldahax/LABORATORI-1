@@ -18,7 +18,9 @@ export default function EditDepartment() {
   const nameRegex = /^[A-Za-z\s]{3,50}$/;
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/departments/${id}`)
+    fetch(`http://localhost:5000/api/departments/${id}`, {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => {
         setDepartmentName(data.department_name);
@@ -54,6 +56,7 @@ export default function EditDepartment() {
         `http://localhost:5000/api/departments/${id}`,
         {
           method: "PUT",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

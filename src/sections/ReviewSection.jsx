@@ -28,7 +28,10 @@ export default function ReviewSection({ image }) {
       try {
 
         const res = await fetch(
-          "http://localhost:5000/api/treatments"
+          "http://localhost:5000/api/treatments",
+          {
+            credentials: "include",
+          }
         );
 
         const data = await res.json();
@@ -283,8 +286,8 @@ export default function ReviewSection({ image }) {
                   setTreatmentError("");
                 }}
                 className={`w-full border-2 rounded-xl px-4 py-3 outline-none transition-all duration-200 ${treatmentError
-                    ? "border-red-500"
-                    : "border-gray-300 focus:border-teal-700"
+                  ? "border-red-500"
+                  : "border-gray-300 focus:border-teal-700"
                   }`}
               >
                 <option value="">
@@ -322,8 +325,8 @@ export default function ReviewSection({ image }) {
                   setRatingError("");
                 }}
                 className={`w-full border-2 rounded-xl px-4 py-3 outline-none transition-all duration-200 ${ratingError
-                    ? "border-red-500"
-                    : "border-gray-300 focus:border-teal-700"
+                  ? "border-red-500"
+                  : "border-gray-300 focus:border-teal-700"
                   }`}
               >
                 <option value="">
@@ -376,8 +379,8 @@ export default function ReviewSection({ image }) {
                 }}
                 placeholder="Write your experience here..."
                 className={`w-full border-2 rounded-xl px-4 py-3 resize-none outline-none transition-all duration-200 ${descriptionError
-                    ? "border-red-500"
-                    : "border-gray-300 focus:border-teal-700"
+                  ? "border-red-500"
+                  : "border-gray-300 focus:border-teal-700"
                   }`}
               />
 
@@ -406,8 +409,8 @@ export default function ReviewSection({ image }) {
               type="submit"
               disabled={loading}
               className={`w-full py-3 rounded-xl font-bold text-white transition-all duration-200 ${loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-teal-700 hover:bg-teal-800"
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-teal-700 hover:bg-teal-800"
                 }`}
             >
               {loading

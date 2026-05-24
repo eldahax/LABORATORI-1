@@ -31,7 +31,9 @@ export default function EditInventory() {
   const nameRegex = /^[A-Za-z0-9\s]{3,50}$/;
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/inventory/${id}`)
+    fetch(`http://localhost:5000/api/inventory/${id}`, {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => {
         setForm({
@@ -124,6 +126,7 @@ export default function EditInventory() {
         `http://localhost:5000/api/inventory/${id}`,
         {
           method: "PUT",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

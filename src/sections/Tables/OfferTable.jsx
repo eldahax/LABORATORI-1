@@ -73,7 +73,9 @@ export default function OfferTable() {
 
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/treatments")
+        fetch("http://localhost:5000/api/treatments", {
+            credentials: "include",
+        })
             .then((res) => res.json())
             .then((data) => setTreatments(data))
             .catch(() =>
@@ -82,7 +84,9 @@ export default function OfferTable() {
     }, []);
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/offers")
+        fetch("http://localhost:5000/api/offers", {
+            credentials: "include",
+        })
             .then((res) => res.json())
             .then((data) => setOffers(data))
             .catch(() =>
@@ -117,7 +121,10 @@ export default function OfferTable() {
                 url = `http://localhost:5000/api/treatments/${selectedId}`;
             }
 
-            const res = await fetch(url, { method: "DELETE" });
+            const res = await fetch(url, {
+                method: "DELETE",
+                credentials: "include",
+            });
 
             if (!res.ok) {
                 showAlert("Delete failed", "error");
@@ -176,7 +183,7 @@ export default function OfferTable() {
                     <div className="w-3/4 ml-[25%]">
                         <TableCard />
 
-                       
+
                         <div className="flex justify-between items-center mb-6">
                             <h1 className="text-xl font-bold text-[#0F766E]">
                                 Offers
@@ -292,7 +299,6 @@ export default function OfferTable() {
                             </tbody>
                         </table>
 
-                        {/* TREATMENTS */}
                         <div className="flex justify-between items-center mb-6 mt-30">
                             <h1 className="text-lg sm:text-xl font-bold text-[#0F766E]">
                                 Treatments

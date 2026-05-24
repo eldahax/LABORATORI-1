@@ -25,7 +25,9 @@ export default function BForm() {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/doctors");
+        const res = await fetch("http://localhost:5000/api/doctors", {
+          credentials: "include",
+        });
         const data = await res.json();
         setDoctors(data);
       } catch (err) {
@@ -35,7 +37,9 @@ export default function BForm() {
 
     const fetchTreatments = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/treatments");
+        const res = await fetch("http://localhost:5000/api/treatments", {
+          credentials: "include",
+        });
         const data = await res.json();
         setTreatments(data);
       } catch (err) {
@@ -131,7 +135,7 @@ export default function BForm() {
     try {
       const res = await fetch("http://localhost:5000/api/appointments", {
         method: "POST",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
