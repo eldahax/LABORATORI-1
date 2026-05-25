@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../sideBar";
 import CustomAlert from "../../components/CustomAlert";
+import AddContact from "../../Crudforms/AddContact";
 
 function ConfirmModal({ show, onConfirm, onCancel }) {
   if (!show) return null;
@@ -35,13 +36,13 @@ function ConfirmModal({ show, onConfirm, onCancel }) {
 
 export default function ContactTable() {
   const [contacts, setContacts] = useState([]);
-  const [search, setSearch] = useState(""); // FIX
+  const [search, setSearch] = useState("");
   const [alert, setAlert] = useState({
     show: false,
     message: "",
     type: "success",
   });
-
+  const [contactOpen, setContactOpen] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
@@ -138,7 +139,7 @@ export default function ContactTable() {
             </h1>
 
             <button
-              onClick={() => navigate("/add-contact")}
+              onClick={() => setContactOpen(true)}
               className="bg-[#0F766E] text-white px-4 py-2 rounded-lg"
             >
               + Add Contact
@@ -200,7 +201,10 @@ export default function ContactTable() {
         onCancel={() => setConfirm(false)}
         onConfirm={handleDelete}
       />
-
+      <AddContact
+        show={contactOpen}
+        onClose={() => setContactOpen(false)}
+      />
       <CustomAlert
         show={alert.show}
         message={alert.message}

@@ -2,8 +2,42 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import CustomAlert from "../components/CustomAlert";
 
-export default function EditPatient() {
-  const { id } = useParams();
+function ConfirmModal({ show, onConfirm, onCancel }) {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
+        <h2 className="text-lg font-bold mb-2">Confirm Update</h2>
+
+        <p className="text-gray-600 mb-6">
+          Are you sure you want to update this patient?
+        </p>
+
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 border rounded-lg"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg"
+          >
+            Update
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function EditPatient({ show, onClose, patientId }) {
+  const { id: urlId } = useParams();
+  const id = patientId || urlId;
+
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -11,26 +45,26 @@ export default function EditPatient() {
     last_name: "",
     email: "",
     phone_number: "",
-    allergy_name: "",
-  });
-
-  const [alert, setAlert] = useState({
-    show: false,
-    message: "",
-    type: "success",
+    allergy_name: ""
   });
 
   const [nameErr, setNameErr] = useState("");
   const [lastNameErr, setLastNameErr] = useState("");
   const [emailErr, setEmailErr] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [alertState, setAlertState] = useState({
+    show: false,
+    message: "",
+    type: "error",
+  });
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
   const nameRegex = /^[A-Za-z]{3,15}$/;
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/patients/${id}`, {
-      credentials: "include",
-    })
+    if (!show || !id) return; 
+
+    fetch(`http://localhost:5000/api/patients/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setForm({
@@ -38,17 +72,13 @@ export default function EditPatient() {
           last_name: data?.User?.last_name || "",
           email: data?.User?.email || "",
           phone_number: data?.User?.phone_number || "",
-          allergy_name: data?.PatientAllergies?.[0]?.allergy_name || "",
+          allergy_name: data?.PatientAllergies?.[0]?.allergy_name || ""
         });
       })
-      .catch(() => {
-        setAlert({
-          show: true,
-          message: "Failed to load patient",
-          type: "error",
-        });
-      });
-  }, [id]);
+      .catch(() => {});
+  }, [id, show]);
+
+  if (!show) return null;
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -57,7 +87,7 @@ export default function EditPatient() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     setNameErr("");
@@ -92,65 +122,53 @@ export default function EditPatient() {
 
     if (hasError) return;
 
-    try {
-      const res = await fetch(
-        `http://localhost:5000/api/patients/${id}`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        }
-      );
+    setConfirmOpen(true);
+  };
 
-      const data = await res.json().catch(() => ({}));
+  const handleConfirmUpdate = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/patients/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
       if (!res.ok) {
-        setAlert({
-          show: true,
-          message: data.error || "Update failed",
-          type: "error",
-        });
+        const data = await res.json();
+        setAlertState({ show: true, message: data.error || "Update failed", type: "error" });
         return;
       }
 
-      setAlert({
-        show: true,
-        message: "Patient updated successfully",
-        type: "success",
-      });
-
-      setTimeout(() => {
-        navigate("/patients");
-      }, 1200);
+      setConfirmOpen(false);
+      onClose(); 
+      navigate("/Staff");
     } catch (err) {
-      setAlert({
-        show: true,
-        message: "Server error",
-        type: "error",
-      });
+      setAlertState({ show: true, message: "Server error", type: "error" });
     }
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-50">
-
-      <CustomAlert
-        show={alert.show}
-        message={alert.message}
-        type={alert.type}
-        onClose={() =>
-          setAlert({ show: false, message: "", type: "success" })
-        }
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      
+      <ConfirmModal
+        show={confirmOpen}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmUpdate}
       />
 
       <form
         onSubmit={handleSubmit}
-        className="w-[450px] bg-white rounded-2xl space-y-2 p-6"
+        className="w-[450px] bg-white rounded-2xl space-y-2 p-8 shadow-lg relative"
       >
-        <h1 className="text-3xl font-bold text-[#134E4A] text-center">
+        <button 
+          type="button"
+          onClick={onClose} 
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
+        >
+          ✕
+        </button>
+
+        <h1 className="text-3xl font-bold text-[#134E4A] text-center mb-4">
           Edit Patient
         </h1>
 
@@ -159,7 +177,6 @@ export default function EditPatient() {
           value={form.first_name}
           onChange={handleChange}
           className="p-3 border w-full rounded-lg"
-          placeholder="First Name"
         />
         <p className="text-red-500 text-sm h-5">{nameErr}</p>
 
@@ -168,7 +185,6 @@ export default function EditPatient() {
           value={form.last_name}
           onChange={handleChange}
           className="p-3 border w-full rounded-lg"
-          placeholder="Last Name"
         />
         <p className="text-red-500 text-sm h-5">{lastNameErr}</p>
 
@@ -177,7 +193,6 @@ export default function EditPatient() {
           value={form.email}
           onChange={handleChange}
           className="p-3 border w-full rounded-lg"
-          placeholder="Email"
         />
         <p className="text-red-500 text-sm h-5">{emailErr}</p>
 
@@ -186,21 +201,37 @@ export default function EditPatient() {
           value={form.phone_number}
           onChange={handleChange}
           className="p-3 border w-full rounded-lg"
-          placeholder="Phone"
         />
+        <div className="h-5"></div> 
 
         <input
           name="allergy_name"
           value={form.allergy_name}
           onChange={handleChange}
           className="p-3 border w-full rounded-lg"
-          placeholder="Allergy"
         />
+        <div className="h-5"></div>
 
-        <button className="w-full bg-[#0F766E] text-white py-3 rounded-lg font-semibold">
-          Update Patient
-        </button>
+        <div className="flex gap-3 pt-2">
+          <button 
+            type="button"
+            onClick={onClose}
+            className="w-1/2 border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold"
+          >
+            Cancel
+          </button>
+          <button type="submit" className="w-1/2 bg-[#0F766E] text-white py-3 rounded-lg font-semibold">
+            Update Patient
+          </button>
+        </div>
       </form>
+
+      <CustomAlert
+        show={alertState.show}
+        message={alertState.message}
+        type={alertState.type}
+        onClose={() => setAlertState({ show: false, message: "", type: "error" })}
+      />
     </div>
   );
 }

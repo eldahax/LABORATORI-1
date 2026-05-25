@@ -1,7 +1,7 @@
 import { useState } from "react";
 import CustomAlert from "../components/CustomAlert";
 
-export default function AddContact() {
+export default function AddContact({ show, onClose }) {
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [phone_number, setPhone] = useState("");
@@ -15,8 +15,11 @@ export default function AddContact() {
     type: "success",
   });
 
+  if (!show) return null;
+
   const emailRegex =
     /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
+
   const nameRegex = /^[A-Za-z\s]{3,30}$/;
 
   const showAlert = (message, type = "success") => {
@@ -66,17 +69,28 @@ export default function AddContact() {
       const data = await res.json();
 
       if (!res.ok) {
-        showAlert(data.error || "Failed to send message", "error");
+        showAlert(
+          data.error || "Failed to send message",
+          "error"
+        );
         return;
       }
 
-      showAlert("Message sent successfully", "success");
+      showAlert(
+        "Message sent successfully",
+        "success"
+      );
 
       setFullname("");
       setEmail("");
       setPhone("");
       setMessage("");
       setErrors({});
+
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+
     } catch (err) {
       console.log(err);
       showAlert("Server error", "error");
@@ -84,70 +98,93 @@ export default function AddContact() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-xl bg-white p-6 rounded-xl flex flex-col gap-4"
-      >
-        <h1 className="text-2xl font-bold text-[#0F766E] text-center">
-          CONTACT US
-        </h1>
+    <>
+      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="bg-white w-[90%] max-w-xl p-6 rounded-xl shadow-lg relative">
 
-        <div className="flex flex-col">
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={fullname}
-            onChange={(e) => setFullname(e.target.value)}
-            className="border-2 border-[#0F766E] rounded-lg px-3 py-2"
-          />
-          <p className="text-red-500 text-sm">
-            {errors.fullname}
-          </p>
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-4 text-xl font-bold"
+          >
+            ✕
+          </button>
+
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-4"
+          >
+            <h1 className="text-2xl font-bold text-[#0F766E] text-center">
+              CONTACT US
+            </h1>
+
+            <div className="flex flex-col">
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={fullname}
+                onChange={(e) =>
+                  setFullname(e.target.value)
+                }
+                className="border-2 border-[#0F766E] rounded-lg px-3 py-2"
+              />
+
+              <p className="text-red-500 text-sm">
+                {errors.fullname}
+              </p>
+            </div>
+
+            <div className="flex flex-col">
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+                className="border-2 border-[#0F766E] rounded-lg px-3 py-2"
+              />
+
+              <p className="text-red-500 text-sm">
+                {errors.email}
+              </p>
+            </div>
+
+            <div className="flex flex-col">
+              <input
+                type="text"
+                placeholder="Phone (optional)"
+                value={phone_number}
+                onChange={(e) =>
+                  setPhone(e.target.value)
+                }
+                className="border-2 border-[#0F766E] rounded-lg px-3 py-2"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <textarea
+                placeholder="Message"
+                value={message}
+                onChange={(e) =>
+                  setMessage(e.target.value)
+                }
+                className="border-2 border-[#0F766E] rounded-lg px-3 py-2 h-24"
+              />
+
+              <p className="text-red-500 text-sm">
+                {errors.message}
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              className="bg-[#0F766E] text-white py-2 rounded-lg font-bold hover:bg-[#134E4A]"
+            >
+              Send Message
+            </button>
+          </form>
         </div>
-
-        <div className="flex flex-col">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="border-2 border-[#0F766E] rounded-lg px-3 py-2"
-          />
-          <p className="text-red-500 text-sm">
-            {errors.email}
-          </p>
-        </div>
-
-        <div className="flex flex-col">
-          <input
-            type="text"
-            placeholder="Phone (optional)"
-            value={phone_number}
-            onChange={(e) => setPhone(e.target.value)}
-            className="border-2 border-[#0F766E] rounded-lg px-3 py-2"
-          />
-        </div>
-
-        <div className="flex flex-col">
-          <textarea
-            placeholder="Message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="border-2 border-[#0F766E] rounded-lg px-3 py-2 h-24"
-          />
-          <p className="text-red-500 text-sm">
-            {errors.message}
-          </p>
-        </div>
-
-        <button
-          type="submit"
-          className="bg-[#0F766E] text-white py-2 rounded-lg font-bold hover:bg-[#134E4A]"
-        >
-          Send Message
-        </button>
-      </form>
+      </div>
 
       <CustomAlert
         show={alert.show}
@@ -161,6 +198,6 @@ export default function AddContact() {
           })
         }
       />
-    </div>
+    </>
   );
 }

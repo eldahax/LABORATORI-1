@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import CustomAlert from "../components/CustomAlert";
 
-export default function AddOffer() {
+export default function AddOffers({ show, onClose }) {
   const [offers_name, setOfferName] = useState("");
   const [price, setPrice] = useState("");
   const [start_date, setStartDate] = useState("");
@@ -17,6 +17,8 @@ export default function AddOffer() {
   });
 
   useEffect(() => {
+    if (!show) return; 
+
     fetch("http://localhost:5000/api/treatments", {
       credentials: "include",
     })
@@ -29,7 +31,9 @@ export default function AddOffer() {
           type: "error",
         })
       );
-  }, []);
+  }, [show]);
+
+  if (!show) return null;
 
   const handleCheckbox = (id) => {
     if (treatment_ids.includes(id)) {
@@ -87,6 +91,8 @@ export default function AddOffer() {
       setStartDate("");
       setEndDate("");
       setTreatmentIds([]);
+
+  
     } catch {
       setAlert({
         show: true,
@@ -97,8 +103,16 @@ export default function AddOffer() {
   };
 
   return (
-    <div className="flex justify-center items-center w-full h-screen">
-      <div className="w-full max-w-md p-8 rounded-xl">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-lg relative max-h-[90vh] overflow-y-auto">
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
+        >
+          ✕
+        </button>
 
         <CustomAlert
           show={alert.show}
@@ -146,10 +160,10 @@ export default function AddOffer() {
           />
 
           <div className="border p-3 rounded">
-            <h3>Select Treatments</h3>
+            <h3 className="font-semibold mb-2 text-[#0F766E]">Select Treatments</h3>
 
             {treatments.map((t) => (
-              <label key={t.treatment_id} className="block">
+              <label key={t.treatment_id} className="flex items-center gap-2 mb-1 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={treatment_ids.includes(t.treatment_id)}
@@ -160,12 +174,22 @@ export default function AddOffer() {
             ))}
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-[#0F766E] text-white py-2 rounded-lg"
-          >
-            Add Offer
-          </button>
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-1/2 border border-gray-300 text-gray-700 py-2 rounded-lg"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              className="w-1/2 bg-[#0F766E] text-white py-2 rounded-lg hover:bg-[#0D665F]"
+            >
+              Add Offer
+            </button>
+          </div>
 
         </form>
       </div>

@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import CustomAlert from "../components/CustomAlert";
 
-export default function AddTreatment() {
-  const navigate = useNavigate();
-
+export default function AddTreatment({ show, onClose }) {
   const [treatmentName, setTreatmentName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
@@ -24,6 +21,7 @@ export default function AddTreatment() {
   };
 
   useEffect(() => {
+    if (!show) return;
     const fetchD = async () => {
       const d = await fetch("http://localhost:5000/api/departments", {
         credentials: "include",
@@ -32,7 +30,9 @@ export default function AddTreatment() {
       setDeps(res);
     };
     fetchD();
-  }, []);
+  }, [show]);
+
+  if (!show) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,43 +65,40 @@ export default function AddTreatment() {
         return;
       }
 
-      showAlert("Treatment created successfully", "success");
-
       setTreatmentName("");
       setPrice("");
       setDescription("");
       setAverageDuration("");
       setDepartmentName("");
 
-      setTimeout(() => navigate("/Treatments"), 900);
+      onClose();
     } catch (err) {
       showAlert("Server error", "error");
     }
   };
 
   return (
-    <div className="flex justify-center items-center w-full h-screen">
-      <div className="w-full max-w-md p-8 rounded-xl">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-lg relative">
 
-        <CustomAlert
-          show={alert.show}
-          message={alert.message}
-          type={alert.type}
-          onClose={() => setAlert((p) => ({ ...p, show: false }))}
-        />
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
+        >
+          ✕
+        </button>
 
-        <h1 className="text-[36px] font-bold text-[#0F766E] text-center mb-5">
+        <h1 className="text-[30px] font-bold text-[#0F766E] text-center mb-5">
           ADD TREATMENT
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           <input
             type="text"
             placeholder="treatment name"
             value={treatmentName}
             onChange={(e) => setTreatmentName(e.target.value)}
-            className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+            className="w-full border p-2 rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
           />
 
           <input
@@ -109,7 +106,7 @@ export default function AddTreatment() {
             placeholder="price"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+            className="w-full border p-2 rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
           />
 
           <input
@@ -117,7 +114,7 @@ export default function AddTreatment() {
             placeholder="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+            className="w-full border p-2 rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
           />
 
           <input
@@ -125,16 +122,15 @@ export default function AddTreatment() {
             placeholder="average duration"
             value={averageDuration}
             onChange={(e) => setAverageDuration(e.target.value)}
-            className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+            className="w-full border p-2 rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
           />
 
           <select
             value={departmentName}
             onChange={(e) => setDepartmentName(e.target.value)}
-            className="w-full border-2 border-[#0F766E] rounded-lg px-3 py-2"
+            className="w-full border p-2 rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
           >
             <option value="">select department</option>
-
             {deps.map((d) => (
               <option key={d.department_id} value={d.department_name}>
                 {d.department_name}
@@ -142,15 +138,30 @@ export default function AddTreatment() {
             ))}
           </select>
 
-          <button
-            type="submit"
-            className="w-full bg-[#0F766E] text-white py-2 rounded-lg"
-          >
-            Add Treatment
-          </button>
-
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-1/2 border border-gray-300 text-gray-700 py-2 rounded hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="w-1/2 bg-[#0F766E] text-white py-2 rounded hover:bg-[#134E4A]"
+            >
+              Create Treatment
+            </button>
+          </div>
         </form>
       </div>
+
+      <CustomAlert
+        show={alert.show}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert((p) => ({ ...p, show: false }))}
+      />
     </div>
   );
 }

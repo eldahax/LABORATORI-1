@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import CustomAlert from "../components/CustomAlert";
 
-export default function EditTreatment() {
-    const { id } = useParams();
-    const navigate = useNavigate();
+export default function EditTreatment({ show, onClose, treatmentId }) {
+    const id = treatmentId;
 
     const [treatmentName, setTreatmentName] = useState("");
     const [price, setPrice] = useState("");
@@ -36,6 +34,8 @@ export default function EditTreatment() {
     ];
 
     useEffect(() => {
+        if (!show || !id) return; 
+
         fetch(`http://localhost:5000/api/treatments/${id}`, {
             credentials: "include"
         })
@@ -54,7 +54,9 @@ export default function EditTreatment() {
                     type: "error",
                 });
             });
-    }, [id]);
+    }, [id, show]);
+
+    if (!show) return null;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -129,8 +131,8 @@ export default function EditTreatment() {
             });
 
             setTimeout(() => {
-                navigate("/Treatments");
-            }, 1000);
+                onClose();
+            }, 900);
 
         } catch {
             setAlert({
@@ -142,11 +144,18 @@ export default function EditTreatment() {
     };
 
     return (
-        <div className="flex justify-center items-center w-full h-screen">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+            <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-lg relative">
+        
+                <button 
+                    type="button"
+                    onClick={onClose} 
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
+                >
+                    ✕
+                </button>
 
-            <div className="w-full max-w-md p-8 rounded-xl">
-
-                {/* ALERT */}
+              
                 <CustomAlert
                     show={alert.show}
                     message={alert.message}
@@ -161,7 +170,6 @@ export default function EditTreatment() {
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-
                     <input
                         type="text"
                         value={treatmentName}
@@ -214,19 +222,18 @@ export default function EditTreatment() {
 
                     <button
                         type="submit"
-                        className="w-full bg-[#0F766E] text-white py-2 rounded-lg font-bold"
+                        className="w-full bg-[#0F766E] text-white py-2 rounded-lg font-bold hover:bg-[#0D665F] transition-colors"
                     >
                         Save
                     </button>
 
                     <button
                         type="button"
-                        onClick={() => navigate("/Treatments")}
-                        className="w-full border border-gray-300 text-gray-600 py-2 rounded-lg mt-2"
+                        onClick={onClose}
+                        className="w-full border border-gray-300 text-gray-600 py-2 rounded-lg mt-2 hover:bg-gray-50 transition-colors"
                     >
                         Cancel
                     </button>
-
                 </form>
             </div>
         </div>
