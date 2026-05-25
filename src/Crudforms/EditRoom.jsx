@@ -15,7 +15,7 @@ export default function EditRoom({ id, onClose, refresh }) {
             .then(data => {
                 setRoomName(data.room_name);
                 setChairNumber(data.chair_number);
-                setDepartmentId(data.department_id);
+                setDepartmentId(data.department_id); 
             })
             .catch(() => setAlert({ show: true, message: "Failed to load room", type: "error" }));
 
@@ -62,6 +62,7 @@ export default function EditRoom({ id, onClose, refresh }) {
                 <input type="number" value={chairNumber} onChange={(e) => setChairNumber(e.target.value)} className="w-full border p-2 rounded" />
                 <label className="text-sm">Department</label>
                 <select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)} className="w-full border p-2 rounded">
+                    <option value="">Select a Department</option>
                     {departments.map(d => <option key={d.department_id} value={d.department_id}>{d.department_name}</option>)}
                 </select>
                 <div className="flex gap-2 pt-4">

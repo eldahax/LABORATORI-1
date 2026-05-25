@@ -16,52 +16,52 @@ function BookingAndPaymentForm() {
 
   const [doctors, setDoctors] = useState([]);
   const [treatments, setTreatments] = useState([]);
-    const [filtered, setFilteredTreatments] = useState([]);
+  const [filtered, setFilteredTreatments] = useState([]);
 
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/doctors"
-      ,{
-        credentials:"include"
+      , {
+        credentials: "include"
       }
     ).then(res => res.json()).then(data => setDoctors(data));
-    fetch("http://localhost:5000/api/treatments",{
-      credentials:"include"
+    fetch("http://localhost:5000/api/treatments", {
+      credentials: "include"
     })
-    .then(res => res.json())
-    .then(data => setTreatments(data));
+      .then(res => res.json())
+      .then(data => setTreatments(data));
   }, []);
-useEffect(() => {
-  if (!doc) {
-    setFilteredTreatments([]);
-    return;
-  }
+  useEffect(() => {
+    if (!doc) {
+      setFilteredTreatments([]);
+      return;
+    }
 
-  const selectedDoctor = doctors.find(
-    (d) => Number(d.doctor_id) === Number(doc)
-  );
+    const selectedDoctor = doctors.find(
+      (d) => Number(d.doctor_id) === Number(doc)
+    );
 
-  if (!selectedDoctor) return;
-  const doctorDepartments =
-    selectedDoctor.Departments || [];
+    if (!selectedDoctor) return;
+    const doctorDepartments =
+      selectedDoctor.Departments || [];
 
-  const departmentIds = doctorDepartments.map(
-    (d) => d.department_id
-  );
+    const departmentIds = doctorDepartments.map(
+      (d) => d.department_id
+    );
 
-  const filtered = treatments.filter((t) =>
-    departmentIds.includes(t.department_id)
-  );
+    const filtered = treatments.filter((t) =>
+      departmentIds.includes(t.department_id)
+    );
 
-  setFilteredTreatments(filtered);
-  setReason("");
-}, [doc, doctors, treatments]);
+    setFilteredTreatments(filtered);
+    setReason("");
+  }, [doc, doctors, treatments]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!stripe || !elements) return; 
+    if (!stripe || !elements) return;
 
     setErrorMsg("");
     setLoading(true);
@@ -85,7 +85,7 @@ useEffect(() => {
           phone_number: phone,
           appointment_date_time: date,
           description: reason,
-          stripeToken: token.id 
+          stripeToken: token.id
         }),
       });
 
@@ -97,8 +97,8 @@ useEffect(() => {
       }
 
       alert("Appointment Booked and Paid Successfully!");
-      
-     
+
+
       setName(""); setDoc(""); setReason(""); setEmail(""); setPhone(""); setDate("");
       cardElement.clear();
     } catch (err) {
@@ -111,7 +111,7 @@ useEffect(() => {
   return (
     <form onSubmit={handleSubmit} className="w-full md:w-[60%] flex flex-col gap-4 mt-[60px] mx-auto p-6 bg-white rounded-xl shadow">
       <h2 className="text-xl font-bold text-gray-800 border-b pb-2">Book Appointment & Pay</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block mb-1 font-bold text-black text-sm">Full Name</label>
@@ -133,8 +133,23 @@ useEffect(() => {
           <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} required className="w-full border border-black rounded-lg px-3 py-2" />
         </div>
         <div>
-          <label className="block mb-1 font-bold text-black text-sm">Date and Time</label>
-          <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} required className="w-full border border-black rounded-lg px-3 py-2" />
+          <label htmlFor="" className="block mb-1 font-bold text-black text-sm"> Date and time</label>
+          <input
+            type="datetime-local"
+            min={new Date().toISOString().slice(0, 16)}
+            value={date}
+            onChange={(e) => {
+              const selected = new Date(e.target.value);
+              if (selected.getDay() === 0) {
+                setErrorMsg("Appointments are not available on Sundays");
+                return;
+              }
+              const hour = selected.getHours();
+               if (hour < 8 || hour >= 16) { setErrorMsg("Appointments are available only between 08:00 and 16:00");
+                return;}setErrorMsg("");setDate(e.target.value);
+            }}
+            className="w-full border border-black rounded-lg px-3 py-2"
+          />
         </div>
         <div>
           <label className="block mb-1 font-bold text-black text-sm">Treatment</label>
@@ -143,7 +158,7 @@ useEffect(() => {
             {filtered.map(t => <option key={t.treatment_id} value={t.treatment_name}>{t.treatment_name} {t.price}$
             </option>)}
           </select>
-          
+
         </div>
       </div>
 

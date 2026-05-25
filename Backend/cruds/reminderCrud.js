@@ -132,37 +132,34 @@ const createReminder = async (data) => {
 
 
 const getAllReminders = async (user) => {
-  let includeFilter = [
-    {
-      model: Appointment,
-      include: [
-        { model: Doctor, include: [User] },
-        { model: Patient, include: [User] },
-      ],
-    },
-  ];
-
   const roles = user.roles || [];
 
-  if (roles.includes("patient")) {
-    includeFilter[0].where = {
-      patient_id: user.patient_id,
-    };
-  }
+  const appointmentWhere = {};
 
-  else if (roles.includes("doctor")) {
-    includeFilter[0].where = {
-      doctor_id: user.doctor_id,
-    };
+  if (!roles.includes("admin")) {
+    if (roles.includes("patient")) {
+      appointmentWhere.patient_id = user.patient_id;
+    }
+
+    if (roles.includes("doctor")) {
+      appointmentWhere.doctor_id = user.doctor_id;
+    }
   }
 
   return await Reminder.findAll({
-    include: includeFilter,
+    include: [
+      {
+        model: Appointment,
+        where: appointmentWhere,
+        include: [
+          { model: Doctor, include: [User] },
+          { model: Patient, include: [User] },
+        ],
+      },
+    ],
     order: [["reminder_date", "DESC"]],
   });
 };
-
-
 
 const getReminderById = async (id) => {
   try {

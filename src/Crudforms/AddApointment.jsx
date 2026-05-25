@@ -21,6 +21,9 @@ function BookingAndPaymentForm({ onClose, onPaymentSuccess }) {
   const [filtered, setFilteredTreatments] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const nameRegex = /^[A-Za-z\s]{3,50}$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex = /^[0-9]{8,15}$/;
 
   useEffect(() => {
     API.get("/doctors")
@@ -59,40 +62,82 @@ function BookingAndPaymentForm({ onClose, onPaymentSuccess }) {
     setReason("");
   }, [doc, doctors, treatments]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!stripe || !elements) return;
 
-    setErrorMsg("");
-    setLoading(true);
+  setErrorMsg("");
+  setLoading(true);
 
-    try {
-      const cardElement = elements.getElement(CardElement);
-      const { token, error: stripeError } = await stripe.createToken(cardElement, {
+  try {
+    if (!name.trim()) throw new Error("Full name is required");
+
+    if (!nameRegex.test(name))
+      throw new Error("Full name must contain only letters");
+
+    if (!email.trim()) throw new Error("Email is required");
+
+    if (!emailRegex.test(email))
+      throw new Error("Invalid email format");
+
+    if (!phone.trim()) throw new Error("Phone number is required");
+
+    if (!phoneRegex.test(phone))
+      throw new Error("Phone number must contain only numbers");
+
+    if (!doc) throw new Error("Please select a doctor");
+
+    if (!reason) throw new Error("Please select a treatment");
+
+    if (!date) throw new Error("Please select a date");
+
+    const selectedDate = new Date(date);
+    const now = new Date();
+
+    if (selectedDate <= now) {
+      throw new Error("Appointment date must be in the future");
+    }
+
+    if (selectedDate.getDay() === 0) {
+      throw new Error("We do not work on Sundays");
+    }
+
+    const hour = selectedDate.getHours();
+
+    if (hour < 8 || hour >= 16) {
+      throw new Error(
+        "Appointments are available only between 08:00 and 16:00"
+      );
+    }
+
+    const cardElement = elements.getElement(CardElement);
+
+    const { token, error: stripeError } =
+      await stripe.createToken(cardElement, {
         name,
       });
 
-      if (stripeError) throw new Error(stripeError.message);
+    if (stripeError) throw new Error(stripeError.message);
 
-      const res = await API.post("/appointments", {
-        full_name: name,
-        doctor: doc,
-        email,
-        phone_number: phone,
-        appointment_date_time: date,
-        description: reason,
-        stripeToken: token.id,
-      });
+    await API.post("/appointments", {
+      full_name: name,
+      doctor: doc,
+      email,
+      phone_number: phone,
+      appointment_date_time: date,
+      description: reason,
+      stripeToken: token.id,
+    });
 
-      if (onPaymentSuccess) onPaymentSuccess();
-      onClose();
-    } catch (err) {
-      setErrorMsg(err.response?.data?.error || err.message);
-    } finally {
-      loading && setLoading(false);
-    }
-  };
+    if (onPaymentSuccess) onPaymentSuccess();
 
+    onClose();
+  } catch (err) {
+    setErrorMsg(err.response?.data?.error || err.message);
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <form
       onSubmit={handleSubmit}
@@ -162,12 +207,32 @@ function BookingAndPaymentForm({ onClose, onPaymentSuccess }) {
           <label className="block mb-1 font-bold text-black text-sm">
             Date and Time
           </label>
-          <input
-            type="datetime-local"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full border border-black rounded-lg px-3 py-2"
-          />
+        <input
+  type="datetime-local"
+  min={new Date().toISOString().slice(0, 16)}
+  value={date}
+  onChange={(e) => {
+    const selected = new Date(e.target.value);
+
+    if (selected.getDay() === 0) {
+      setErrorMsg("Appointments are not available on Sundays");
+      return;
+    }
+
+    const hour = selected.getHours();
+
+    if (hour < 8 || hour >= 16) {
+      setErrorMsg(
+        "Appointments are available only between 08:00 and 16:00"
+      );
+      return;
+    }
+
+    setErrorMsg("");
+    setDate(e.target.value);
+  }}
+  className="w-full border border-black rounded-lg px-3 py-2"
+/>
         </div>
         <div>
           <label className="block mb-1 font-bold text-black text-sm">

@@ -35,7 +35,7 @@ export default function AddRoom({ onClose, refresh }) {
                 body: JSON.stringify({
                     room_name: roomName,
                     chair_number: Number(chairNumber),
-                    department_id: Number(departmentId)
+                    department_id: departmentId
                 })
             });
             const data = await res.json();
@@ -62,7 +62,7 @@ export default function AddRoom({ onClose, refresh }) {
                 <p className="text-red-500 text-xs">{chairErr}</p>
                 <select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)} className="w-full border p-2 rounded">
                     <option value="">Select department</option>
-                    {departments.map(d => <option key={d.department_id} value={d.department_id}>{d.department_name}</option>)}
+                    {departments.map(d => <option key={d.department_name} value={d.department_name}>{d.department_name}</option>)}
                 </select>
                 <p className="text-red-500 text-xs">{departmentErr}</p>
                 <div className="flex gap-2">

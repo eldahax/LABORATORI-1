@@ -1,7 +1,7 @@
 import { useState } from "react";
 import CustomAlert from "../components/CustomAlert";
 
-export default function AddInventory() {
+function AddInventoryForm({ onClose, onSuccess }) {
   const [item_name, setInventoryName] = useState("");
   const [category, setCategory] = useState("");
   const [cost, setCost] = useState("");
@@ -16,10 +16,7 @@ export default function AddInventory() {
   const [descriptionError, setDescriptionError] = useState("");
 
   const [loading, setLoading] = useState(false);
-
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState("");
-  const [showAlert, setShowAlert] = useState(false);
+  const [alert, setAlert] = useState({ show: false, message: "", type: "success" });
 
   const nameRegex = /^[A-Za-z0-9\s]{3,50}$/;
 
@@ -42,9 +39,7 @@ export default function AddInventory() {
       setInventoryError("Item name is required");
       hasError = true;
     } else if (!nameRegex.test(item_name)) {
-      setInventoryError(
-        "Invalid item name (3-50 chars, no special symbols)"
-      );
+      setInventoryError("Invalid item name (3-50 chars, no special symbols)");
       hasError = true;
     }
 
@@ -53,12 +48,12 @@ export default function AddInventory() {
       hasError = true;
     }
 
-    if (cost === "" || parseFloat(cost) <= 0) {
+    if (cost === "" || isNaN(cost) || parseFloat(cost) <= 0) {
       setCostError("Valid cost is required");
       hasError = true;
     }
 
-    if (quantity === "" || parseInt(quantity) <= 0) {
+    if (quantity === "" || isNaN(quantity) || parseInt(quantity) <= 0) {
       setQuantityError("Valid quantity is required");
       hasError = true;
     }
@@ -93,35 +88,25 @@ export default function AddInventory() {
 
       if (!res.ok) {
         setSignupErr(data.error || "Something went wrong");
-
-        setAlertMessage(data.error || "Failed to add inventory");
-        setAlertType("error");
-        setShowAlert(true);
-
+        setAlert({
+          show: true,
+          message: data.error || "Failed to add inventory",
+          type: "error",
+        });
         setLoading(false);
         return;
       }
 
-      setAlertMessage("Item added successfully!");
-      setAlertType("success");
-      setShowAlert(true);
-
-      setInventoryName("");
-      setCategory("");
-      setCost("");
-      setQuantity("");
-      setDescription("");
-
-      setLoading(false);
+      if (onSuccess) onSuccess();
+      onClose();
     } catch (err) {
       console.error(err);
-
       setSignupErr("Failed to connect to the server.");
-
-      setAlertMessage("Server connection failed");
-      setAlertType("error");
-      setShowAlert(true);
-
+      setAlert({
+        show: true,
+        message: "Server connection failed",
+        type: "error",
+      });
       setLoading(false);
     }
   };
@@ -129,119 +114,138 @@ export default function AddInventory() {
   return (
     <>
       <CustomAlert
-        show={showAlert}
-        message={alertMessage}
-        type={alertType}
-        onClose={() => setShowAlert(false)}
+        show={alert.show}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert((p) => ({ ...p, show: false }))}
       />
 
-      <div className="flex justify-center items-center w-full min-h-screen bg-gray-50">
-        <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-xl">
-          <h1 className="text-[32px] font-bold text-[#0F766E] text-center tracking-tight mb-6">
-            ADD TO INVENTORY
-          </h1>
+      <form
+        onSubmit={handleSubmit}
+        className="w-[450px] bg-white p-8 rounded-2xl relative flex flex-col gap-4 text-black shadow-2xl animate-fade-in"
+      >
+      
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold cursor-pointer transition"
+        >
+          ✕
+        </button>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex flex-col">
-              <input
-                type="text"
-                placeholder="Item Name"
-                value={item_name}
-                onChange={(e) => {
-                  setInventoryName(e.target.value);
-                  setInventoryError("");
-                }}
-                className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#134E4A]"
-              />
-              <p className="text-red-500 text-xs mt-1">
-                {inventoryError}
-              </p>
-            </div>
+        <h1 className="text-2xl font-bold text-[#134E4A] text-center border-b pb-2">
+          Add New Item
+        </h1>
 
-            <div className="flex flex-col">
-              <select
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                  setCategoryError("");
-                }}
-                className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 bg-white"
-              >
-                <option value="">Select Category</option>
-                <option value="consumable">Consumable</option>
-                <option value="instrument">Instrument</option>
-                <option value="anesthetic">Anesthetic</option>
-                <option value="medication">Medication</option>
-                <option value="other">Other</option>
-              </select>
-              <p className="text-red-500 text-xs mt-1">
-                {categoryError}
-              </p>
-            </div>
+        {signupErr && <p className="text-red-500 text-xs font-semibold text-center">{signupErr}</p>}
 
-            <div className="flex flex-col">
-              <input
-                type="number"
-                placeholder="Cost"
-                value={cost}
-                onChange={(e) => {
-                  setCost(e.target.value);
-                  setCostError("");
-                }}
-                className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
-              />
-              <p className="text-red-500 text-xs mt-1">
-                {costError}
-              </p>
-            </div>
-
-            <div className="flex flex-col">
-              <input
-                type="number"
-                placeholder="Quantity"
-                value={quantity}
-                onChange={(e) => {
-                  setQuantity(e.target.value);
-                  setQuantityError("");
-                }}
-                className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2"
-              />
-              <p className="text-red-500 text-xs mt-1">
-                {quantityError}
-              </p>
-            </div>
-
-            <div className="flex flex-col">
-              <textarea
-                placeholder="Description"
-                value={description}
-                onChange={(e) => {
-                  setDescription(e.target.value);
-                  setDescriptionError("");
-                }}
-                className="block w-full border-[2px] border-[#0F766E] rounded-lg px-3 py-2 h-24"
-              />
-              <p className="text-red-500 text-xs mt-1">
-                {descriptionError}
-              </p>
-            </div>
-
-            {signupErr && (
-              <p className="text-red-500 text-center">
-                {signupErr}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#0F766E] text-white font-bold py-3 rounded-lg cursor-pointer hover:bg-[#134E4A] transition-all"
-            >
-              {loading ? "ADDING..." : "Add to Inventory"}
-            </button>
-          </form>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-bold text-gray-700">Item Name</label>
+          <input
+            type="text"
+            placeholder="Item Name"
+            value={item_name}
+            onChange={(e) => {
+              setInventoryName(e.target.value);
+              setInventoryError("");
+            }}
+            className="p-3 border rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
+          />
+          {inventoryError && <p className="text-red-500 text-xs font-semibold mt-0.5">{inventoryError}</p>}
         </div>
-      </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-bold text-gray-700">Category</label>
+          <select
+            value={category}
+            onChange={(e) => {
+              setCategory(e.target.value);
+              setCategoryError("");
+            }}
+            className="p-3 border rounded-lg text-sm border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
+          >
+            <option value="">Select Category</option>
+            <option value="consumable">Consumable</option>
+            <option value="instrument">Instrument</option>
+            <option value="anesthetic">Anesthetic</option>
+            <option value="medication">Medication</option>
+            <option value="other">Other</option>
+          </select>
+          {categoryError && <p className="text-red-500 text-xs font-semibold mt-0.5">{categoryError}</p>}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-bold text-gray-700">Cost</label>
+          <input
+            type="number"
+            step="0.01"
+            placeholder="Cost"
+            value={cost}
+            onChange={(e) => {
+              setCost(e.target.value);
+              setCostError("");
+            }}
+            className="p-3 border rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
+          />
+          {costError && <p className="text-red-500 text-xs font-semibold mt-0.5">{costError}</p>}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-bold text-gray-700">Quantity</label>
+          <input
+            type="number"
+            placeholder="Quantity"
+            value={quantity}
+            onChange={(e) => {
+              setQuantity(e.target.value);
+              setQuantityError("");
+            }}
+            className="p-3 border rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
+          />
+          {quantityError && <p className="text-red-500 text-xs font-semibold mt-0.5">{quantityError}</p>}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-bold text-gray-700">Description</label>
+          <textarea
+            placeholder="Description"
+            value={description}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              setDescriptionError("");
+            }}
+            className="p-3 border rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
+          />
+          {descriptionError && <p className="text-red-500 text-xs font-semibold mt-0.5">{descriptionError}</p>}
+        </div>
+
+        <div className="flex gap-3 mt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-1/2 py-3 border border-gray-300 text-gray-600 rounded-lg text-sm font-semibold hover:bg-gray-50 transition cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-1/2 bg-[#0F766E] text-white py-3 rounded-lg text-sm font-semibold hover:bg-teal-800 transition shadow-md disabled:opacity-50 cursor-pointer"
+          >
+            {loading ? "Adding..." : "Add Item"}
+          </button>
+        </div>
+      </form>
     </>
+  );
+}
+
+export default function AddInventoryModal({ show, onClose, onSuccess }) {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <AddInventoryForm onClose={onClose} onSuccess={onSuccess} />
+    </div>
   );
 }

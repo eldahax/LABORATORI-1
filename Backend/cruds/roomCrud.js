@@ -1,9 +1,6 @@
 const { Room, Department } = require("../models");
 
-const createRoom = async (room_name,
-    chair_number,
-    department_name
-) => {
+const createRoom = async (room_name, chair_number, department_name) => {
     try {
         const department = await Department.findOne({
             where: { department_name },
@@ -42,7 +39,7 @@ const getRoomById = async (id) => {
         include: [
             {
                 model: Department,
-                attributes: ["department_name"],
+                attributes: ["department_name", "department_id"],
             },
         ],
     });
@@ -57,22 +54,21 @@ const updateRoom = async (id, data) => {
 
     if (!room) throw new Error("Room not found");
 
-    let department_id = room.department_id;
+    let dep = room.department_id;
 
-    if (data.department_name) {
-        const department = await Department.findOne({
-            where: { department_name: data.department_name },
-        });
+    if (data.department_id) {
+        const d = data.department_id;
+        const department = await Department.findByPk(d);
 
         if (!department) throw new Error("Department not found");
 
-        department_id = department.department_id;
+        dep = department.department_id;
     }
 
     await room.update({
         room_name: data.room_name,
         chair_number: data.chair_number,
-        department_id,
+        department_id: dep,
     });
 
     return { message: "Room updated" };

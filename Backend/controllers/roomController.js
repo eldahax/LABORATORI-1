@@ -2,12 +2,12 @@ const roomService = require("../cruds/roomCrud");
 
 const createRoom = async (req, res) => {
     try {
-        const { room_name, chair_number, department_name } = req.body;
+        const { room_name, chair_number, department_id } = req.body;
 
         const result = await roomService.createRoom(
             room_name,
             chair_number,
-            department_name
+            department_id
         );
 
         res.json(result);

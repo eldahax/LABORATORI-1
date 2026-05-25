@@ -4,7 +4,9 @@ const {
     Patient,
     PatientAllergy,
     Role,
-    UserRole
+    UserRole,
+    DentalRecord,
+    Appointment
 } = require("../models");
 
 const bcrypt = require("bcryptjs");
@@ -234,6 +236,8 @@ const deletePatient = async (patient_id) => {
         if (!patient) {
             throw new Error("Patient not found");
         }
+        const ap=await Appointment.findOne( {where: { patient_id: patient.patient_id } , transaction: t });
+        if(ap){  throw new Error("this patient cant be delted due to dental history")}
 
         const userId = patient.user_id;
 

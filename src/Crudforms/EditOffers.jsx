@@ -32,8 +32,8 @@ export default function EditOffer({ show, onClose, offerId }) {
       .then((data) => {
         setOfferName(data.offers_name || "");
         setPrice(data.price || "");
-        setStartDate(data.start_date || "");
-        setEndDate(data.end_date || "");
+      setStartDate(data.start_date ? data.start_date.split("T")[0] : "");
+      setEndDate(data.end_date ? data.end_date.split("T")[0] : "");
 
         setSelectedTreatments(
           data.Treatments?.map((t) => t.treatment_id) || []

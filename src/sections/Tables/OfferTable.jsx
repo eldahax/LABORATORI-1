@@ -72,7 +72,6 @@ export default function OfferTable() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Treatments fetched:", data);
         setTreatments(data);
       })
       .catch(() =>
@@ -90,7 +89,6 @@ export default function OfferTable() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Offers fetched:", data);
         setOffers(data);
       })
       .catch(() =>
