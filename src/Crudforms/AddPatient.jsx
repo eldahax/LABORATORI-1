@@ -68,7 +68,7 @@ export default function AddPatient({ show, onClose }) {
                     phone_number: phone,
                     password,
                     date_of_birth: dateOfBirth,
-                    allergy_name: allergy || null
+                    allergy_name: allergy.trim() ? [allergy.trim()] : []
                 }),
             });
 
@@ -86,7 +86,6 @@ export default function AddPatient({ show, onClose }) {
             setPhone("");
             setDateOfBirth("");
             setAllergy("");
-
 
             onClose();
 
@@ -136,10 +135,12 @@ export default function AddPatient({ show, onClose }) {
                         onChange={(e) => setDateOfBirth(e.target.value)}
                         className="w-full border p-2 rounded" />
 
-                    <input placeholder="allergy"
+                    <input
+                        placeholder="allergy"
                         value={allergy}
                         onChange={(e) => setAllergy(e.target.value)}
-                        className="w-full border p-2 rounded" />
+                        className="w-full border p-2 rounded"
+                    />
 
                     <div className="flex gap-3 pt-2">
                         <button

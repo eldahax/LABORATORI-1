@@ -45,9 +45,9 @@ export default function EditPatient({ show, onClose, patientId }) {
     last_name: "",
     email: "",
     phone_number: "",
-    allergy_name: ""
+    allergy_name: []
   });
-
+  const [allergyInput, setAllergyInput] = useState("");
   const [nameErr, setNameErr] = useState("");
   const [lastNameErr, setLastNameErr] = useState("");
   const [emailErr, setEmailErr] = useState("");
@@ -62,7 +62,7 @@ export default function EditPatient({ show, onClose, patientId }) {
   const nameRegex = /^[A-Za-z]{3,15}$/;
 
   useEffect(() => {
-    if (!show || !id) return; 
+    if (!show || !id) return;
 
     fetch(`http://localhost:5000/api/patients/${id}`)
       .then((res) => res.json())
@@ -72,10 +72,10 @@ export default function EditPatient({ show, onClose, patientId }) {
           last_name: data?.User?.last_name || "",
           email: data?.User?.email || "",
           phone_number: data?.User?.phone_number || "",
-          allergy_name: data?.PatientAllergies?.[0]?.allergy_name || ""
+          allergy_name: data?.PatientAllergies?.map(a => a.allergy_name) || []
         });
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [id, show]);
 
   if (!show) return null;
@@ -140,8 +140,8 @@ export default function EditPatient({ show, onClose, patientId }) {
       }
 
       setConfirmOpen(false);
-      onClose(); 
-      navigate("/Staff");
+      onClose();
+      navigate("/patients");
     } catch (err) {
       setAlertState({ show: true, message: "Server error", type: "error" });
     }
@@ -149,7 +149,7 @@ export default function EditPatient({ show, onClose, patientId }) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      
+
       <ConfirmModal
         show={confirmOpen}
         onCancel={() => setConfirmOpen(false)}
@@ -160,9 +160,9 @@ export default function EditPatient({ show, onClose, patientId }) {
         onSubmit={handleSubmit}
         className="w-[450px] bg-white rounded-2xl space-y-2 p-8 shadow-lg relative"
       >
-        <button 
+        <button
           type="button"
-          onClick={onClose} 
+          onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
         >
           ✕
@@ -202,18 +202,24 @@ export default function EditPatient({ show, onClose, patientId }) {
           onChange={handleChange}
           className="p-3 border w-full rounded-lg"
         />
-        <div className="h-5"></div> 
+        <div className="h-5"></div>
 
         <input
           name="allergy_name"
-          value={form.allergy_name}
-          onChange={handleChange}
+          value={allergyInput}
+          onChange={(e) => {
+            setAllergyInput(e.target.value);
+            setForm((prev) => ({
+              ...prev,
+              allergy_name: e.target.value ? [e.target.value] : []
+            }));
+          }}
           className="p-3 border w-full rounded-lg"
         />
         <div className="h-5"></div>
 
         <div className="flex gap-3 pt-2">
-          <button 
+          <button
             type="button"
             onClick={onClose}
             className="w-1/2 border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold"

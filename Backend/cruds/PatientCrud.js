@@ -1,4 +1,4 @@
-const { User, Patient, PatientAllergy,Role,UserRole } = require("../models");
+const { User, Patient, PatientAllergy, Role, UserRole } = require("../models");
 const { createUser, updateUser } = require("./userCrud");
 
 const bcrypt = require('bcryptjs')
@@ -21,17 +21,17 @@ const addPatient = async (
         phone_number,
         password_hash
     });
-     const role = await Role.findOne({
-          where: { role_name: "patient" }
-        
-        });
-    
-        if (!role) throw new Error("Patient role not found");
-    
-        await UserRole.create({
-          user_id: user.user_id,
-          role_id: role.role_id
-        });
+    const role = await Role.findOne({
+        where: { role_name: "patient" }
+
+    });
+
+    if (!role) throw new Error("Patient role not found");
+
+    await UserRole.create({
+        user_id: user.user_id,
+        role_id: role.role_id
+    });
 
     const patient = await Patient.create({
         user_id: user.user_id,
@@ -42,7 +42,7 @@ const addPatient = async (
         patient_id: patient.patient_id,
         allergy_name
     });
-   
+
     return {
         user_id: user.user_id,
         patient_id: patient.patient_id,
@@ -72,7 +72,7 @@ const getPatientById = async (patient_id) => {
             {
                 model: User,
                 attributes: ["user_id", "first_name", "last_name", "email", "phone_number"]
-            },{
+            }, {
                 model: PatientAllergy,
                 attributes: ["allergy_name"]
             }
@@ -103,16 +103,20 @@ const updatePatient = async (patient_id, data) => {
 
     await patient.update({
         date_of_birth: data.date_of_birth ?? patient.date_of_birth,
-       
-    });
-   await PatientAllergy.destroy({
-  where: { patient_id: patient.patient_id }
-});
 
-await PatientAllergy.create({
-  patient_id: patient.patient_id,
-  allergy_name: data.allergy_name
-});
+    });
+    await PatientAllergy.destroy({
+        where: { patient_id: patient.patient_id }
+    });
+
+    if (data.allergy_name && Array.isArray(data.allergy_name) && data.allergy_name.length > 0) {
+        const allergyData = data.allergy_name.map((a) => ({
+            patient_id: patient.patient_id,
+            allergy_name: a
+        }));
+
+        await PatientAllergy.bulkCreate(allergyData);
+    }
 
     return {
         patient_id: patient.patient_id,

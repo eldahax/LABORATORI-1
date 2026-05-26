@@ -148,8 +148,11 @@ export default function TablePatient() {
                   <td>{user.User?.phone_number}</td>
 
                   <td>
-                    {user.PatientAllergies?.length > 0
-                      ? user.PatientAllergies.map((a) => a.allergy_name).join(", ")
+                    {user.PatientAllergies?.length
+                      ? user.PatientAllergies
+                        .map((a) => a?.allergy_name)
+                        .filter(Boolean)
+                        .join(", ")
                       : "No allergy"}
                   </td>
 
