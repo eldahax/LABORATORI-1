@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../sideBar";
 import CustomAlert from "../../components/CustomAlert";
-
+import BookingModal from "../../Crudforms/AddApointment";
+import EditAppointmentModal from "../../Crudforms/EditAppointment";
 function ConfirmModal({ show, onConfirm, onCancel }) {
   if (!show) return null;
 
@@ -16,17 +17,10 @@ function ConfirmModal({ show, onConfirm, onCancel }) {
         </p>
 
         <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 border rounded-lg"
-          >
+          <button onClick={onCancel} className="px-4 py-2 border rounded-lg">
             Cancel
           </button>
-
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg"
-          >
+          <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white rounded-lg">
             Delete
           </button>
         </div>
@@ -37,6 +31,7 @@ function ConfirmModal({ show, onConfirm, onCancel }) {
 
 export default function AppointmentTable() {
   const [appointments, setAppointments] = useState([]);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   const [alert, setAlert] = useState({
@@ -45,27 +40,18 @@ export default function AppointmentTable() {
     type: "success",
   });
 
-  
- useEffect(() => {
-    fetch("http://localhost:5000/api/users/me", {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setUser(data))
-      .catch((err) => console.log(err));
-  }, []);
-  const [user, setUser] = useState(null);
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+
+  const [editAppointmentOpen, setEditAppointmentOpen] = useState(false);
+  const [editAppointmentId, setEditAppointmentId] = useState(null);
 
   const roles = user?.roles || [];
 
-
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-
-  useEffect(() => {
-   fetch("http://localhost:5000/api/appointments", {
-  credentials: "include"
-})
+  const fetchAppointments = () => {
+    fetch("http://localhost:5000/api/appointments", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setAppointments(data))
       .catch(() =>
@@ -75,40 +61,44 @@ export default function AppointmentTable() {
           type: "error",
         })
       );
+  };
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/users/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setUser(data))
+      .catch((err) => console.log(err));
+
+    fetchAppointments();
   }, []);
 
   const deleteAppointment = async () => {
     try {
-     const res = await fetch( `http://localhost:5000/api/appointments/${selectedId}`, 
-      { method: "DELETE", 
-        credentials: "include" } );
+      const res = await fetch(`http://localhost:5000/api/appointments/${selectedId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
       if (!res.ok) {
-        setAlert({
-          show: true,
-          message: "Delete failed",
-          type: "error",
-        });
+        setAlert({ show: true, message: "Delete failed", type: "error" });
         return;
       }
 
-      setAppointments((prev) =>
-        prev.filter((app) => app.appointment_id !== selectedId)
-      );
-
-      setAlert({
-        show: true,
-        message: "Appointment deleted successfully",
-        type: "success",
-      });
+      setAppointments((prev) => prev.filter((app) => app.appointment_id !== selectedId));
+      setAlert({ show: true, message: "Appointment deleted successfully", type: "success" });
     } catch (err) {
-      setAlert({
-        show: true,
-        message: "Server error",
-        type: "error",
-      });
+      setAlert({ show: true, message: "Server error", type: "error" });
     }
-
     setConfirmOpen(false);
+  };
+
+
+  const handleBookingSuccess = () => {
+    fetchAppointments();
+    setAlert({
+      show: true,
+      message: "Appointment Booked and Paid Successfully!",
+      type: "success"
+    });
   };
 
   return (
@@ -125,8 +115,8 @@ export default function AppointmentTable() {
             </h1>
 
             <button
-              onClick={() => navigate("/addApointment")}
-              className="bg-[#0F766E] text-white px-4 py-2 rounded-lg"
+              onClick={() => setBookingOpen(true)}
+              className="bg-[#0F766E] text-white px-4 py-2 rounded-lg hover:bg-[#0d635c] transition"
             >
               + Book Appointment
             </button>
@@ -145,93 +135,81 @@ export default function AppointmentTable() {
             onConfirm={deleteAppointment}
           />
 
-         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-  {appointments.map((app) => (
-    <div
-      key={app.appointment_id}
-      className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 hover:shadow-md transition"
-    >
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h2 className="text-lg font-bold text-[#0F766E]">
-            Appointment with   Dr. {app.Doctor?.User?.first_name}{" "}
-          {app.Doctor?.User?.last_name}
-          </h2>
+          <BookingModal
+            show={bookingOpen}
+            onClose={() => setBookingOpen(false)}
+            onPaymentSuccess={handleBookingSuccess}
+          />
+          <EditAppointmentModal
+            show={editAppointmentOpen}
+            appointmentId={editAppointmentId}
+            onClose={() => {
+              setEditAppointmentOpen(false);
+              setEditAppointmentId(null);
+            }}
+            onSuccess={() => {
+              setAlert({ show: true, message: "Appointment updated successfully", type: "success" });
+              fetchAppointments();
+            }}
+          />
 
-          <p className="text-sm text-gray-500">
-            {new Date(app.appointment_date_time).toLocaleString()}
-          </p>
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {appointments.map((app) => (
+              <div
+                key={app.appointment_id}
+                className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 hover:shadow-md transition"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-lg font-bold text-[#0F766E]">
+                      Appointment with Dr. {app.Doctor?.User?.first_name}{" "}{app.Doctor?.User?.last_name}
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      {new Date(app.appointment_date_time).toLocaleString()}
+                    </p>
+                  </div>
+                  <span className="bg-[#0F766E]/10 text-[#0F766E] text-xs px-3 py-1 rounded-full">
+                    {app.appointment_status}
+                  </span>
+                </div>
 
-        <span className="bg-[#0F766E]/10 text-[#0F766E] text-xs px-3 py-1 rounded-full">
-          {app.appointment_status}
-        </span>
-      </div>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-semibold">Patient:</span> {app.Patient?.User?.first_name} {app.Patient?.User?.last_name}</p>
+                  <p><span className="font-semibold">Doctor:</span> Dr. {app.Doctor?.User?.first_name} {app.Doctor?.User?.last_name}</p>
+                  <p><span className="font-semibold">Room:</span> {app.Room?.room_name}</p>
+                  <p><span className="font-semibold">Duration:</span> {app.duration} mins</p>
+                  <p><span className="font-semibold">Procedure:</span> {app.PatientTreatments?.[0]?.Treatment?.treatment_name}</p>
+                  <p><span className="font-semibold">Condition:</span> {app.DentalRecords?.[0]?.dental_condition}</p>
+                  <p><span className="font-semibold">Tooth:</span> {app.DentalRecords?.[0]?.tooth}</p>
+                </div>
 
-      <div className="space-y-2 text-sm">
-        <p>
-          <span className="font-semibold">Patient:</span>{" "}
-          {app.Patient?.User?.first_name}{" "}
-          {app.Patient?.User?.last_name}
-        </p>
-
-        <p>
-          <span className="font-semibold">Doctor:</span>{" "}
-          Dr. {app.Doctor?.User?.first_name}{" "}
-          {app.Doctor?.User?.last_name}
-        </p>
-
-        <p>
-  <span className="font-semibold">Room:</span>{" "}
-  {app.Room?.room_name}
-</p>
-
-<p>
-  <span className="font-semibold">Duration:</span>{" "}
-  {app.duration} mins
-</p>
-<p>
-  <span className="font-semibold">Procedure:</span>{" "}
-  {app.PatientTreatments?.[0]?.Treatment?.treatment_name}
-</p>
-
-<p>
-  <span className="font-semibold">Condition:</span>{" "}
-  {app.DentalRecords?.[0]?.dental_condition}
-</p>
-<p>
-  <span className="font-semibold">Tooth:</span>{" "}
-  {app.DentalRecords?.[0]?.tooth}
-</p>
-      </div>
-
-      <div className="flex gap-3 mt-5">
-          {(roles.includes("doctor") || roles.includes("admin")) && (
-        <button
-          onClick={() => {
-            setSelectedId(app.appointment_id);
-            setConfirmOpen(true);
-          }}
-          className="flex-1 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition py-2 rounded-xl"
-        >
-          Delete
-        </button>
-          )}
-           {(roles.includes("doctor") || roles.includes("admin")) && (
-        <button
-          onClick={() =>
-            navigate(`/appointments/edit/${app.appointment_id}`)
-          }
-          className="flex-1 bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition py-2 rounded-xl"
-        >
-          Update
-        </button>
-           )}
-  
-      </div>
-    </div>
-  ))}
-</div>
+                <div className="flex gap-3 mt-5">
+                  {(roles.includes("doctor") || roles.includes("admin")) && (
+                    <button
+                      onClick={() => {
+                        setSelectedId(app.appointment_id);
+                        setConfirmOpen(true);
+                      }}
+                      className="flex-1 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition py-2 rounded-xl"
+                    >
+                      Delete
+                    </button>
+                  )}
+                  {(roles.includes("doctor") || roles.includes("admin")) && (
+                    <button
+                      onClick={() => {
+                        setEditAppointmentId(app.appointment_id);
+                        setEditAppointmentOpen(true);
+                      }}
+                      className="flex-1 text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg transition cursor-pointer"
+                    >
+                      Update
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

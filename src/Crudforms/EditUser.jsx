@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import CustomAlert from "../components/CustomAlert";
 
-export default function EditUser() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-
+function EditUserForm({ userId, onClose, onSuccess }) {
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -14,32 +11,48 @@ export default function EditUser() {
   const [nameErr, setNameErr] = useState("");
   const [lastNameErr, setLastNameErr] = useState("");
   const [emailErr, setEmailErr] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [alert, setAlert] = useState({ show: false, message: "", type: "success" });
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
   const nameRegex = /^[A-Za-z]{3,15}$/;
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/users/${id}`, {
-  credentials: "include",
-})
-      .then((res) => res.json())
-      .then((data) => {
-        setForm({
-          first_name: data.first_name,
-          last_name: data.last_name,
-          email: data.email,
+    if (!userId) return;
+
+    const fetchUserData = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
+          credentials: "include",
         });
-      })
-      .catch(() => {});
-  }, [id]);
+        if (!res.ok) throw new Error("Could not retrieve user data");
+        const data = await res.json();
+        setForm({
+          first_name: data.first_name || "",
+          last_name: data.last_name || "",
+          email: data.email || "",
+        });
+      } catch {
+        setAlert({
+          show: true,
+          message: "Failed to load user records.",
+          type: "error",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [userId]);
 
   const handleChange = (e) => {
-    setForm({
-      first_name: form.first_name,
-      last_name: form.last_name,
-      email: form.email,
+    setForm((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -75,80 +88,140 @@ export default function EditUser() {
       hasError = true;
     }
 
-    if (hasError) return;
+    if (hasError || saving) return;
 
-   const res = await fetch(
-  `http://localhost:5000/api/users/${id}`,
-  {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify(form),
-  }
-);
+    setSaving(true);
+    try {
+      const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
+        method: "PUT",
+        credentials:"include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(form),
+      });
 
-const data = await res.json();
+      const data = await res.json();
 
-if (!res.ok) {
-  alert(data.error || "Update failed");
-  return;
-}
+      if (!res.ok) {
+        setAlert({
+          show: true,
+          message: data.error || "Update cycle failed",
+          type: "error",
+        });
+        setSaving(false);
+        return;
+      }
 
-alert("User updated successfully");
-
-
-    navigate("/Users");
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch {
+      setAlert({
+        show: true,
+        message: "Server error encountered on submission",
+        type: "error",
+      });
+      setSaving(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-50">
+    <>
+      <CustomAlert
+        show={alert.show}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert((p) => ({ ...p, show: false }))}
+      />
+
       <form
         onSubmit={handleSubmit}
-        className="w-[450px] bg-white p-8 rounded-2xl shadow-lg space-y-4"
+        className="w-[450px] bg-white p-8 rounded-2xl relative flex flex-col gap-4 text-black shadow-2xl"
       >
-        <h1 className="text-3xl font-bold text-[#134E4A] text-center">
-          Edit User
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold cursor-pointer transition"
+        >
+          ✕
+        </button>
+
+        <h1 className="text-2xl font-bold text-[#134E4A] text-center border-b pb-2">
+          Edit User Profile
         </h1>
 
-        <div>
-          <input
-            name="first_name"
-            value={form.first_name}
-            onChange={handleChange}
-            placeholder="First Name"
-            className="p-3 border w-full rounded-lg"
-          />
-          <p className="text-red-500 text-sm">{nameErr}</p>
-        </div>
+        {loading ? (
+          <div className="text-center py-8 text-gray-500 font-medium">
+            Loading user information...
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold text-gray-700">First Name</label>
+              <input
+                name="first_name"
+                value={form.first_name}
+                onChange={handleChange}
+                placeholder="First Name"
+                className="p-3 border rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
+              />
+              {nameErr && <p className="text-red-500 text-xs font-semibold mt-0.5">{nameErr}</p>}
+            </div>
 
-        <div>
-          <input
-            name="last_name"
-            value={form.last_name}
-            onChange={handleChange}
-            placeholder="Last Name"
-            className="p-3 border w-full rounded-lg"
-          />
-          <p className="text-red-500 text-sm">{lastNameErr}</p>
-        </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold text-gray-700">Last Name</label>
+              <input
+                name="last_name"
+                value={form.last_name}
+                onChange={handleChange}
+                placeholder="Last Name"
+                className="p-3 border rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
+              />
+              {lastNameErr && <p className="text-red-500 text-xs font-semibold mt-0.5">{lastNameErr}</p>}
+            </div>
 
-        <div>
-          <input
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            placeholder="Email"
-            className="p-3 border w-full rounded-lg"
-          />
-          <p className="text-red-500 text-sm">{emailErr}</p>
-        </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold text-gray-700">Email Address</label>
+              <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Email"
+                className="p-3 border rounded-lg text-sm border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
+              />
+              {emailErr && <p className="text-red-500 text-xs font-semibold mt-0.5">{emailErr}</p>}
+            </div>
 
-        <button className="w-full bg-[#0F766E] text-white py-3 rounded-lg font-semibold">
-          Update User
-        </button>
+            <div className="flex gap-3 mt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-1/2 py-3 border border-gray-300 text-gray-600 rounded-lg text-sm font-semibold hover:bg-gray-50 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-1/2 bg-[#0F766E] text-white py-3 rounded-lg text-sm font-semibold hover:bg-teal-800 transition shadow-md disabled:opacity-50 cursor-pointer"
+              >
+                {saving ? "Updating..." : "Update User"}
+              </button>
+            </div>
+          </>
+        )}
       </form>
+    </>
+  );
+}
+
+export default function EditUserModal({ show, userId, onClose, onSuccess }) {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <EditUserForm userId={userId} onClose={onClose} onSuccess={onSuccess} />
     </div>
   );
 }

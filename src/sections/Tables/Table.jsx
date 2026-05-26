@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import TableCard from "./TableCard";
 import Navbar from "../../components/Navbar";
-import Sidebar from "../sideBar"
+import Sidebar from "../sideBar";
 import CustomAlert from "../../components/CustomAlert";
+import EditUserModal from "../../Crudforms/EditUser"; 
 
 function ConfirmModal({ show, onConfirm, onCancel }) {
   if (!show) return null;
@@ -11,24 +11,13 @@ function ConfirmModal({ show, onConfirm, onCancel }) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
-        <h2 className="text-lg font-bold mb-2">Confirm Delete</h2>
-
-        <p className="text-gray-600 mb-6">
-          Are you sure you want to delete this patient?
-        </p>
-
+        <h2 className="text-lg font-bold mb-2 text-black">Confirm Delete</h2>
+        <p className="text-gray-600 mb-6">Are you sure you want to delete this user?</p>
         <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 border rounded-lg"
-          >
+          <button onClick={onCancel} className="px-4 py-2 border rounded-lg text-gray-600">
             Cancel
           </button>
-
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg"
-          >
+          <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white rounded-lg">
             Delete
           </button>
         </div>
@@ -36,48 +25,74 @@ function ConfirmModal({ show, onConfirm, onCancel }) {
     </div>
   );
 }
+
 export default function Table() {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState(""); 
-   const [selectedId, setSelectedId] = useState(null);
-    const [deleteType, setDeleteType] = useState("");
-    const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editUserOpen, setEditUserOpen] = useState(false);
+  const [editUserId, setEditUserId] = useState(null);
 
-    const [alert, setAlert] = useState({
-        show: false,
-        message: "",
-        type: "success",
-    });
-  const navigate = useNavigate();
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
-  useEffect(() => {
+  const fetchUsers = () => {
     fetch("http://localhost:5000/api/users", {
       credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => setUsers(data))
       .catch((err) => console.log(err));
+  };
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
- const handleDelete = async (user_id) => {
-  try {
-    const res = await fetch(
-      `http://localhost:5000/api/users/${user_id}`,
-      {
+  const handleDelete = async () => {
+    if (!selectedId) return;
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/users/${selectedId}`, {
         method: "DELETE",
         credentials: "include",
+      });
+
+      if (res.ok) {
+        setUsers(users.filter((user) => user.user_id !== selectedId));
+        setAlert({
+          show: true,
+          message: "User successfully unlinked and deleted.",
+          type: "success",
+        });
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setAlert({
+          show: true,
+          message: errData.error || "Failed to complete delete routing",
+          type: "error",
+        });
       }
-    );
-
-    console.log("DELETE status:", res.status);
-
-    if (res.ok) {
-      setUsers(users.filter((user) => user.user_id !== user_id));
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setConfirmOpen(false);
+      setSelectedId(null);
     }
-  } catch (err) {
-    console.log(err);
-  }
-};
+  };
+
+  const handleEditUserSuccess = () => {
+    setAlert({
+      show: true,
+      message: "User context variables saved cleanly!",
+      type: "success",
+    });
+    fetchUsers();
+  };
 
   const filteredUsers = users.filter((user) => {
     const firstName = user.first_name?.toLowerCase() || "";
@@ -96,6 +111,31 @@ export default function Table() {
     <div className="bg-white p-4 sm:p-6 rounded-xl mb-8 overflow-x-auto">
       <Navbar />
 
+      <CustomAlert
+        show={alert.show}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({ show: false, message: "", type: "success" })}
+      />
+
+      <ConfirmModal
+        show={confirmOpen}
+        onConfirm={handleDelete}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setSelectedId(null);
+        }}
+      />
+      <EditUserModal
+        show={editUserOpen}
+        userId={editUserId}
+        onClose={() => {
+          setEditUserOpen(false);
+          setEditUserId(null);
+        }}
+        onSuccess={handleEditUserSuccess}
+      />
+
       <div className="min-h-screen">
         <div className="flex w-full min-h-screen mt-[50px]">
           <Sidebar />
@@ -108,15 +148,15 @@ export default function Table() {
                 USERS
               </h1>
 
-                <div className="w-1/2 max-w-sm">
-                  <input
-                    type="text"
-                    placeholder="Search by name or email..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-lg text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#0F766E] border-gray-300 shadow-sm"
-                  />
-                </div>
+              <div className="w-1/2 max-w-sm mb-6">
+                <input
+                  type="text"
+                  placeholder="Search by name or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-lg text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#0F766E] border-gray-300 shadow-sm"
+                />
+              </div>
 
               <table className="min-w-full text-left text-sm sm:text-base text-black">
                 <thead>
@@ -132,29 +172,30 @@ export default function Table() {
 
                 <tbody>
                   {filteredUsers.map((user) => (
-                    <tr
-                      key={user.user_id}
-                      className="border-b hover:bg-gray-50"
-                    >
+                    <tr key={user.user_id} className="border-b hover:bg-gray-50">
                       <td className="py-4 pl-4">{user.user_id}</td>
                       <td className="py-2">{user.first_name}</td>
                       <td>{user.last_name}</td>
                       <td>{user.email}</td>
-                      <td>{user.phone_number}</td>
+                      <td>{user.phone_number || "—"}</td>
 
-                      <td className="flex gap-2">
+                      <td className="flex gap-2 py-3">
                         <button
-                          onClick={() => handleDelete(user.user_id)}
-                          className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
+                          onClick={() => {
+                            setSelectedId(user.user_id);
+                            setConfirmOpen(true);
+                          }}
+                          className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg transition cursor-pointer"
                         >
                           Delete
                         </button>
 
                         <button
-                          onClick={() =>
-                            navigate(`/users/edit/${user.user_id}`)
-                          }
-                          className="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg"
+                          onClick={() => {
+                            setEditUserId(user.user_id);
+                            setEditUserOpen(true);
+                          }}
+                          className="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg transition cursor-pointer"
                         >
                           Update
                         </button>

@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
-import CustomAlert from "../components/CustomAlert";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
-export default function BForm() {
+const stripePromise = loadStripe("pk_test_51TaeDAF3VKWlDYBwcOZJ0lEeZkdUCEHRZKk3L26o3IgIDMWZVoGW9XuvJkb3xcoHiuI8GXXc1ZsIJaCFum6Jr8sy00IIyPt5Uh");
+
+function BookingAndPaymentForm({ onClose, onPaymentSuccess }) {
+  const stripe = useStripe();
+  const elements = useElements();
+
   const [name, setName] = useState("");
   const [doc, setDoc] = useState("");
   const [reason, setReason] = useState("");
@@ -11,298 +17,137 @@ export default function BForm() {
 
   const [doctors, setDoctors] = useState([]);
   const [treatments, setTreatments] = useState([]);
-
-  const [nameError, setNameError] = useState("");
-  const [docError, setDocError] = useState("");
-  const [reasonError, setReasonError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [phoneError, setPhoneError] = useState("");
-  const [dateError, setDateError] = useState("");
-  const [signupErr, setSignupErr] = useState("");
-
+  const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/doctors", {
-          credentials: "include",
-        });
-        const data = await res.json();
-        setDoctors(data);
-      } catch (err) {
-        console.error("Failed to fetch doctors:", err);
-      }
-    };
-
-    const fetchTreatments = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/treatments", {
-          credentials: "include",
-        });
-        const data = await res.json();
-        setTreatments(data);
-      } catch (err) {
-        console.error("Failed to fetch treatments:", err);
-      }
-    };
-
-    fetchDoctors();
-    fetchTreatments();
+    fetch("http://localhost:5000/api/doctors").then(res => res.json()).then(data => setDoctors(data));
+    fetch("http://localhost:5000/api/treatments").then(res => res.json()).then(data => setTreatments(data));
   }, []);
-
-  const nameRegex = /^[A-Za-z\s'-]{5,30}$/;
-  const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-  const phoneRegex = /^[0-9+\-\s]{8,15}$/;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!stripe || !elements) return; 
 
-    if (loading) return;
+    setErrorMsg("");
     setLoading(true);
 
-    let hasError = false;
-
-    setNameError("");
-    setDocError("");
-    setReasonError("");
-    setEmailError("");
-    setPhoneError("");
-    setDateError("");
-    setSignupErr("");
-
-    if (name.trim() === "") {
-      setNameError("Name is required");
-      hasError = true;
-    } else if (!nameRegex.test(name)) {
-      setNameError("Only letters, 5–30 characters");
-      hasError = true;
-    }
-
-    if (doc === "") {
-      setDocError("Please select a doctor");
-      hasError = true;
-    }
-
-    if (reason === "") {
-      setReasonError("Please select a treatment");
-      hasError = true;
-    }
-
-    if (email.trim() === "") {
-      setEmailError("Email is required");
-      hasError = true;
-    } else if (!emailRegex.test(email)) {
-      setEmailError("Invalid email");
-      hasError = true;
-    }
-
-    if (phone.trim() === "") {
-      setPhoneError("Phone is required");
-      hasError = true;
-    } else if (!phoneRegex.test(phone)) {
-      setPhoneError("Invalid phone number");
-      hasError = true;
-    }
-
-    if (date === "") {
-      setDateError("Please select date and time");
-      hasError = true;
-    } else {
-      const selectedDate = new Date(date);
-      const now = new Date();
-
-      if (selectedDate < now) {
-        setDateError("Cannot select past date");
-        hasError = true;
-      } else if (selectedDate.getDay() === 0) {
-        setDateError("Closed on Sunday");
-        hasError = true;
-      } else if (
-        selectedDate.getHours() < 9 ||
-        selectedDate.getHours() >= 17
-      ) {
-        setDateError("Working hours: 09:00 - 17:00");
-        hasError = true;
-      }
-    }
-
-    if (hasError) {
-      setLoading(false);
-      return;
-    }
-
     try {
+      const cardElement = elements.getElement(CardElement);
+      const { token, error: stripeError } = await stripe.createToken(cardElement, { name });
+
+      if (stripeError) {
+        throw new Error(stripeError.message);
+      }
+
       const res = await fetch("http://localhost:5000/api/appointments", {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           full_name: name,
           doctor: doc,
-          email: email,
+          email,
           phone_number: phone,
           appointment_date_time: date,
           description: reason,
+          stripeToken: token.id 
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setSignupErr(data.error || "Something went wrong");
-        setLoading(false);
-        return;
+        throw new Error(data.error || "Something went wrong processing appointment payment.");
       }
-
-      alert("Appointment created successfully");
-
-      setName("");
-      setDoc("");
-      setReason("");
-      setEmail("");
-      setPhone("");
-      setDate("");
-
-      setLoading(false);
+      if (onPaymentSuccess) onPaymentSuccess();
+      onClose();
+      
     } catch (err) {
-      console.error(err);
-      setSignupErr("Failed to connect to the server.");
+      setErrorMsg(err.message);
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full flex justify-center items-center flex-wrap mt-[60px]"
-    >
-      <div className="w-full sm:w-[300px] md:w-[60%] p-2 mx-auto">
-        <h1 className="text-center text-[30px] font-bold mb-[5px]">
-          ADD APPOINTMENT
-        </h1>
+    <form onSubmit={handleSubmit} className="w-full max-w-2xl flex flex-col gap-4 p-6 bg-white rounded-xl shadow-xl max-h-[90vh] overflow-y-auto relative">
+      <button 
+        type="button" 
+        onClick={onClose} 
+        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold"
+      >
+        ✕
+      </button>
 
-        <div className="flex flex-col w-[70%] mx-auto">
-          <label className="mb-1 font-bold">Full Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              setNameError("");
-            }}
-            className={`border-2 rounded-lg px-3 py-2 ${nameError ? "border-red-500" : "border-black"
-              }`}
-          />
-          <span className="text-red-600 text-[14px]">{nameError}</span>
+      <h2 className="text-xl font-bold text-gray-800 border-b pb-2">Book Appointment & Pay</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block mb-1 font-bold text-black text-sm">Full Name</label>
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} required className="w-full border border-black rounded-lg px-3 py-2" />
         </div>
-
-        <div className="flex flex-col mt-3 w-[70%] mx-auto">
-          <label className="mb-1 font-bold">Doctor</label>
-          <select
-            value={doc}
-            onChange={(e) => {
-              setDoc(e.target.value);
-              setDocError("");
-            }}
-            className={`border-2 rounded-lg px-3 py-2 ${docError ? "border-red-500" : "border-black"
-              }`}
-          >
+        <div>
+          <label className="block mb-1 font-bold text-black text-sm">Email</label>
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full border border-black rounded-lg px-3 py-2" />
+        </div>
+        <div>
+          <label className="block mb-1 font-bold text-black text-sm">Doctor</label>
+          <select value={doc} onChange={(e) => setDoc(e.target.value)} required className="w-full border border-black rounded-lg px-3 py-2">
             <option value="">Select a doctor</option>
-            {doctors.map((d) => (
-              <option key={d.doctor_id} value={d.doctor_id}>
-                {d.User?.first_name} {d.User?.last_name}
-              </option>
-            ))}
+            {doctors.map(d => <option key={d.doctor_id} value={d.doctor_id}>{d.User?.first_name} {d.User?.last_name}</option>)}
           </select>
-          <span className="text-red-500 text-[14px]">{docError}</span>
         </div>
-      </div>
-
-      <div className="w-full sm:w-[300px] md:w-[60%] p-2">
-        <div className="flex flex-col w-[70%] mx-auto">
-          <label className="mb-1 font-bold">Email</label>
-          <input
-            type="text"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setEmailError("");
-            }}
-            className={`border-2 rounded-lg px-3 py-2 ${emailError ? "border-red-500" : "border-black"
-              }`}
-          />
-          <span className="text-red-500 text-[14px]">{emailError}</span>
+        <div>
+          <label className="block mb-1 font-bold text-black text-sm">Phone Number</label>
+          <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} required className="w-full border border-black rounded-lg px-3 py-2" />
         </div>
-
-        <div className="flex flex-col mt-3 w-[70%] mx-auto">
-          <label className="mb-1 font-bold">Phone Number</label>
-          <input
-            type="text"
-            value={phone}
-            onChange={(e) => {
-              setPhone(e.target.value);
-              setPhoneError("");
-            }}
-            className={`border-2 rounded-lg px-3 py-2 ${phoneError ? "border-red-500" : "border-black"
-              }`}
-          />
-          <span className="text-red-500 text-[14px]">{phoneError}</span>
+        <div>
+          <label className="block mb-1 font-bold text-black text-sm">Date and Time</label>
+          <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} required className="w-full border border-black rounded-lg px-3 py-2" />
         </div>
-      </div>
-
-      <div className="w-full sm:w-[300px] md:w-[60%] p-2">
-        <div className="flex flex-col w-[70%] mx-auto">
-          <label className="mb-1 font-bold">Date and Time</label>
-          <input
-            type="datetime-local"
-            value={date}
-            onChange={(e) => {
-              setDate(e.target.value);
-              setDateError("");
-            }}
-            className={`border-2 rounded-lg px-3 py-2 ${dateError ? "border-red-500" : "border-black"
-              }`}
-          />
-          <span className="text-red-500 text-[14px]">{dateError}</span>
-        </div>
-
-        <div className="flex flex-col mt-3 w-[70%] mx-auto">
-          <label className="mb-1 font-bold">Treatment</label>
-          <select
-            value={reason}
-            onChange={(e) => {
-              setReason(e.target.value);
-              setReasonError("");
-            }}
-            className={`border-2 rounded-lg px-3 py-2 ${reasonError ? "border-red-500" : "border-black"
-              }`}
-          >
+        <div>
+          <label className="block mb-1 font-bold text-black text-sm">Treatment</label>
+          <select value={reason} onChange={(e) => setReason(e.target.value)} required className="w-full border border-black rounded-lg px-3 py-2">
             <option value="">Select a treatment</option>
-            {treatments.map((t) => (
-              <option key={t.treatment_id} value={t.treatment_name}>
-                {t.treatment_name}
-              </option>
-            ))}
+            {treatments.map(t => <option key={t.treatment_id} value={t.treatment_name}>{t.treatment_name}</option>)}
           </select>
-          <span className="text-red-500 text-[14px]">{reasonError}</span>
         </div>
+      </div>
 
-        {signupErr && (
-          <p className="text-red-600 text-center mt-3">{signupErr}</p>
-        )}
-
-        <div className="w-full text-center mt-4">
-          <input
-            type="submit"
-            value={loading ? "BOOKING..." : "BOOK"}
-            disabled={loading}
-            className="px-8 py-2 text-white bg-teal-700 font-bold shadow-md text-sm cursor-pointer rounded-md"
-          />
+      <div className="mt-4 p-4 border border-teal-600 rounded-lg bg-teal-50/30">
+        <label className="block mb-2 font-bold text-teal-900 text-sm">Credit or Debit Card</label>
+        <div className="p-3 bg-white border border-gray-300 rounded-md shadow-sm">
+          <CardElement options={{ style: { base: { fontSize: "16px", color: "#424770", "::placeholder": { color: "#aab7c4" } } } }} />
         </div>
+      </div>
+
+      {errorMsg && <p className="text-red-600 text-sm font-semibold text-center mt-2">{errorMsg}</p>}
+
+      <div className="flex justify-end gap-3 mt-4">
+        <button 
+          type="button" 
+          onClick={onClose} 
+          className="px-6 py-2.5 border rounded-md font-semibold text-sm hover:bg-gray-50"
+        >
+          Cancel
+        </button>
+        <button type="submit" disabled={loading} className="px-8 py-2.5 text-white bg-teal-700 font-bold shadow-md text-sm rounded-md hover:bg-teal-800 disabled:opacity-50 cursor-pointer">
+          {loading ? "PROCESSING..." : "CONFIRM & PAY NOW"}
+        </button>
       </div>
     </form>
+  );
+}
+
+export default function BookingModal({ show, onClose, onPaymentSuccess }) {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <Elements stripe={stripePromise}>
+        <BookingAndPaymentForm onClose={onClose} onPaymentSuccess={onPaymentSuccess} />
+      </Elements>
+    </div>
   );
 }

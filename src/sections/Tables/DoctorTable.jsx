@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import TableCard from "./TableCard";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../sideBar";
 import CustomAlert from "../../components/CustomAlert";
+import AddDoctorModal from "../../Crudforms/AddDoctor"; 
+import EditDoctorModal from "../../Crudforms/EditDoctor";
 
 function ConfirmModal({ show, onConfirm, onCancel, loading }) {
   if (!show) return null;
@@ -12,25 +13,12 @@ function ConfirmModal({ show, onConfirm, onCancel, loading }) {
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
         <h2 className="text-lg font-bold mb-2">Confirm Delete</h2>
-
-        <p className="text-gray-600 mb-6">
-          Are you sure you want to delete this doctor?
-        </p>
-
+        <p className="text-gray-600 mb-6">Are you sure you want to delete this doctor?</p>
         <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 border rounded-lg"
-            disabled={loading}
-          >
+          <button onClick={onCancel} className="px-4 py-2 border rounded-lg" disabled={loading}>
             Cancel
           </button>
-
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-60"
-          >
+          <button onClick={onConfirm} disabled={loading} className="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-60">
             {loading ? "Deleting..." : "Delete"}
           </button>
         </div>
@@ -46,6 +34,10 @@ export default function DoctorTable() {
   const [selectedId, setSelectedId] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+ 
+  const [addDoctorOpen, setAddDoctorOpen] = useState(false);
+  const [editDoctorOpen, setEditDoctorOpen] = useState(false);
+  const [editDoctorId, setEditDoctorId] = useState(null);
 
   const [alert, setAlert] = useState({
     show: false,
@@ -53,12 +45,8 @@ export default function DoctorTable() {
     type: "success",
   });
 
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetch("http://localhost:5000/api/doctors", {
-      credentials: "include",
-    })
+  const fetchDoctors = () => {
+    fetch("http://localhost:5000/api/doctors")
       .then((res) => res.json())
       .then((data) => setDoctors(data))
       .catch(() =>
@@ -68,21 +56,20 @@ export default function DoctorTable() {
           type: "error",
         })
       );
+  };
+  useEffect(() => {
+    fetchDoctors();
   }, []);
 
   const handleDelete = async () => {
     if (!selectedId) return;
-
     setDeleteLoading(true);
 
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/doctors/${selectedId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`http://localhost:5000/api/doctors/${selectedId}`, {
+        method: "DELETE",
+        credentials:"include"
+      });
 
       const data = await res.json().catch(() => ({}));
 
@@ -96,10 +83,7 @@ export default function DoctorTable() {
         return;
       }
 
-      setDoctors((prev) =>
-        prev.filter((doc) => doc.doctor_id !== selectedId)
-      );
-
+      setDoctors((prev) => prev.filter((doc) => doc.doctor_id !== selectedId));
       setAlert({
         show: true,
         message: "Doctor deleted successfully",
@@ -115,8 +99,24 @@ export default function DoctorTable() {
         type: "error",
       });
     }
-
     setDeleteLoading(false);
+  };
+
+  const handleAddDoctorSuccess = () => {
+    setAlert({
+      show: true,
+      message: "Doctor created successfully!",
+      type: "success",
+    });
+    fetchDoctors();
+  };
+  const handleEditDoctorSuccess = () => {
+    setAlert({
+      show: true,
+      message: "Doctor profile changes saved successfully!",
+      type: "success",
+    });
+    fetchDoctors();
   };
 
   const filteredDoctors = doctors.filter((doc) => {
@@ -140,9 +140,7 @@ export default function DoctorTable() {
         show={alert.show}
         message={alert.message}
         type={alert.type}
-        onClose={() =>
-          setAlert({ show: false, message: "", type: "success" })
-        }
+        onClose={() => setAlert({ show: false, message: "", type: "success" })}
       />
 
       <ConfirmModal
@@ -154,6 +152,20 @@ export default function DoctorTable() {
         }}
         onConfirm={handleDelete}
       />
+      <AddDoctorModal
+        show={addDoctorOpen}
+        onClose={() => setAddDoctorOpen(false)}
+        onSuccess={handleAddDoctorSuccess}
+      />
+      <EditDoctorModal
+        show={editDoctorOpen}
+        doctorId={editDoctorId}
+        onClose={() => {
+          setEditDoctorOpen(false);
+          setEditDoctorId(null);
+        }}
+        onSuccess={handleEditDoctorSuccess}
+      />
 
       <div className="min-h-screen flex w-full mt-[50px]">
         <Sidebar />
@@ -162,13 +174,10 @@ export default function DoctorTable() {
           <TableCard />
 
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-lg sm:text-xl font-bold text-[#0F766E]">
-              Doctors
-            </h1>
-
+            <h1 className="text-lg sm:text-xl font-bold text-[#0F766E]">Doctors</h1>
             <button
-              onClick={() => navigate("/add")}
-              className="bg-[#0F766E] text-white px-4 py-2 rounded-lg"
+              onClick={() => setAddDoctorOpen(true)}
+              className="bg-[#0F766E] text-white px-4 py-2 rounded-lg font-semibold hover:bg-teal-800 transition shadow-sm cursor-pointer"
             >
               + Add Doctor
             </button>
@@ -181,14 +190,11 @@ export default function DoctorTable() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#0F766E] border-gray-300 shadow-sm"
-
             />
           </div>
 
           {filteredDoctors.length === 0 ? (
-            <p className="text-gray-500 mt-10 text-center">
-              No doctors found
-            </p>
+            <p className="text-gray-500 mt-10 text-center">No doctors found</p>
           ) : (
             <table className="min-w-full text-left text-sm sm:text-base text-black">
               <thead>
@@ -200,16 +206,13 @@ export default function DoctorTable() {
                   <th>Experience</th>
                   <th>Email</th>
                   <th>Phone</th>
-                  <th>Actions</th>
+                  <th className="pr-4">Actions</th>
                 </tr>
               </thead>
 
               <tbody>
                 {filteredDoctors.map((doc) => (
-                  <tr
-                    key={doc.doctor_id}
-                    className="border-b hover:bg-gray-50"
-                  >
+                  <tr key={doc.doctor_id} className="border-b hover:bg-gray-50">
                     <td className="py-4 pl-4">{doc.doctor_id}</td>
                     <td>{doc.User?.first_name}</td>
                     <td>{doc.User?.last_name}</td>
@@ -218,22 +221,22 @@ export default function DoctorTable() {
                     <td>{doc.User?.email}</td>
                     <td>{doc.User?.phone_number}</td>
 
-                    <td className="flex gap-2">
+                    <td className="flex gap-2 py-3 pr-4">
                       <button
                         onClick={() => {
                           setSelectedId(doc.doctor_id);
                           setConfirmOpen(true);
                         }}
-                        className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
+                        className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg transition cursor-pointer"
                       >
                         Delete
                       </button>
-
                       <button
-                        onClick={() =>
-                          navigate(`/doctors/edit/${doc.doctor_id}`)
-                        }
-                        className="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg"
+                        onClick={() => {
+                          setEditDoctorId(doc.doctor_id);
+                          setEditDoctorOpen(true);
+                        }}
+                        className="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg transition cursor-pointer"
                       >
                         Update
                       </button>
