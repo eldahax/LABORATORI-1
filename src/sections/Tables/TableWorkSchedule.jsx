@@ -102,7 +102,8 @@ const roles = user?.roles || [];
         <div className="w-3/4 ml-[25%] p-10">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-xl font-bold text-[#0F766E]">Work Schedules</h1>
-            <button onClick={() => setShowAdd(true)} className="bg-[#0F766E] text-white px-4 py-2 rounded-lg">+ Add Schedule</button>
+                                {( roles.includes("admin") || roles.includes("receptionist")) && (
+     <button onClick={() => setShowAdd(true)} className="bg-[#0F766E] text-white px-4 py-2 rounded-lg">+ Add Schedule</button>)}
           </div>
 
           <input type="text" placeholder="Search by day..." value={search} onChange={(e) => setSearch(e.target.value)} className="border px-3 py-2 rounded mb-6 w-full" />
@@ -119,12 +120,13 @@ const roles = user?.roles || [];
                       <p className="text-sm font-semibold">{ws.schedule_day}</p>
                       <p className="text-xs text-gray-600">{ws.start_time} - {ws.end_time}</p>
                       <p className="text-xs mt-1">Status: <span className={ws.status === "active" ? "text-green-600 font-semibold" : "text-red-500 font-semibold"}>{ws.status}</span></p>
-                            {( roles.includes("admin")) && (
+                           
                       <div className="flex gap-2 mt-3">
-                        <button onClick={() => { setEditId(ws.work_schedule_id); setShowEdit(true); }} className="text-xs border px-2 py-1 rounded">Edit</button>
-                        <button onClick={() => { setDeleteId(ws.work_schedule_id); setConfirmOpen(true); }} className="text-xs border border-red-500 text-red-500 px-2 py-1 rounded">Delete</button>  
+                         {( roles.includes("admin") || roles.includes("receptionist")) && (
+                        <button onClick={() => { setEditId(ws.work_schedule_id); setShowEdit(true); }} className="text-xs border px-2 py-1 rounded">Edit</button>      )}
+                        {( roles.includes("admin")) && ( <button onClick={() => { setDeleteId(ws.work_schedule_id); setConfirmOpen(true); }} className="text-xs border border-red-500 text-red-500 px-2 py-1 rounded">Delete</button> )} 
                       </div>
-                            )}
+                      
                     </div>
                   ))}
                 </div>

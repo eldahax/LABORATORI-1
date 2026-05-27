@@ -25,10 +25,12 @@ function AddDoctorForm({ onClose, onSuccess }) {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
   const nameRegex = /^[A-Za-z]{3,15}$/;
   const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!.@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
-  const phoneRegex = /^[0-9+\s-]{6,20}$/; // Basic safe fallback for phone digits
+  const phoneRegex = /^[0-9+\s-]{6,20}$/; 
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/departments")
+    fetch("http://localhost:5000/api/departments",{
+      credentials:"include"
+    })
       .then((res) => res.json())
       .then((data) => setDeps(data))
       .catch(() =>

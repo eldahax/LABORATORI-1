@@ -29,8 +29,12 @@ function EditDoctorForm({ doctorId, onClose, onSuccess }) {
       setLoading(true);
       try {
         const [docRes, depRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/doctors/${doctorId}`),
-          fetch("http://localhost:5000/api/departments"),
+          fetch(`http://localhost:5000/api/doctors/${doctorId}`,{
+            credentials:"include"
+          }),
+          fetch("http://localhost:5000/api/departments",{
+            credentials:"include"
+          }),
         ]);
 
         if (!docRes.ok || !depRes.ok) throw new Error("Failed to load records");

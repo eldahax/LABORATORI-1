@@ -1,6 +1,5 @@
 const { User, UserRole, Role,Patient } = require("../models");
 const bcrypt = require("bcryptjs");
-
 const createUser = async (first_name, last_name, email, phone_number, password) => {
   const exists = await User.findOne({ where: { email } });
 
@@ -54,9 +53,14 @@ const getAllUsers = async () => {
 };
 
 const getUserById = async (user_id) => {
-  return await User.findByPk(user_id, {
-    attributes: ["user_id", "first_name", "last_name", "email", "phone_number"]
+  const user = await User.findByPk(user_id);
+  if (!user) return null;
+  const userFind = await UserRole.findAll({ 
+    where: { user_id: user.user_id },
+    include: [{ model: Role, attributes: ["role_name"] }]
   });
+  user.Roles = userFind.map(conn => conn.Role).filter(r => r !== null);
+  return user;
 };
 
 const updateUser = async (user_id, data) => {

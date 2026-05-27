@@ -1,4 +1,3 @@
-
 const userService = require("../cruds/userCrud");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -7,6 +6,8 @@ const db = require("../models/index");
 const RefreshToken = db.RefreshToken;
 const Patient = db.Patient;
 const Doctor = db.Doctor;
+const ACCESS_TOKEN_TIME = "30m";
+const ACCESS_COOKIE_TIME = 30 * 60 * 1000;
 
 const login = async (req, res) => {
   try {
@@ -20,10 +21,7 @@ const login = async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(
-      password,
-      user.password_hash
-    );
+    const isMatch = await bcrypt.compare(password, user.password_hash);
 
     if (!isMatch) {
       return res.status(400).json({
@@ -31,20 +29,14 @@ const login = async (req, res) => {
       });
     }
 
-    const roles = user.Roles
-      ? user.Roles.map(r => r.role_name)
-      : [];
+    const roles = user.Roles ? user.Roles.map(r => r.role_name) : [];
 
     const patient = await Patient.findOne({
-      where: {
-        user_id: user.user_id
-      }
+      where: { user_id: user.user_id }
     });
 
     const doctor = await Doctor.findOne({
-      where: {
-        user_id: user.user_id
-      }
+      where: { user_id: user.user_id }
     });
 
     const accessToken = jwt.sign(
@@ -52,30 +44,20 @@ const login = async (req, res) => {
         user_id: user.user_id,
         email: user.email,
         roles: roles,
-
-        patient_id: patient
-          ? patient.patient_id
-          : null,
-
-        doctor_id: doctor
-          ? doctor.doctor_id
-          : null
+        phone: user.phone_number,
+        patient_id: patient ? patient.patient_id : null,
+        doctor_id: doctor ? doctor.doctor_id : null,
+        patient_date: patient ? patient.date_of_birth : null,
       },
-
       process.env.JWT_SECRET,
-
       {
-        expiresIn: "1h"
+        expiresIn: ACCESS_TOKEN_TIME
       }
     );
 
     const refreshToken = jwt.sign(
-      {
-        user_id: user.user_id
-      },
-
+      { user_id: user.user_id },
       process.env.REFRESH_SECRET,
-
       {
         expiresIn: "1d"
       }
@@ -84,9 +66,7 @@ const login = async (req, res) => {
     await RefreshToken.create({
       user_id: user.user_id,
       token: refreshToken,
-      expires: new Date(
-        Date.now() + 24 * 60 * 60 * 1000
-      ),
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
 
     res.cookie("token", accessToken, {
@@ -94,7 +74,7 @@ const login = async (req, res) => {
       secure: false,
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 1000
+      maxAge: ACCESS_COOKIE_TIME
     });
 
     res.cookie("refreshToken", refreshToken, {
@@ -107,36 +87,26 @@ const login = async (req, res) => {
 
     res.json({
       message: "Login successful",
-
       user: {
         user_id: user.user_id,
         email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
         roles: roles,
-
-        patient_id: patient
-          ? patient.patient_id
-          : null,
-
-        doctor_id: doctor
-          ? doctor.doctor_id
-          : null
+        patient_id: patient ? patient.patient_id : null,
+        doctor_id: doctor ? doctor.doctor_id : null
       }
     });
 
   } catch (err) {
-
     res.status(500).json({
       error: err.message
     });
-
   }
 };
 
 const signup = async (req, res) => {
   try {
-
     const result = await userService.createUser(
       req.body.first_name,
       req.body.last_name,
@@ -146,72 +116,48 @@ const signup = async (req, res) => {
     );
 
     res.json(result);
-
   } catch (err) {
-
     res.status(400).json({
       error: err.message
     });
-
   }
 };
 
 const getAllUsers = async (req, res) => {
   try {
-
     const users = await userService.getAllUsers();
-
     res.json(users);
-
   } catch (err) {
-
     res.status(500).json({
       error: err.message
     });
-
   }
 };
 
 const getUserById = async (req, res) => {
-
-  const user = await userService.getUserById(
-    req.params.id
-  );
-
+  const user = await userService.getUserById(req.params.id);
   res.json(user);
 };
 
 const updateUser = async (req, res) => {
-
-  const updated = await userService.updateUser(
-    req.params.id,
-    req.body
-  );
-
+  const updated = await userService.updateUser(req.params.id, req.body);
   res.json(updated);
 };
 
 const deleteUser = async (req, res) => {
-
-  const result = await userService.deleteUser(
-    req.params.id
-  );
-
+  const result = await userService.deleteUser(req.params.id);
   res.json(result);
 };
 
 const logout = async (req, res) => {
   try {
-
     const token = req.cookies.refreshToken;
 
     if (token) {
-
       await RefreshToken.update(
         { revoked: new Date() },
         { where: { token } }
       );
-
     }
 
     res.clearCookie("token", {
@@ -228,154 +174,84 @@ const logout = async (req, res) => {
       path: "/",
     });
 
-    res.json({
-      message: "Logged out"
-    });
+    res.json({ message: "Logged out" });
 
   } catch (err) {
-
     res.status(500).json({
       error: err.message
     });
-
   }
 };
 
 const refresh = async (req, res) => {
   try {
-
     const token = req.cookies.refreshToken;
 
     if (!token) {
-      return res.status(401).json({
-        error: "No refresh token"
-      });
+      return res.status(401).json({ error: "No refresh token" });
     }
 
     const storedToken = await RefreshToken.findOne({
-      where: {
-        token,
-        revoked: null,
-      },
+      where: { token, revoked: null }
     });
 
     if (!storedToken) {
-      return res.status(403).json({
-        error: "Invalid or revoked refresh token"
-      });
+      return res.status(403).json({ error: "Invalid refresh token" });
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.REFRESH_SECRET
-    );
-
-    if (new Date() > storedToken.expires) {
-      return res.status(403).json({
-        error: "Refresh token expired"
-      });
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.REFRESH_SECRET);
+    } catch {
+      return res.status(403).json({ error: "Refresh expired" });
     }
 
-    const user = await userService.getUserById(
-      decoded.user_id,
-      true
-    );
-
+    const user = await userService.getUserById(decoded.user_id, true);
     if (!user) {
-      return res.status(403).json({
-        error: "User no longer exists"
-      });
+      return res.status(403).json({ error: "User not found" });
     }
 
-    const roles = user.Roles
-      ? user.Roles.map(r => r.role_name)
-      : [];
+    const roles = user.Roles ? user.Roles.map(r => r.role_name) : [];
 
-    const patient = await Patient.findOne({
-      where: {
-        user_id: user.user_id
-      }
-    });
-
-    const doctor = await Doctor.findOne({
-      where: {
-        user_id: user.user_id
-      }
-    });
+    const patient = await Patient.findOne({ where: { user_id: user.user_id } });
+    const doctor = await Doctor.findOne({ where: { user_id: user.user_id } });
 
     const accessToken = jwt.sign(
       {
         user_id: user.user_id,
         email: user.email,
         roles: roles,
-
-        patient_id: patient
-          ? patient.patient_id
-          : null,
-
-        doctor_id: doctor
-          ? doctor.doctor_id
-          : null
+        phone: user.phone_number,
+        patient_id: patient ? patient.patient_id : null,
+        doctor_id: doctor ? doctor.doctor_id : null,
+        patient_date: patient ? patient.date_of_birth : null,
       },
-
       process.env.JWT_SECRET,
-
-      {
-        expiresIn: "1h"
-      }
+      { expiresIn: ACCESS_TOKEN_TIME } 
     );
-
-    await RefreshToken.update(
-      { revoked: new Date() },
-      { where: { token } }
-    );
-
-    const newRefreshToken = jwt.sign(
-      {
-        user_id: user.user_id
-      },
-
-      process.env.REFRESH_SECRET,
-
-      {
-        expiresIn: "1d"
-      }
-    );
-
-    await RefreshToken.create({
-      user_id: user.user_id,
-      token: newRefreshToken,
-      expires: new Date(
-        Date.now() + 24 * 60 * 60 * 1000
-      ),
-    });
 
     res.cookie("token", accessToken, {
       httpOnly: true,
-      secure: false,
+      secure: false, 
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 1000,
-    });
-
-    res.cookie("refreshToken", newRefreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: ACCESS_COOKIE_TIME
     });
 
     return res.json({
-      message: "Token refreshed"
+      message: "Token refreshed successfully",
+      user: {
+        user_id: user.user_id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        roles: roles,
+        patient_id: patient ? patient.patient_id : null,
+        doctor_id: doctor ? doctor.doctor_id : null
+      }
     });
-
   } catch (err) {
-
-    return res.status(403).json({
-      error: "Invalid refresh token"
-    });
-
+    return res.status(500).json({ error: "refresh failed" });
   }
 };
 
@@ -389,4 +265,3 @@ module.exports = {
   logout,
   refresh
 };
-

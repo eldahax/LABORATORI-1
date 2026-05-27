@@ -28,8 +28,7 @@ function EditDentalForm({ recordId, onClose, onSuccess }) {
       setLoading(true);
       try {
         const res = await fetch(`http://localhost:5000/api/dental-history/${recordId}`, {
-          credentials: "include",
-          signal: controller.signal,
+          credentials: "include"
         });
         
         const data = await res.json();
@@ -60,7 +59,9 @@ function EditDentalForm({ recordId, onClose, onSuccess }) {
   }, [recordId]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/doctors")
+    fetch("http://localhost:5000/api/doctors",{
+      credentials:"include"
+    })
       .then((res) => res.json())
       .then(setAllDoctors)
       .catch(() =>

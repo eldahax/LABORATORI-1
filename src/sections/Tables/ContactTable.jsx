@@ -37,6 +37,8 @@ function ConfirmModal({ show, onConfirm, onCancel }) {
 export default function ContactTable() {
   const [contacts, setContacts] = useState([]);
   const [search, setSearch] = useState("");
+  const[user,setUser]=useState(null);
+   const roles = user?.roles || [];
   const [alert, setAlert] = useState({
     show: false,
     message: "",
@@ -66,6 +68,11 @@ export default function ContactTable() {
 
   useEffect(() => {
     fetchContacts();
+      fetch("http://localhost:5000/api/users/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setUser(data))
+      .catch((err) => console.log(err));
+   
   }, []);
 
   const openDelete = (id) => {
@@ -181,12 +188,14 @@ export default function ContactTable() {
 
                   <td className="flex gap-2">
 
-                    <button
+                   {(roles.includes("admin")) &&(
+                     <button
                       onClick={() => openDelete(c.contact_id)}
                       className="text-red-500"
                     >
                       Delete
                     </button>
+                   )}
                   </td>
                 </tr>
               ))}

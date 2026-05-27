@@ -7,7 +7,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         primaryKey: true,
         references: {
-          model: 'users', // Must match the table name in your Users migration
+          model: 'users', 
           key: 'user_id',
         },
         onUpdate: 'CASCADE',
@@ -17,7 +17,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         primaryKey: true,
         references: {
-          model: 'roles', // Must match the table name in your Roles migration
+          model: 'roles', 
           key: 'role_id',
         },
         onUpdate: 'CASCADE',

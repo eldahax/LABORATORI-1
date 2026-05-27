@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TableCard from "./TableCard";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../sideBar";
 import CustomAlert from "../../components/CustomAlert";
@@ -45,6 +44,8 @@ export default function TableRoom() {
   const [departments, setDepartments] = useState([]);
   const [roomSearch, setRoomSearch] = useState("");
   const [depSearch, setDepSearch] = useState("");
+  const[user,setUser]=useState(null);
+  const roles = user?.roles || [];
 
   const [alert, setAlert] = useState({
     show: false,
@@ -95,9 +96,16 @@ export default function TableRoom() {
   };
 
   useEffect(() => {
-    fetchRooms();
+  
+       fetch("http://localhost:5000/api/users/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setUser(data))
+      .catch((err) => console.log(err));
+        fetchRooms();
     fetchDepartments();
-  }, []);
+
+        },[]);
+      
 
   const handleDelete = async (room_id) => {
     try {
@@ -244,7 +252,6 @@ export default function TableRoom() {
           <Sidebar />
 
           <div className="w-3/4 p-10 ml-[25%]">
-            <TableCard />
 
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-lg font-bold text-[#0F766E]">
@@ -278,7 +285,9 @@ export default function TableRoom() {
                   <th>Room Name</th>
                   <th>Department</th>
                   <th>Chairs</th>
-                  <th>Actions</th>
+                  
+                {(roles.includes("admin") || roles.includes ("doctor") || roles.includes ("receptionist"))&&(  <th>Actions</th>)}
+                  
                 </tr>
               </thead>
 
@@ -302,6 +311,7 @@ export default function TableRoom() {
 
                     <td className="py-4">
                       <div className="flex gap-2">
+                          {(roles.includes("admin") || roles.includes ("receptionist"))&&(
                         <button
                           onClick={() => {
                             setSelectedId(
@@ -318,7 +328,8 @@ export default function TableRoom() {
                         >
                           Delete
                         </button>
-
+                          )}
+{(roles.includes("admin") )&&(
                         <button
                           onClick={() => {
                             setEditRoomId(
@@ -332,6 +343,7 @@ export default function TableRoom() {
                         >
                           Update
                         </button>
+)}
                       </div>
                     </td>
                   </tr>
@@ -380,7 +392,7 @@ export default function TableRoom() {
                 <tr className="border-b">
                   <th className="py-3 pl-4">ID</th>
                   <th>Department Name</th>
-                  <th>Actions</th>
+                <th>Actions</th>
                 </tr>
               </thead>
 
@@ -400,6 +412,7 @@ export default function TableRoom() {
 
                     <td className="py-4">
                       <div className="flex gap-2">
+                          {(roles.includes("admin") || roles.includes ("receptionist"))&&(
                         <button
                           onClick={() => {
                             setSelectedId(
@@ -416,7 +429,8 @@ export default function TableRoom() {
                         >
                           Delete
                         </button>
-
+                          )}
+{(roles.includes("admin"))&&(
                         <button
                           onClick={() => {
                             setEditDepId(
@@ -430,6 +444,7 @@ export default function TableRoom() {
                         >
                           Update
                         </button>
+)}
                       </div>
                     </td>
                   </tr>

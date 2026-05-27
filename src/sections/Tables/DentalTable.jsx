@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TableCard from "./TableCard";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../sideBar";
 import CustomAlert from "../../components/CustomAlert";
@@ -164,7 +163,6 @@ export default function DentalTable() {
         <Sidebar />
 
         <div className="w-3/4 p-10 ml-[25%]">
-          <TableCard />
 
           <div className="bg-white p-6 rounded-xl shadow-md">
             <h1 className="text-2xl font-bold text-[#0F766E] mb-6">
