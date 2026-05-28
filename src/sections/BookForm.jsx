@@ -16,13 +16,42 @@ function BookingAndPaymentForm() {
 
   const [doctors, setDoctors] = useState([]);
   const [treatments, setTreatments] = useState([]);
+    const [filtered, setFilteredTreatments] = useState([]);
+
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/doctors").then(res => res.json()).then(data => setDoctors(data));
-    fetch("http://localhost:5000/api/treatments").then(res => res.json()).then(data => setTreatments(data));
+    fetch("http://localhost:5000/api/treatments")
+    .then(res => res.json())
+    .then(data => setTreatments(data));
   }, []);
+useEffect(() => {
+  if (!doc) {
+    setFilteredTreatments([]);
+    return;
+  }
+
+  const selectedDoctor = doctors.find(
+    (d) => Number(d.doctor_id) === Number(doc)
+  );
+
+  if (!selectedDoctor) return;
+  const doctorDepartments =
+    selectedDoctor.Departments || [];
+
+  const departmentIds = doctorDepartments.map(
+    (d) => d.department_id
+  );
+
+  const filtered = treatments.filter((t) =>
+    departmentIds.includes(t.department_id)
+  );
+
+  setFilteredTreatments(filtered);
+  setReason("");
+}, [doc, doctors, treatments]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,6 +84,7 @@ function BookingAndPaymentForm() {
       });
 
       const data = await res.json();
+      console.log(reason);
 
       if (!res.ok) {
         throw new Error(data.error || "Something went wrong processing appointment payment.");
@@ -104,8 +134,10 @@ function BookingAndPaymentForm() {
           <label className="block mb-1 font-bold text-black text-sm">Treatment</label>
           <select value={reason} onChange={(e) => setReason(e.target.value)} required className="w-full border border-black rounded-lg px-3 py-2">
             <option value="">Select a treatment</option>
-            {treatments.map(t => <option key={t.treatment_id} value={t.treatment_name}>{t.treatment_name}</option>)}
+            {filtered.map(t => <option key={t.treatment_id} value={t.treatment_name}>{t.treatment_name} {t.price}$
+            </option>)}
           </select>
+          
         </div>
       </div>
 

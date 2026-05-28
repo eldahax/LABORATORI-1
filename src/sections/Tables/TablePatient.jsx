@@ -7,14 +7,29 @@ import EditPatient from "../../Crudforms/EditPatient";
 
 function ConfirmDeleteModal({ show, onConfirm, onCancel }) {
   if (!show) return null;
+
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
         <h2 className="text-lg font-bold mb-2">Confirm Delete</h2>
-        <p className="text-gray-600 mb-6">Are you sure you want to delete this patient?</p>
+        <p className="text-gray-600 mb-6">
+          Are you sure you want to delete this patient?
+        </p>
+
         <div className="flex justify-end gap-3">
-          <button onClick={onCancel} className="px-4 py-2 border rounded-lg">Cancel</button>
-          <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white rounded-lg">Delete</button>
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 border rounded-lg"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg"
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>
@@ -29,6 +44,7 @@ export default function TablePatient() {
     type: "success",
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -60,7 +76,9 @@ export default function TablePatient() {
     try {
       const res = await fetch(
         `http://localhost:5000/api/patients/${selectedPatientId}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+        }
       );
 
       if (!res.ok) {
@@ -73,7 +91,9 @@ export default function TablePatient() {
       }
 
       setUsers((prev) =>
-        prev.filter((user) => user.patient_id !== selectedPatientId)
+        prev.filter(
+          (user) => user.patient_id !== selectedPatientId
+        )
       );
 
       setAlert({
@@ -81,6 +101,7 @@ export default function TablePatient() {
         message: "Patient deleted successfully",
         type: "success",
       });
+
       setShowDeleteModal(false);
     } catch (err) {
       setAlert({
@@ -96,6 +117,21 @@ export default function TablePatient() {
     setShowEditModal(true);
   };
 
+  const filteredUsers = users.filter((user) => {
+    const firstName = user.User?.first_name?.toLowerCase() || "";
+    const lastName = user.User?.last_name?.toLowerCase() || "";
+    const email = user.User?.email?.toLowerCase() || "";
+    const phone = user.User?.phone_number?.toLowerCase() || "";
+    const search = searchTerm.toLowerCase();
+
+    return (
+      firstName.includes(search) ||
+      lastName.includes(search) ||
+      email.includes(search) ||
+      phone.includes(search)
+    );
+  });
+
   return (
     <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-8 overflow-x-auto">
       <Navbar />
@@ -104,12 +140,16 @@ export default function TablePatient() {
         <Sidebar />
 
         <div className="w-3/4 p-10 ml-[25%]">
-
           <CustomAlert
             show={alert.show}
             message={alert.message}
             type={alert.type}
-            onClose={() => setAlert((p) => ({ ...p, show: false }))}
+            onClose={() =>
+              setAlert((p) => ({
+                ...p,
+                show: false,
+              }))
+            }
           />
 
           <div className="flex justify-between items-center mb-6">
@@ -123,6 +163,18 @@ export default function TablePatient() {
             >
               + Add Patient
             </button>
+          </div>
+
+          <div className="w-1/3 mb-6">
+            <input
+              type="text"
+              placeholder="Search patients..."
+              value={searchTerm}
+              onChange={(e) =>
+                setSearchTerm(e.target.value)
+              }
+              className="w-full px-4 py-2 border rounded-lg text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#0F766E] border-gray-300 shadow-sm"
+            />
           </div>
 
           <table className="min-w-full text-left text-sm sm:text-base text-black">
@@ -139,33 +191,54 @@ export default function TablePatient() {
             </thead>
 
             <tbody>
-              {users.map((user) => (
-                <tr key={user.patient_id} className="border-b hover:bg-gray-50">
-                  <td className="py-4 pl-4">{user.patient_id}</td>
-                  <td>{user.User?.first_name}</td>
-                  <td>{user.User?.last_name}</td>
-                  <td>{user.User?.email}</td>
-                  <td>{user.User?.phone_number}</td>
+              {filteredUsers.map((user) => (
+                <tr
+                  key={user.patient_id}
+                  className="border-b hover:bg-gray-50"
+                >
+                  <td className="py-4 pl-4">
+                    {user.patient_id}
+                  </td>
 
                   <td>
-                    {user.PatientAllergies?.length
-                      ? user.PatientAllergies
-                        .map((a) => a?.allergy_name)
-                        .filter(Boolean)
-                        .join(", ")
-                      : "No allergy"}
+                    {user.User?.first_name}
+                  </td>
+
+                  <td>
+                    {user.User?.last_name}
+                  </td>
+
+                  <td>
+                    {user.User?.email}
+                  </td>
+
+                  <td>
+                    {user.User?.phone_number}
+                  </td>
+
+                  <td>
+                    {user.PatientAllergies?.length ? user.PatientAllergies.map(
+                      (a) => a?.allergy_name).filter(Boolean).join(", ") : "No allergy"}
                   </td>
 
                   <td className="flex gap-2">
                     <button
-                      onClick={() => openDelete(user.patient_id)}
+                      onClick={() =>
+                        openDelete(
+                          user.patient_id
+                        )
+                      }
                       className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
                     >
                       Delete
                     </button>
 
                     <button
-                      onClick={() => openEdit(user.patient_id)}
+                      onClick={() =>
+                        openEdit(
+                          user.patient_id
+                        )
+                      }
                       className="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg"
                     >
                       Update
@@ -174,9 +247,12 @@ export default function TablePatient() {
                 </tr>
               ))}
 
-              {users.length === 0 && (
+              {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="text-center py-8 text-gray-500">
+                  <td
+                    colSpan="7"
+                    className="text-center py-8 text-gray-500"
+                  >
                     No patients found
                   </td>
                 </tr>
@@ -186,7 +262,6 @@ export default function TablePatient() {
         </div>
       </div>
 
-
       <AddPatient
         show={showAddModal}
         onClose={() => {
@@ -194,7 +269,6 @@ export default function TablePatient() {
           fetchPatients();
         }}
       />
-
 
       <EditPatient
         show={showEditModal}
@@ -208,9 +282,10 @@ export default function TablePatient() {
       <ConfirmDeleteModal
         show={showDeleteModal}
         onConfirm={handleDelete}
-        onCancel={() => setShowDeleteModal(false)}
+        onCancel={() =>
+          setShowDeleteModal(false)
+        }
       />
-
     </div>
   );
 }
