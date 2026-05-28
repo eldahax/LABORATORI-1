@@ -24,6 +24,9 @@ function ConfirmModal({ show, onConfirm, onCancel, loading }) {
 }
 
 export default function TableWorkSchedule() {
+  const [user, setUser] = useState(null);
+
+const roles = user?.roles || [];
   const [workSchedules, setWorkSchedules] = useState([]);
   const [search, setSearch] = useState("");
   const [alert, setAlert] = useState({ show: false, message: "", type: "success" });
@@ -44,6 +47,10 @@ export default function TableWorkSchedule() {
   };
 
   useEffect(() => {
+     fetch("http://localhost:5000/api/users/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setUser(data))
+      .catch((err) => console.log(err));
     fetchSchedules();
   }, []);
 
@@ -112,10 +119,12 @@ export default function TableWorkSchedule() {
                       <p className="text-sm font-semibold">{ws.schedule_day}</p>
                       <p className="text-xs text-gray-600">{ws.start_time} - {ws.end_time}</p>
                       <p className="text-xs mt-1">Status: <span className={ws.status === "active" ? "text-green-600 font-semibold" : "text-red-500 font-semibold"}>{ws.status}</span></p>
+                            {( roles.includes("admin")) && (
                       <div className="flex gap-2 mt-3">
                         <button onClick={() => { setEditId(ws.work_schedule_id); setShowEdit(true); }} className="text-xs border px-2 py-1 rounded">Edit</button>
-                        <button onClick={() => { setDeleteId(ws.work_schedule_id); setConfirmOpen(true); }} className="text-xs border border-red-500 text-red-500 px-2 py-1 rounded">Delete</button>
+                        <button onClick={() => { setDeleteId(ws.work_schedule_id); setConfirmOpen(true); }} className="text-xs border border-red-500 text-red-500 px-2 py-1 rounded">Delete</button>  
                       </div>
+                            )}
                     </div>
                   ))}
                 </div>

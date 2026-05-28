@@ -44,7 +44,7 @@ const updateWorkSchedule = async (req, res) => {
 const getAllWorkSchedules = async (req, res) => {
     try {
 
-        const result = await workScheduleService.getAllWorkSchedules();
+        const result = await workScheduleService.getAllWorkSchedules(req.user);
 
         res.json(result);
 

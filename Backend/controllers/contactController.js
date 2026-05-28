@@ -10,11 +10,12 @@ const add = async (req, res) => {
             message
         } = req.body;
 
-        const result = await crud.create(
-    req,
-    treatment_id,
-    rating,
-    description
+        const result = await contactService.createContact(
+    
+    fullname,
+            email,
+            phone_number,
+            message
 );
 
         res.json(result);

@@ -3,10 +3,11 @@ const router = express.Router();
 
 const workScheduleController = require("../controllers/workScheduleController");
 
-router.post("/", workScheduleController.createWorkSchedule);
-router.get("/", workScheduleController.getAllWorkSchedules);
-router.get("/:id", workScheduleController.getWorkScheduleById);
-router.put("/:id", workScheduleController.updateWorkSchedule);
-router.delete("/:id", workScheduleController.deleteWorkSchedule);
+const {  protect, authorize} = require("../auth/authMiddleWear");
+router.post("/",protect, authorize("admin"),workScheduleController.createWorkSchedule);
+router.get("/", protect,workScheduleController.getAllWorkSchedules);
+router.get("/:id",protect, workScheduleController.getWorkScheduleById);
+router.put("/:id",protect,authorize("admin") ,workScheduleController.updateWorkSchedule);
+router.delete("/:id",protect,authorize("admin"), workScheduleController.deleteWorkSchedule);
 
 module.exports = router;

@@ -30,8 +30,27 @@ const createWorkSchedule = async (
         throw err;
     }
 };
-const getAllWorkSchedules = async () => {
+const getAllWorkSchedules = async (user) => {
+    try{
+         let whereCondition = {};
+    const roles = user.roles || [];
+
+  
+    if (!roles.includes("admin")) {
+
+   
+      if (roles.includes("patient")) {
+        whereCondition.patient_id = user.patient_id;
+      }
+
+     
+      if (roles.includes("doctor")) {
+        whereCondition.doctor_id = user.doctor_id;
+      }
+    }
+
   return await WorkSchedule.findAll({
+      where: whereCondition,
     include: [
       {
         model: Doctor,
@@ -44,6 +63,12 @@ const getAllWorkSchedules = async () => {
       },
     ],
   });
+}
+catch(err){
+  throw new Error(
+      "Could not fetch workschedule"
+    );
+}
 };
 
 const getWorkScheduleById = async (id) => {
