@@ -10,12 +10,12 @@ class Invoice extends Model {
 
 module.exports = (sequelize) => {
   Invoice.init({
-    Id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'invoice_id' },
-    PatientId: { type: DataTypes.INTEGER, allowNull: false, field: 'patient_id' },
-    AppointmentId: { type: DataTypes.INTEGER, allowNull: false, field: 'appointment_id' },
-    CreatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, field: 'created_at' },
-    Status: { type: DataTypes.ENUM('done', 'pending'), defaultValue: 'pending', field: 'invoice_status' },
-    PaymentMethod: { type: DataTypes.ENUM('cash', 'card', 'insurance'), defaultValue: 'cash', field: 'payment_method' },
+    invoice_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, field: 'invoice_id' },
+    patient_id: { type: DataTypes.INTEGER, allowNull: false, field: 'patient_id' },
+    appointment_id: { type: DataTypes.INTEGER, allowNull: false, field: 'appointment_id' },
+    created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, field: 'created_at' },
+    invoice_status: { type: DataTypes.ENUM('done', 'pending'), defaultValue: 'pending', field: 'invoice_status' },
+    payment_method: { type: DataTypes.ENUM('cash', 'card', 'insurance'), defaultValue: 'cash', field: 'payment_method' },
   }, { sequelize, tableName: 'invoices', timestamps: false });
   return Invoice;
 };

@@ -9,53 +9,30 @@ app.use(cors({
   credentials: true
 }));
 
+app.use(cookieParser());
+app.use("/api/payments", require("./routes/payment.router"));
+
 app.use(express.json());
-app.use(cookieParser())
 
 const sequelize = require("./config/database");
 
-const userRoutes = require("./routes/user.router");
-app.use("/api/users", userRoutes);
 
-const patientrouter = require("./routes/patient.router");
-app.use("/api/patients", patientrouter);
+app.use("/api/users", require("./routes/user.router"));
+app.use("/api/patients", require("./routes/patient.router"));
+app.use("/api/doctors", require("./routes/doc.router"));
+app.use("/api/treatments", require("./routes/treatment.router"));
+app.use("/api/reviews", require("./routes/review.router"));
+app.use("/api/offers", require("./routes/offer.router"));
+app.use("/api/rooms", require("./routes/room.router"));
+app.use("/api/inventory", require("./routes/inventory.router"));
+app.use("/api/departments", require("./routes/dep.router"));
+app.use("/api/appointments", require("./routes/appointment.router"));
+app.use("/api/work-schedules", require("./routes/workSchedule.router"));
+app.use("/api/contacts", require("./routes/contact.router"));
+app.use("/api/dental-history", require("./routes/dentalrecord.router"));
+app.use("/api/reminders", require("./routes/reminder.router"));
+app.use("/api/payments",require("./routes/payment.router"))
 
-const docRouter = require("./routes/doc.router");
-app.use("/api/doctors", docRouter);
-
-const tretRouter = require("./routes/treatment.router");
-app.use("/api/treatments", tretRouter);
-
-const reviewRouter = require("./routes/review.router");
-app.use("/api/reviews", reviewRouter);
-
-const offerRouter = require("./routes/offer.router");
-app.use("/api/offers", offerRouter);
-
-const roomRouter = require("./routes/room.router");
-app.use("/api/rooms", roomRouter);
-
-const inventoryRouter = require("./routes/inventory.router");
-app.use("/api/inventory", inventoryRouter);
-
-const depRouter = require("./routes/dep.router");
-app.use("/api/departments", depRouter)
-
-const appRouter = require("./routes/appointment.router");
-app.use("/api/appointments", appRouter);
-
-
-const workScheduleRouter = require("./routes/workSchedule.router");
-app.use("/api/work-schedules", workScheduleRouter);
-
-const contactRouter = require("./routes/contact.router");
-app.use("/api/contacts", contactRouter);
-
-const DentalRecordRouter = require('./routes/dentalrecord.router');
-app.use("/api/dental-history", DentalRecordRouter);
-
-const reminderRouter = require("./routes/reminder.router");
-app.use("/api/reminders", reminderRouter);
 
 
 const PORT = process.env.PORT || 5000;

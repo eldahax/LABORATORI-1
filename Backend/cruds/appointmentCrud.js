@@ -1,3 +1,4 @@
+const stripe = require("../config/stripe");
 const {
   Appointment,
   PatientTreatment,
@@ -9,7 +10,9 @@ const {
   Room,
   DentalRecord,
   WorkSchedule,
+  Invoice,
   Reminder,
+  Payment,
   sequelize,
 } = require("../models/index");
 
@@ -19,7 +22,10 @@ const create = async (
   email,
   appointment_date_time,
   description,
+  stripeToken 
 ) => {
+  if (!stripeToken) throw new Error("Payment credentials card token is strictly required.");
+  
   const t = await sequelize.transaction();
 
   try {
@@ -88,7 +94,6 @@ const create = async (
 
     
     const allAppointments = await Appointment.findAll({ transaction: t });
-
     for (const app of allAppointments) {
       if (app.doctor_id === doctorId || app.room_id === room.room_id) {
         const existingStart = new Date(app.appointment_date_time);
@@ -114,35 +119,54 @@ const create = async (
         appointment_date_time: newStart,
         duration: duration,
         description,
-        status: "pending",
+        appointment_status: "confirmed", 
       },
       { transaction: t },
     );
 
-    const newRecord = await DentalRecord.create(
-      {
-        patient_id: patientId,
-        doctor_id: doctorId,
-        appointment_id: newAppointment.appointment_id,
-        tooth: "TBD",
-        dental_condition: "Pending Examination",
-        notes: `Initial booking: ${description}`,
-      },
-      { transaction: t },
-    );
+   
+    const newRecord = await DentalRecord.create({
+      patient_id: patientId,
+      doctor_id: doctorId,
+      appointment_id: newAppointment.appointment_id,
+      tooth: "TBD",
+      dental_condition: "Pending Examination",
+      notes: `Initial booking: ${description}`,
+    }, { transaction: t });
 
-    await PatientTreatment.create(
-      {
-        appointment_id: newAppointment.appointment_id,
+    await PatientTreatment.create({
+      appointment_id: newAppointment.appointment_id,
         treatment_id: treatmentPreformed.treatment_id,
-        dental_record_id: newRecord.dental_record_id,
-        pt_description: `Planned: ${description}`,
-      },
-      { transaction: t },
-    );
+      dental_record_id: newRecord.dental_record_id,
+      pt_description: `Planned: ${description}`,
+    }, { transaction: t });
+
+    const invoice = await Invoice.create({
+      patient_id: patientId,
+      appointment_id: newAppointment.appointment_id,
+      invoice_status: "done",
+      payment_method: "card"
+    }, { transaction: t });
+
+
+    const chargeAmount = parseFloat(treatmentPreformed.price || 50);
+    const charge = await stripe.charges.create({
+      amount: Math.round(chargeAmount * 100), 
+      currency: "usd",
+      source: stripeToken,
+      description: `Charge for Appointment #${newAppointment.appointment_id} - ${description}`,
+    });
+
+    await Payment.create({
+      invoice_id: invoice.invoice_id,
+      amount: chargeAmount,
+      payment_method: "card",
+      stripe_session_id: charge.id,
+      status: "paid",
+    }, { transaction: t });
 
     await t.commit();
-    return newAppointment;
+    return { message: "Success", appointment_id: newAppointment.appointment_id };
   } catch (err) {
     if (t) await t.rollback();
     throw new Error(err.message);

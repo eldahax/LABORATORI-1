@@ -43,6 +43,7 @@ import AddContact from "./Crudforms/AddContact";
 import DentalTable from "./sections/Tables/DentalTable";
 import EditDentalRecord from "./Crudforms/EditDentalRecord"
 import TableReview from "./sections/Tables/TableReview";
+import PaymentTable from "./sections/Tables/paymentTable";
 function App() {
   return (
     <Routes>
@@ -92,10 +93,11 @@ function App() {
         <Route path="/addApointment" element={<AddApointment />} />
         <Route path="/patients/edit/:id" element={<EditPatient />} />
         <Route path="/Doctors" element={<DoctorTable />} />
-        <Route path="/add" element={<AddDoc />} />
+        <Route path="/addD" element={<AddDoc />} />
         <Route path="/doctors/edit/:id" element={<EditDoctor />} />
         <Route path="/Users" element={<Table />} />
         <Route path="/appointments/edit/:id" element={< EditAppointment />} />
+        <Route path="/payment" element={< PaymentTable/>} />
 
         <Route path="/rooms" element={<TableRoom />} />
         <Route path="/offers" element={<OfferTable />} />

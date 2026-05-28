@@ -43,14 +43,16 @@ const Sidebar = () => {
             <>
               <Link to="/Users" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Users
-              </Link>
+              </Link>      
               <Link to="/Doctors" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Doctors
               </Link>
               <Link to="/Patients" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Patients
               </Link>
-
+ <Link to="/Payment" className="block text-center font-bold p-3 rounded-lg hover:bg-white hover:text-black">
+                Payment
+          </Link>
 
               <Link to="/inventory" className="font-bold block text-center p-3 rounded-lg hover:bg-white hover:text-black">
                 Inventory

@@ -44,6 +44,7 @@ export default function AppointmentTable() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [search, setSearch] = useState("");
 
   const [editAppointmentOpen, setEditAppointmentOpen] = useState(false);
   const [editAppointmentId, setEditAppointmentId] = useState(null);
@@ -100,6 +101,18 @@ export default function AppointmentTable() {
       type: "success"
     });
   };
+  const filteredAppointments = appointments.filter((app) => {
+  const doctor =
+    `${app.Doctor?.User?.first_name || ""} ${app.Doctor?.User?.last_name || ""}`.toLowerCase();
+
+  const patient =
+    `${app.Patient?.User?.first_name || ""} ${app.Patient?.User?.last_name || ""}`.toLowerCase();
+
+  return (
+    doctor.includes(search.toLowerCase()) ||
+    patient.includes(search.toLowerCase())
+  );
+});
 
   return (
     <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-8 overflow-x-auto">
@@ -121,6 +134,13 @@ export default function AppointmentTable() {
               + Book Appointment
             </button>
           </div>
+          <input
+  type="text"
+  placeholder="Search by doctor or patient..."
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  className="border px-3 py-2 rounded-lg w-[30%] mb-4"
+/>
 
           <CustomAlert
             show={alert.show}
@@ -154,7 +174,7 @@ export default function AppointmentTable() {
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {appointments.map((app) => (
+           {filteredAppointments.map((app) => (
               <div
                 key={app.appointment_id}
                 className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 hover:shadow-md transition"
@@ -184,7 +204,7 @@ export default function AppointmentTable() {
                 </div>
 
                 <div className="flex gap-3 mt-5">
-                  {(roles.includes("doctor") || roles.includes("admin")) && (
+                  {( roles.includes("admin")) && (
                     <button
                       onClick={() => {
                         setSelectedId(app.appointment_id);
@@ -195,7 +215,7 @@ export default function AppointmentTable() {
                       Delete
                     </button>
                   )}
-                  {(roles.includes("doctor") || roles.includes("admin")) && (
+                  {( roles.includes("admin")) && (
                     <button
                       onClick={() => {
                         setEditAppointmentId(app.appointment_id);

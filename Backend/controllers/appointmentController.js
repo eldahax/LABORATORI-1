@@ -1,17 +1,15 @@
 const crud=require("../cruds/appointmentCrud");
 
-
-const createApp=async(req,res)=>{
-    try{
-     const{full_name,doctor,email,appointment_date_time,description}=req.body;
-
-     const result=await crud.create(full_name,doctor,email,appointment_date_time,description);
-      res.json(result);
-    }
-    catch(err){
+const createApp = async (req, res) => {
+  try {
+    const { full_name, doctor, email, appointment_date_time, description, stripeToken } = req.body;
+       
+    const result = await crud.create(full_name, doctor, email, appointment_date_time, description, stripeToken);
+    res.json(result);
+  } catch (err) {
     res.status(500).json({ error: err.message });
-    }
-}
+  }
+};
 
 const update=async(req,res)=>{
     try{

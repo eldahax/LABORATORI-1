@@ -32,7 +32,7 @@ module.exports = (sequelize) => {
         allowNull: false,
         field: "doctor_id",
       },
-      created_at: { type: DataTypes.INTEGER, allowNull: false, field: "room_id" },
+     
       CreatedAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
