@@ -13,8 +13,8 @@ router.get("/me", protect, (req, res) => {
 
 router.get("/", protect, authorize("admin"), userController.getAllUsers);
 router.delete("/:id", protect, authorize("admin"), userController.deleteUser);
-router.get("/:id", protect, userController.getUserById);
-router.put("/:id", protect, userController.updateUser);
+router.get("/:id", protect,authorize("admin"), userController.getUserById);
+router.put("/:id", protect,authorize("admin"), userController.updateUser);
 
 
 

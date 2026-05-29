@@ -2,11 +2,12 @@ const express = require("express");
 const router = express.Router();
 const offerController = require("../controllers/offersController");
 
+const{protect,authorize}=require("../auth/authMiddleWear")
 
-router.post("/", offerController.addOffer);
-router.get("/", offerController.getAllOffers);
-router.get("/:id", offerController.getOfferById);
-router.put("/:id", offerController.updateOffer);
-router.delete("/:id", offerController.deleteOffer);
+router.post("/",protect,authorize("admin","receptionist"), offerController.addOffer);
+router.get("/",protect,authorize("admin","receptionist","doctors"), offerController.getAllOffers);
+router.get("/:id",protect,authorize("admin","receptionist"), offerController.getOfferById);
+router.put("/:id",protect,authorize("admin","receptionist"), offerController.updateOffer);
+router.delete("/:id",protect,authorize("admin","receptionist"), offerController.deleteOffer);
 
 module.exports = router;
