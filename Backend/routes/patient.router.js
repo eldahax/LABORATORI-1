@@ -3,11 +3,11 @@ const router = express.Router();
 
 const patientController = require("../controllers/patientController");
 
-
-router.post("/add", patientController.insertPatient);
-router.get("/", patientController.getAllPatients);
-router.get("/:id", patientController.getPatientById);
-router.put("/:id", patientController.updatePatient);
-router.delete("/:id", patientController.deletePatient);
+const { protect, authorize } = require("../auth/authMiddleWear")
+router.post("/add", protect, authorize("admin", "receptionist"), patientController.insertPatient);
+router.get("/", protect, authorize("admin", "receptionist"), patientController.getAllPatients);
+router.get("/:id", protect, authorize("admin"), patientController.getPatientById);
+router.put("/:id", protect, authorize("admin"), patientController.updatePatient);
+router.delete("/:id", protect, authorize("admin"), patientController.deletePatient);
 
 module.exports = router;
