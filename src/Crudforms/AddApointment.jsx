@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import API from "../components/costumFetch";
 
 const stripePromise = loadStripe("pk_test_51TaeDAF3VKWlDYBwcOZJ0lEeZkdUCEHRZKk3L26o3IgIDMWZVoGW9XuvJkb3xcoHiuI8GXXc1ZsIJaCFum6Jr8sy00IIyPt5Uh");
 
@@ -20,14 +21,15 @@ function BookingAndPaymentForm({ onClose, onPaymentSuccess }) {
   const [filtered, setFilteredTreatments] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    fetch("http://localhost:5000/api/doctors")
-      .then((res) => res.json())
-      .then((data) => setDoctors(data));
 
-    fetch("http://localhost:5000/api/treatments")
-      .then((res) => res.json())
-      .then((data) => setTreatments(data));
+  useEffect(() => {
+    API.get("/doctors")
+      .then((res) => setDoctors(res.data))
+      .catch((err) => console.log(err));
+
+    API.get("/treatments")
+      .then((res) => setTreatments(res.data))
+      .catch((err) => console.log(err));
   }, []);
 
   useEffect(() => {
@@ -72,31 +74,22 @@ function BookingAndPaymentForm({ onClose, onPaymentSuccess }) {
 
       if (stripeError) throw new Error(stripeError.message);
 
-      const res = await fetch("http://localhost:5000/api/appointments", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          full_name: name,
-          doctor: doc,
-          email,
-          phone_number: phone,
-          appointment_date_time: date,
-          description: reason,
-          stripeToken: token.id,
-        }),
+      const res = await API.post("/appointments", {
+        full_name: name,
+        doctor: doc,
+        email,
+        phone_number: phone,
+        appointment_date_time: date,
+        description: reason,
+        stripeToken: token.id,
       });
-
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.error || "Payment failed");
 
       if (onPaymentSuccess) onPaymentSuccess();
       onClose();
     } catch (err) {
-      setErrorMsg(err.message);
+      setErrorMsg(err.response?.data?.error || err.message);
     } finally {
-      setLoading(false);
+      loading && setLoading(false);
     }
   };
 

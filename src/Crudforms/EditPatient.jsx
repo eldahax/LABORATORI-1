@@ -64,7 +64,9 @@ export default function EditPatient({ show, onClose, patientId }) {
   useEffect(() => {
     if (!show || !id) return;
 
-    fetch(`http://localhost:5000/api/patients/${id}`)
+    fetch(`http://localhost:5000/api/patients/${id}`, {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => {
         setForm({
@@ -74,8 +76,16 @@ export default function EditPatient({ show, onClose, patientId }) {
           phone_number: data?.User?.phone_number || "",
           allergy_name: data?.PatientAllergies?.map(a => a.allergy_name) || []
         });
+        setAllergyInput(data?.PatientAllergies?.map(a => a.allergy_name)[0] || "");
       })
-      .catch(() => { });
+      .catch((err) => {
+        console.error("Error fetching patient:", err);
+        setAlertState({ 
+          show: true, 
+          message: "Failed to load patient data", 
+          type: "error" 
+        });
+      });
   }, [id, show]);
 
   if (!show) return null;
@@ -129,31 +139,49 @@ export default function EditPatient({ show, onClose, patientId }) {
     try {
       const res = await fetch(`http://localhost:5000/api/patients/${id}`, {
         method: "PUT",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          first_name: form.first_name,
+          last_name: form.last_name,
+          email: form.email,
+          phone_number: form.phone_number,
+          allergy_name: allergyInput ? [allergyInput] : []
+        }),
       });
+      const data = await res.json();
 
       if (!res.ok) {
-        const data = await res.json();
         setAlertState({ show: true, message: data.error || "Update failed", type: "error" });
         return;
       }
 
-      setConfirmOpen(false);
-      onClose();
-      navigate("/patients");
+      setAlertState({ show: true, message: "Patient updated successfully!", type: "success" });
+      
+      setTimeout(() => {
+        setConfirmOpen(false);
+        onClose();
+        navigate("/patients");
+      }, 800);
     } catch (err) {
+      console.error("Update error:", err);
       setAlertState({ show: true, message: "Server error", type: "error" });
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-
       <ConfirmModal
         show={confirmOpen}
         onCancel={() => setConfirmOpen(false)}
         onConfirm={handleConfirmUpdate}
+      />
+
+      <CustomAlert
+        show={alertState.show}
+        message={alertState.message}
+        type={alertState.type}
+        onClose={() => setAlertState({ show: false, message: "", type: "error" })}
       />
 
       <form
@@ -176,6 +204,7 @@ export default function EditPatient({ show, onClose, patientId }) {
           name="first_name"
           value={form.first_name}
           onChange={handleChange}
+          placeholder="First Name"
           className="p-3 border w-full rounded-lg"
         />
         <p className="text-red-500 text-sm h-5">{nameErr}</p>
@@ -184,6 +213,7 @@ export default function EditPatient({ show, onClose, patientId }) {
           name="last_name"
           value={form.last_name}
           onChange={handleChange}
+          placeholder="Last Name"
           className="p-3 border w-full rounded-lg"
         />
         <p className="text-red-500 text-sm h-5">{lastNameErr}</p>
@@ -192,6 +222,7 @@ export default function EditPatient({ show, onClose, patientId }) {
           name="email"
           value={form.email}
           onChange={handleChange}
+          placeholder="Email"
           className="p-3 border w-full rounded-lg"
         />
         <p className="text-red-500 text-sm h-5">{emailErr}</p>
@@ -200,20 +231,15 @@ export default function EditPatient({ show, onClose, patientId }) {
           name="phone_number"
           value={form.phone_number}
           onChange={handleChange}
+          placeholder="Phone Number"
           className="p-3 border w-full rounded-lg"
         />
         <div className="h-5"></div>
 
         <input
-          name="allergy_name"
           value={allergyInput}
-          onChange={(e) => {
-            setAllergyInput(e.target.value);
-            setForm((prev) => ({
-              ...prev,
-              allergy_name: e.target.value ? [e.target.value] : []
-            }));
-          }}
+          onChange={(e) => setAllergyInput(e.target.value)}
+          placeholder="Allergy (optional)"
           className="p-3 border w-full rounded-lg"
         />
         <div className="h-5"></div>
@@ -231,13 +257,6 @@ export default function EditPatient({ show, onClose, patientId }) {
           </button>
         </div>
       </form>
-
-      <CustomAlert
-        show={alertState.show}
-        message={alertState.message}
-        type={alertState.type}
-        onClose={() => setAlertState({ show: false, message: "", type: "error" })}
-      />
     </div>
   );
 }

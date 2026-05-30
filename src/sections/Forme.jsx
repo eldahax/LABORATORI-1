@@ -164,20 +164,7 @@ const Forme = () => {
         </div>
       </div>
 
-      <select
-        value={user.roles}
-        onChange={(e) => setRole(e.target.value)}
-        className="w-full bg-gray-100 p-4 rounded-lg outline-none"
-      >
-        <option value="">Dental role</option>
-        <option>General Dentistry</option>
-        <option>Orthodontics</option>
-        <option>Oral Surgery</option>
-        <option>Endodontics</option>
-        <option>Nurse</option>
-        <option>Receptionist</option>
-      </select>
-
+     
     
       <div className="flex justify-between pt-6 max-[500px]:flex-col max-[500px]:gap-3">
         <button

@@ -30,6 +30,8 @@ function ConfirmModal({ show, onConfirm, onCancel, loading }) {
 export default function DoctorTable() {
   const [doctors, setDoctors] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const[user,setUser]=useState(null);
+     const roles = user?.roles || [];
 
   const [selectedId, setSelectedId] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -46,7 +48,9 @@ export default function DoctorTable() {
   });
 
   const fetchDoctors = () => {
-    fetch("http://localhost:5000/api/doctors")
+    fetch("http://localhost:5000/api/doctors",{
+      credentials:"include"
+    })
       .then((res) => res.json())
       .then((data) => setDoctors(data))
       .catch(() =>
@@ -58,7 +62,13 @@ export default function DoctorTable() {
       );
   };
   useEffect(() => {
-    fetchDoctors();
+    
+ fetch("http://localhost:5000/api/users/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setUser(data))
+      .catch((err) => console.log(err))
+      ;
+      fetchDoctors();
   }, []);
 
   const handleDelete = async () => {
@@ -171,7 +181,6 @@ export default function DoctorTable() {
         <Sidebar />
 
         <div className="w-3/4 p-10 ml-[25%]">
-          <TableCard />
 
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-lg sm:text-xl font-bold text-[#0F766E]">Doctors</h1>
@@ -231,6 +240,7 @@ export default function DoctorTable() {
                       >
                         Delete
                       </button>
+                      {(roles.includes("admin")) && (
                       <button
                         onClick={() => {
                           setEditDoctorId(doc.doctor_id);
@@ -240,6 +250,7 @@ export default function DoctorTable() {
                       >
                         Update
                       </button>
+                      )}
                     </td>
                   </tr>
                 ))}

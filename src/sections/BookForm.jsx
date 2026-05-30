@@ -22,8 +22,14 @@ function BookingAndPaymentForm() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/doctors").then(res => res.json()).then(data => setDoctors(data));
-    fetch("http://localhost:5000/api/treatments")
+    fetch("http://localhost:5000/api/doctors"
+      ,{
+        credentials:"include"
+      }
+    ).then(res => res.json()).then(data => setDoctors(data));
+    fetch("http://localhost:5000/api/treatments",{
+      credentials:"include"
+    })
     .then(res => res.json())
     .then(data => setTreatments(data));
   }, []);

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TableCard from "./TableCard";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../sideBar";
 import CustomAlert from "../../components/CustomAlert";
@@ -119,7 +118,6 @@ export default function InventoryTable() {
           <Sidebar />
 
           <div className="w-3/4 p-10 ml-[25%]">
-            <TableCard />
 
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-lg sm:text-xl font-bold text-[#0F766E]">

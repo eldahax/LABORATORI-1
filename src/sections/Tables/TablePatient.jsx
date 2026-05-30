@@ -43,6 +43,8 @@ export default function TablePatient() {
     message: "",
     type: "success",
   });
+  const[user,setUser]=useState(null);
+  const roles=user?.roles || [];
 
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -51,7 +53,9 @@ export default function TablePatient() {
   const [selectedPatientId, setSelectedPatientId] = useState(null);
 
   const fetchPatients = () => {
-    fetch("http://localhost:5000/api/patients")
+    fetch("http://localhost:5000/api/patients", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setUsers(data))
       .catch(() =>
@@ -78,6 +82,7 @@ export default function TablePatient() {
         `http://localhost:5000/api/patients/${selectedPatientId}`,
         {
           method: "DELETE",
+          credentials: "include",
         }
       );
 
@@ -90,11 +95,7 @@ export default function TablePatient() {
         return;
       }
 
-      setUsers((prev) =>
-        prev.filter(
-          (user) => user.patient_id !== selectedPatientId
-        )
-      );
+      fetchPatients();
 
       setAlert({
         show: true,
@@ -186,7 +187,9 @@ export default function TablePatient() {
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Allergy</th>
+                {(roles.includes("admin")) &&(
                 <th>Actions</th>
+                )}
               </tr>
             </thead>
 
@@ -221,28 +224,33 @@ export default function TablePatient() {
                       (a) => a?.allergy_name).filter(Boolean).join(", ") : "No allergy"}
                   </td>
 
-                  <td className="flex gap-2">
-                    <button
-                      onClick={() =>
-                        openDelete(
-                          user.patient_id
-                        )
-                      }
-                      className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
-                    >
-                      Delete
-                    </button>
+                  <td className="py-4">
+                     {(roles.includes("admin")) &&(
+                    <div className="flex gap-2">
+                      
+                      <button
+                        onClick={() =>
+                          openDelete(
+                            user.patient_id
+                          )
+                        }
+                        className="text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg"
+                      >
+                        Delete
+                      </button>
 
-                    <button
-                      onClick={() =>
-                        openEdit(
-                          user.patient_id
-                        )
-                      }
-                      className="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg"
-                    >
-                      Update
-                    </button>
+                      <button
+                        onClick={() =>
+                          openEdit(
+                            user.patient_id
+                          )
+                        }
+                        className="text-green-600 hover:bg-green-500 hover:text-white px-3 py-1 rounded-lg"
+                      >
+                        Update
+                      </button>
+                    </div>
+                     )}
                   </td>
                 </tr>
               ))}
