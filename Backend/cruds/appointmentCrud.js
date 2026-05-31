@@ -15,7 +15,7 @@ const {
   Payment,
   TreatmentInventory,
   Inventory,
-    sequelize,
+  sequelize,
 } = require("../models/index");
 
 const create = async (
@@ -24,10 +24,10 @@ const create = async (
   email,
   appointment_date_time,
   description,
-  stripeToken 
+  stripeToken
 ) => {
   if (!stripeToken) throw new Error("Payment credentials card token is strictly required.");
-  
+
   const t = await sequelize.transaction();
 
   try {
@@ -94,7 +94,7 @@ const create = async (
       throw new Error("this doctor doesnt work on " + dayName + " ' s");
     }
 
-    
+
     const allAppointments = await Appointment.findAll({ transaction: t });
     for (const app of allAppointments) {
       if (app.doctor_id === doctorId || app.room_id === room.room_id) {
@@ -121,12 +121,12 @@ const create = async (
         appointment_date_time: newStart,
         duration: duration,
         description,
-        appointment_status: "confirmed", 
+        appointment_status: "confirmed",
       },
       { transaction: t },
     );
 
-   
+
     const newRecord = await DentalRecord.create({
       patient_id: patientId,
       doctor_id: doctorId,
@@ -138,7 +138,7 @@ const create = async (
 
     await PatientTreatment.create({
       appointment_id: newAppointment.appointment_id,
-        treatment_id: treatmentPreformed.treatment_id,
+      treatment_id: treatmentPreformed.treatment_id,
       dental_record_id: newRecord.dental_record_id,
       pt_description: `Planned: ${description}`,
     }, { transaction: t });
@@ -153,7 +153,7 @@ const create = async (
 
     const chargeAmount = parseFloat(treatmentPreformed.price || 50);
     const charge = await stripe.charges.create({
-      amount: Math.round(chargeAmount * 100), 
+      amount: Math.round(chargeAmount * 100),
       currency: "usd",
       source: stripeToken,
       description: `Charge for Appointment #${newAppointment.appointment_id} - ${description}`,
@@ -181,15 +181,15 @@ const getAllApp = async (user) => {
     let whereCondition = {};
     const roles = user.roles || [];
 
-  
+
     if (!roles.includes("admin")) {
 
-   
+
       if (roles.includes("patient")) {
         whereCondition.patient_id = user.patient_id;
       }
 
-     
+
       if (roles.includes("doctor")) {
         whereCondition.doctor_id = user.doctor_id;
       }
@@ -217,10 +217,11 @@ const getAllApp = async (user) => {
           as: "PatientTreatments",
           include: [Treatment],
         },
-        { model: DentalRecord,
-            as: "DentalRecords"
+        {
+          model: DentalRecord,
+          as: "DentalRecords"
 
-         },
+        },
       ],
       order: [["appointment_date_time", "DESC"]],
     });
@@ -237,10 +238,12 @@ const deleteAppoint = async (appointment_id) => {
   try {
     const appointmentExist = await Appointment.findByPk(appointment_id);
     if (!appointmentExist) throw new Error("This appointment doesn't exist");
-    const db=await Appointment.findOne({where:{
-     appointment_status:'complete'
-    }});
-    if(db){
+    const db = await Appointment.findOne({
+      where: {
+        appointment_status: 'complete'
+      }
+    });
+    if (db) {
       throw new Error('this appointment was completed ')
     }
 
@@ -271,8 +274,9 @@ const getAppById = async (appointment_id) => {
           as: "PatientTreatments",
           include: [Treatment],
         },
-        { model: DentalRecord,  as: "DentalRecords"
- },
+        {
+          model: DentalRecord, as: "DentalRecords"
+        },
       ],
     });
     if (!appointment) throw new Error("Not found");
@@ -297,31 +301,29 @@ const updateAppointment = async (appointment_id, updateData) => {
     let finalDuration = appointment.duration;
     let finalRoomId = appointment.room_id;
 
-    if (doctorId || description) {
-      const docDep = await DoctorDepartment.findOne({
-        where: { doctor_id: finalDoctorId },
-        transaction: t,
-      });
-      if (!docDep) throw new Error("Doctor is not assigned to a department");
+    const docDep = await DoctorDepartment.findOne({
+      where: { doctor_id: finalDoctorId },
+      transaction: t,
+    });
+    if (!docDep) throw new Error("Doctor is not assigned to a department");
 
-      const treatment = await Treatment.findOne({
-        where: {
-          treatment_name: finalDescription,
-          department_id: docDep.department_id,
-        },
-        transaction: t,
-      });
+    const treatment = await Treatment.findOne({
+      where: {
+        treatment_name: finalDescription,
+        department_id: docDep.department_id,
+      },
+      transaction: t,
+    });
 
-      if (!treatment)
-        throw new Error("This doctor doesn't perform this treatment");
+    if (!treatment)
+      throw new Error("This doctor doesn't perform this treatment");
 
-      finalDuration = treatment.average_duration || 30;
-      const room = await Room.findOne({
-        where: { department_id: docDep.department_id },
-        transaction: t,
-      });
-      finalRoomId = room.room_id;
-    }
+    finalDuration = treatment.average_duration || 30;
+    const room = await Room.findOne({
+      where: { department_id: docDep.department_id },
+      transaction: t,
+    });
+    finalRoomId = room.room_id;
 
     const newStart = appointment_date_time
       ? new Date(appointment_date_time)
@@ -360,45 +362,62 @@ const updateAppointment = async (appointment_id, updateData) => {
       },
       { transaction: t },
     );
-    if (status === "complete") {
-  const patientTreatments = await PatientTreatment.findAll({
-    where: { appointment_id },
-    transaction: t,
-  });
 
-  for (const pt of patientTreatments) {
-
-    const items = await TreatmentInventory.findAll({
-      where: { treatment_id: pt.treatment_id },
+    const dentalRecord = await DentalRecord.findOne({
+      where: { appointment_id: appointment_id },
       transaction: t,
     });
 
-    for (const item of items) {
-
-      const inv = await Inventory.findByPk(item.inventory_id, {
+    if (dentalRecord) {
+      await PatientTreatment.destroy({
+        where: { appointment_id: appointment_id },
         transaction: t,
       });
 
-      if (!inv) throw new Error("Inventory not found");
-
-      if (inv.quantity < item.quantity_used) {
-        throw new Error(`Not enough stock for ${inv.item_name}`);
-      }
-
-      await Inventory.decrement("quantity", {
-        by: item.quantity_used,
-        where: { inventory_id: item.inventory_id },
-        transaction: t,
-      });
+      await PatientTreatment.create(
+        {
+          appointment_id: appointment.appointment_id,
+          treatment_id: treatment.treatment_id,
+          dental_record_id: dentalRecord.dental_record_id,
+          pt_description: `Planned/Updated: ${finalDescription}`,
+        },
+        { transaction: t }
+      );
     }
-  }
-}
 
-    if (
-      status &&
-      status.toLowerCase() === "confirmed"
-    ) {
+    if (status === "complete") {
+      const patientTreatments = await PatientTreatment.findAll({
+        where: { appointment_id },
+        transaction: t,
+      });
 
+      for (const pt of patientTreatments) {
+        const items = await TreatmentInventory.findAll({
+          where: { treatment_id: pt.treatment_id },
+          transaction: t,
+        });
+
+        for (const item of items) {
+          const inv = await Inventory.findByPk(item.inventory_id, {
+            transaction: t,
+          });
+
+          if (!inv) throw new Error("Inventory not found");
+
+          if (inv.quantity < item.quantity_used) {
+            throw new Error(`Not enough stock for ${inv.item_name}`);
+          }
+
+          await Inventory.decrement("quantity", {
+            by: item.quantity_used,
+            where: { inventory_id: item.inventory_id },
+            transaction: t,
+          });
+        }
+      }
+    }
+
+    if (status && status.toLowerCase() === "confirmed") {
       const existingReminderr = await Reminder.findOne({
         where: { appointment_id: appointment.appointment_id },
         transaction: t,
@@ -409,36 +428,26 @@ const updateAppointment = async (appointment_id, updateData) => {
           {
             appointment_id: appointment.appointment_id,
             patient_id: appointment.patient_id,
-            reminder_date: new Date(
-              new Date(newStart).getTime() - 24 * 60 * 60 * 1000
-            ),
-            message: `Appointment in 24 hours  ${finalDescription} at ${newStart.toLocaleString()}`,
+            reminder_date: new Date(newStart.getTime() - 24 * 60 * 60 * 1000),
+            message: `Appointment in 24 hours: ${finalDescription} at ${newStart.toLocaleString()}`,
             sent: false,
           },
           { transaction: t }
         );
       }
+
       const existingReminder = await Reminder.findOne({
-        where: {
-          appointment_id: appointment.appointment_id,
-        },
+        where: { appointment_id: appointment.appointment_id },
         transaction: t,
       });
 
       if (!existingReminder) {
-
-        const reminderDate = new Date(
-          newStart.getTime() - 60 * 60 * 1000
-        );
-
+        const reminderDate = new Date(newStart.getTime() - 60 * 60 * 1000);
         await Reminder.create(
           {
             appointment_id: appointment.appointment_id,
-
             reminder_date: reminderDate,
-
             message: `Reminder: Appointment for ${finalDescription} at ${newStart.toLocaleString()}`,
-
             sent: false,
           },
           { transaction: t }
@@ -446,7 +455,22 @@ const updateAppointment = async (appointment_id, updateData) => {
       }
     }
 
+    appointment.PatientTreatments = undefined;
 
+    await appointment.reload({
+      include: [
+        { model: Patient, include: [User] },
+        { model: Doctor, include: [User] },
+        { model: Room },
+        {
+          model: PatientTreatment,
+          as: "PatientTreatments",
+          include: [Treatment],
+        },
+        { model: DentalRecord, as: "DentalRecords" },
+      ],
+      transaction: t,
+    });
 
     await t.commit();
     return appointment;

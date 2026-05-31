@@ -74,10 +74,10 @@ export default function AppointmentTable() {
         setAlert({ show: true, message: "Appointment deleted successfully", type: "success" });
       }
     } catch (err) {
-      setAlert({ 
-        show: true, 
-        message: err.response?.data?.error || "Delete operation failed", 
-        type: "error" 
+      setAlert({
+        show: true,
+        message: err.response?.data?.error || "Delete operation failed",
+        type: "error"
       });
     } finally {
       setConfirmOpen(false);
@@ -113,7 +113,7 @@ export default function AppointmentTable() {
 
         <div className="w-3/4 p-10 ml-[25%]">
           <TableCard />
-          
+
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-lg sm:text-xl font-bold text-[#0F766E]">
               Appointments
@@ -199,7 +199,7 @@ export default function AppointmentTable() {
                   <p><span className="font-semibold">Doctor:</span> Dr. {app.Doctor?.User?.first_name} {app.Doctor?.User?.last_name}</p>
                   <p><span className="font-semibold">Room:</span> {app.Room?.room_name}</p>
                   <p><span className="font-semibold">Duration:</span> {app.duration} mins</p>
-                  <p><span className="font-semibold">Procedure:</span> {app.PatientTreatments?.[0]?.Treatment?.treatment_name}</p>
+                  <p><span className="font-semibold">Procedure:</span>  {app.description || app.PatientTreatments?.[0]?.Treatment?.treatment_name}</p>
                   <p><span className="font-semibold">Condition:</span> {app.DentalRecords?.[0]?.dental_condition}</p>
                   <p><span className="font-semibold">Tooth:</span> {app.DentalRecords?.[0]?.tooth}</p>
                 </div>
@@ -216,8 +216,8 @@ export default function AppointmentTable() {
                       Delete
                     </button>
                   )}
-                
-                  {(roles.includes("admin")  || roles.includes("receptionist")) && (
+
+                  {(roles.includes("admin") || roles.includes("receptionist")) && (
                     <button
                       onClick={() => {
                         setEditAppointmentId(app.appointment_id);
@@ -231,7 +231,7 @@ export default function AppointmentTable() {
                 </div>
               </div>
             ))}
-            
+
             {filteredAppointments.length === 0 && (
               <p className="text-gray-500 col-span-2 text-center py-8">No appointments found.</p>
             )}
