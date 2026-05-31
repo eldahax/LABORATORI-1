@@ -271,7 +271,7 @@ export default function OfferTable() {
             <Sidebar />
 
             <div className="w-3/4 p-10 ml-[25%]">
-            
+
 
               <div className="flex justify-between items-center mb-6">
                 <h1 className="text-lg font-bold text-[#0F766E]">
@@ -330,8 +330,9 @@ export default function OfferTable() {
                         {off.Treatments?.map((t) => t.treatment_name).join(", ")}
                       </td>
                       <td className="py-4">
+                         {( roles.includes("admin") || roles.includes("receptionist")) && (
                         <div className="flex gap-2">
-                            {(roles.includes("admin")) &&(
+                           
                           <button
                             onClick={() => {
                               setSelectedId(off.offers_id);
@@ -342,8 +343,8 @@ export default function OfferTable() {
                           >
                             Delete
                           </button>
-                          )}
-                         {( roles.includes("admin") || roles.includes("receptionist")) && (
+                          
+                        
 
                           <button
                             onClick={() => {
@@ -353,8 +354,9 @@ export default function OfferTable() {
                             className="text-green-600 px-3 py-1"
                           >
                             Update
-                          </button>)}
+                          </button>
                         </div>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -407,7 +409,7 @@ export default function OfferTable() {
                     <th>Price</th>
                     <th>Duration</th>
                     <th>Department</th>
-                    {(roles.includes("admin"))  &&(
+                    {(roles.includes("admin") || roles.includes("receptionist"))  &&(
                     <th>Actions</th>
                     )}
                   </tr>
@@ -428,8 +430,9 @@ export default function OfferTable() {
                       <td>{t.average_duration}</td>
                       <td>{t.Department?.department_name}</td>
                       <td className="py-4">
+                        {( roles.includes("admin") || roles.includes("receptionist"))&&(
                         <div className="flex gap-2">
-                            {(roles.includes("admin") )  &&(
+                         
                           <button
                             onClick={() => {
                               setSelectedId(t.treatment_id);
@@ -440,8 +443,7 @@ export default function OfferTable() {
                           >
                             Delete
                           </button>
-                            )}
-             {( roles.includes("admin"))&&(
+                           
                           <button
                             onClick={() => {
                               setEditTreatmentId(t.treatment_id);
@@ -451,8 +453,9 @@ export default function OfferTable() {
                           >
                             Update
                           </button>
-                  )}
+                  
                         </div>
+                        )}
                       </td>
                     </tr>
                   ))}

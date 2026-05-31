@@ -13,7 +13,9 @@ const {
   Invoice,
   Reminder,
   Payment,
-  sequelize,
+  TreatmentInventory,
+  Inventory,
+    sequelize,
 } = require("../models/index");
 
 const create = async (
@@ -235,6 +237,12 @@ const deleteAppoint = async (appointment_id) => {
   try {
     const appointmentExist = await Appointment.findByPk(appointment_id);
     if (!appointmentExist) throw new Error("This appointment doesn't exist");
+    const db=await Appointment.findOne({where:{
+     appointment_status:'complete'
+    }});
+    if(db){
+      throw new Error('this appointment was completed ')
+    }
 
     await PatientTreatment.destroy({
       where: { appointment_id },
@@ -352,6 +360,39 @@ const updateAppointment = async (appointment_id, updateData) => {
       },
       { transaction: t },
     );
+    if (status === "complete") {
+  const patientTreatments = await PatientTreatment.findAll({
+    where: { appointment_id },
+    transaction: t,
+  });
+
+  for (const pt of patientTreatments) {
+
+    const items = await TreatmentInventory.findAll({
+      where: { treatment_id: pt.treatment_id },
+      transaction: t,
+    });
+
+    for (const item of items) {
+
+      const inv = await Inventory.findByPk(item.inventory_id, {
+        transaction: t,
+      });
+
+      if (!inv) throw new Error("Inventory not found");
+
+      if (inv.quantity < item.quantity_used) {
+        throw new Error(`Not enough stock for ${inv.item_name}`);
+      }
+
+      await Inventory.decrement("quantity", {
+        by: item.quantity_used,
+        where: { inventory_id: item.inventory_id },
+        transaction: t,
+      });
+    }
+  }
+}
 
     if (
       status &&

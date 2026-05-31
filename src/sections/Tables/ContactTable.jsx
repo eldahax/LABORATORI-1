@@ -171,7 +171,9 @@ export default function ContactTable() {
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Message</th>
-                <th>Actions</th>
+                {(roles.includes("admin")) && (
+                  <th>Actions</th>
+                )}
               </tr>
             </thead>
 

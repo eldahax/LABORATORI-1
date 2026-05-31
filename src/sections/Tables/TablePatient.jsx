@@ -4,6 +4,7 @@ import Sidebar from "../sideBar";
 import CustomAlert from "../../components/CustomAlert";
 import AddPatient from "../../Crudforms/AddPatient";
 import EditPatient from "../../Crudforms/EditPatient";
+import API from "../../components/costumFetch";
 
 function ConfirmDeleteModal({ show, onConfirm, onCancel }) {
   if (!show) return null;
@@ -68,6 +69,13 @@ export default function TablePatient() {
   };
 
   useEffect(() => {
+      fetch("http://localhost:5000/api/users/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setUser(data))
+      .catch((err) => console.log(err));
+   
+  
+  
     fetchPatients();
   }, []);
 

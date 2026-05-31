@@ -286,7 +286,7 @@ export default function TableRoom() {
                   <th>Department</th>
                   <th>Chairs</th>
                   
-                {(roles.includes("admin") || roles.includes ("doctor") || roles.includes ("receptionist"))&&(  <th>Actions</th>)}
+                {(roles.includes("admin"))&&(  <th>Actions</th>)}
                   
                 </tr>
               </thead>
@@ -311,7 +311,7 @@ export default function TableRoom() {
 
                     <td className="py-4">
                       <div className="flex gap-2">
-                          {(roles.includes("admin") || roles.includes ("receptionist"))&&(
+                          {(roles.includes("admin") )&&(
                         <button
                           onClick={() => {
                             setSelectedId(
@@ -392,7 +392,8 @@ export default function TableRoom() {
                 <tr className="border-b">
                   <th className="py-3 pl-4">ID</th>
                   <th>Department Name</th>
-                <th>Actions</th>
+                   {(roles.includes("admin") )&&(
+                <th>Actions</th> )}
                 </tr>
               </thead>
 
@@ -412,7 +413,7 @@ export default function TableRoom() {
 
                     <td className="py-4">
                       <div className="flex gap-2">
-                          {(roles.includes("admin") || roles.includes ("receptionist"))&&(
+                          {(roles.includes("admin") )&&(
                         <button
                           onClick={() => {
                             setSelectedId(

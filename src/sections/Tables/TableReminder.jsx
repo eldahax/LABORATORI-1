@@ -136,7 +136,7 @@ export default function TableReminder() {
                   <p className="text-gray-600 italic">"{r.message}"</p>
                   <p className="text-xs text-gray-400 mt-2">{formatDate(r.reminder_date)}</p>
                 </div>
-                {(roles.includes("doctor") || roles.includes("admin")) && (
+                {(roles.includes("admin")) && (
                   <div className="flex gap-2 mt-4 pt-4 border-t">
                     <button onClick={() => { setEditId(r.reminder_id); setShowEdit(true); }} className="text-xs border px-3 py-1 rounded hover:bg-white">Edit</button>
                     <button onClick={() => { setDeleteId(r.reminder_id); setConfirmOpen(true); }} className="text-xs border border-red-500 text-red-500 px-3 py-1 rounded hover:bg-red-50">Delete</button>

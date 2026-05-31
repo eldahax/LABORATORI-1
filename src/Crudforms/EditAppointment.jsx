@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import CustomAlert from "../components/CustomAlert";
+import API from "../components/costumFetch";
 
 function EditAppointmentForm({ appointmentId, onClose, onSuccess }) {
   const [doctorId, setDoctorId] = useState("");
@@ -11,7 +12,7 @@ function EditAppointmentForm({ appointmentId, onClose, onSuccess }) {
   const [allDoctors, setAllDoctors] = useState([]);
   const [allTreatments, setAllTreatments] = useState([]);
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [alert, setAlert] = useState({
     show: false,
@@ -25,25 +26,40 @@ function EditAppointmentForm({ appointmentId, onClose, onSuccess }) {
     const loadAppointmentData = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/appointments/${appointmentId}`, {
-          credentials: "include",
-        });
-        const data = await res.json();
-
-        setDoctorId(data.doctor_id || "");
-        setTreatmentName(data.description || "");
-        setStatus(data.appointment_status || "pending");
-        setPatientName(
-          data.Patient?.User
-            ? `${data.Patient.User.first_name} ${data.Patient.User.last_name}`
-            : ""
-        );
-
-        if (data.appointment_date_time) {
-          setDateTime(data.appointment_date_time.slice(0, 16));
+        const res = await API.get(`/appointments/${appointmentId}`);
+        const data = res.data;
+        if (data.doctor_id) {
+          setDoctorId(String(data.doctor_id));
         }
+
+        if (data.description) {
+          setTreatmentName(data.description);
+        } else if (data.PatientTreatments?.[0]?.Treatment?.treatment_name) {
+          setTreatmentName(data.PatientTreatments[0].Treatment.treatment_name);
+        }
+
+        setStatus(data.appointment_status || "pending");
+        
+        if (data.Patient?.User) {
+          setPatientName(`${data.Patient.User.first_name || ""} ${data.Patient.User.last_name || ""}`);
+        }
+
+       if (data.appointment_date_time) {
+  
+  const dateObj = new Date(data.appointment_date_time);
+
+ 
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const hours = String(dateObj.getHours()).padStart(2, "0");
+  const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+  const localString = `${year}-${month}-${day}T${hours}:${minutes}`;
+  
+  setDateTime(localString);
+}
       } catch (err) {
-        console.error("ERROR LOADING APPOINTMENT:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -51,29 +67,20 @@ function EditAppointmentForm({ appointmentId, onClose, onSuccess }) {
 
     loadAppointmentData();
   }, [appointmentId]);
-
   useEffect(() => {
-    fetch("http://localhost:5000/api/doctors")
-      .then((res) => res.json())
-      .then(setAllDoctors)
-      .catch(() =>
-        setAlert({
-          show: true,
-          message: "Error loading doctors options list",
-          type: "error",
-        })
-      );
+    API.get("/doctors")
+      .then((res) => {
+        const docData = res.data?.data || res.data;
+        setAllDoctors(Array.isArray(docData) ? docData : []);
+      })
+      .catch((err) => console.error(err));
 
- fetch("http://localhost:5000/api/treatments")
-      .then((res) => res.json())
-      .then(setAllTreatments)
-      .catch(() =>
-        setAlert({
-          show: true,
-          message: "Error loading treatments list",
-          type: "error",
-        })
-      );
+    API.get("/treatments")
+      .then((res) => {
+        const treatData = res.data?.data || res.data;
+        setAllTreatments(Array.isArray(treatData) ? treatData : []);
+      })
+      .catch((err) => console.error(err));
   }, []);
 
   const validate = () => {
@@ -91,35 +98,21 @@ function EditAppointmentForm({ appointmentId, onClose, onSuccess }) {
     if (!validate()) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/appointments/${appointmentId}`, {
-        credentials: "include",
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          doctorId: Number(doctorId),
-          appointment_date_time: dateTime,
-          description: treatmentName,
-          status: status,
-        }),
+      const res = await API.put(`/appointments/${appointmentId}`, {
+        doctorId: Number(doctorId),
+        appointment_date_time: dateTime,
+        description: treatmentName,
+        status: status,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setAlert({
-          show: true,
-          message: data.error || "Update cycle failed",
-          type: "error",
-        });
-        return;
+      if (res.status === 200 || res.status === 204) {
+        if (onSuccess) onSuccess();
+        onClose();
       }
-
-      if (onSuccess) onSuccess();
-      onClose();
     } catch (err) {
       setAlert({
         show: true,
-        message: "Server update response failure",
+        message: err.response?.data?.error || "Update operation failed",
         type: "error",
       });
     }
@@ -169,14 +162,14 @@ function EditAppointmentForm({ appointmentId, onClose, onSuccess }) {
                   Assigned Practitioner
                 </label>
                 <select
-                  value={doctorId}
+                  value={String(doctorId)}
                   onChange={(e) => setDoctorId(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
                 >
                   <option value="">Select Doctor</option>
                   {allDoctors.map((doc) => (
-                    <option key={doc.doctor_id} value={doc.doctor_id}>
-                      Dr. {doc.User?.first_name} {doc.User?.last_name}
+                    <option key={doc.doctor_id} value={String(doc.doctor_id)}>
+                      Dr. {doc.User?.first_name || doc.first_name || ""} {doc.User?.last_name || doc.last_name || doc.doctor_id}
                     </option>
                   ))}
                 </select>
@@ -264,7 +257,7 @@ function EditAppointmentForm({ appointmentId, onClose, onSuccess }) {
 }
 
 export default function EditAppointmentModal({ show, appointmentId, onClose, onSuccess }) {
-  if (!show) return null;
+  if (!show || !appointmentId) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">

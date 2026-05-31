@@ -1,4 +1,4 @@
-const { User, Doctor, DoctorDepartment, Department, Role, UserRole,Certification } = require("../models");
+const { User, Doctor, DoctorDepartment, Department, Role, UserRole,Certification,Appointment,DentalRecord } = require("../models");
 const bcrypt = require("bcryptjs");
 
 const createDoc = async (first_name,
@@ -152,6 +152,9 @@ await DoctorDepartment.create({
 const deleteDoc = async (id) => {
   const doctor = await Doctor.findByPk(id);
   if (!doctor) throw new Error("Doctor not found");
+  const idS=await Appointment.findOne({where:{doctor_id:doctor.doctor_id}});
+  const dId=await DentalRecord.findOne({where:{doctor_id:doctor.doctor_id}});
+  if(idS || dId){ throw new Error("this Doctor has records it cant be deleted");}
 
   await DoctorDepartment.destroy({ where: { doctor_id: doctor.doctor_id } });
   await Certification.destroy({where:{doctor_id:doctor.doctor_id}})

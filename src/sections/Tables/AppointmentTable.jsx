@@ -217,7 +217,7 @@ export default function AppointmentTable() {
                     </button>
                   )}
                 
-                  {(roles.includes("admin")  || roles.includes("doctor")) && (
+                  {(roles.includes("admin")  || roles.includes("receptionist")) && (
                     <button
                       onClick={() => {
                         setEditAppointmentId(app.appointment_id);
